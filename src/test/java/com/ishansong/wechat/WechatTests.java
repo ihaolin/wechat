@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
  */
 public class WechatTests {
 
-    private Wechat wechat = Wechat.newWechat("wx385a90db08d23825", "a11fc1829321e606502b53a62ac1c056");
+    private Wechat wechat = Wechat.newWechat("appId", "appSecret");
 
     private String accessToken = "M0imM0RdVRiFC_6n-jKXjj2iXJvT0fPMf3LkDfk51qKeN4dnQWH8dBLoLCeOqDTOU9pnh2EDGt8R3yQpF_6uukIL_XNzMfpBGYBwhcG7BMEQASeACAFPH";
 

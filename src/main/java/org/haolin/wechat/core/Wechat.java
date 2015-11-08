@@ -13,6 +13,7 @@ import org.haolin.wechat.model.message.Article;
 import org.haolin.wechat.model.message.SendMessage;
 import org.haolin.wechat.model.message.SendMessageScope;
 import org.haolin.wechat.model.message.SendMessageType;
+import org.haolin.wechat.model.message.SendPreviewMessage;
 import org.haolin.wechat.model.message.TemplateField;
 import org.haolin.wechat.model.message.RespMessageType;
 import org.haolin.wechat.model.user.Group;
@@ -73,6 +74,11 @@ public class Wechat {
      * 消息API
      */
     public final Messages MESSAGE = new Messages();
+
+    /**
+     * 素材API
+     */
+    public final Materials MATERIAL = new Materials();
 
     private final String ERROR_CODE = "errcode";
 
@@ -1100,6 +1106,8 @@ public class Wechat {
 
         /**
          * 群发消息:
+         *  1. 分组群发:【订阅号与服务号认证后均可用】
+         *  2. 按OpenId列表发: 订阅号不可用，服务号认证后可用
          *  @see org.haolin.wechat.model.message.SendMessageScope
          * @param accessToken accessToken
          * @param msg 消息
@@ -1108,7 +1116,7 @@ public class Wechat {
         public Integer send(String accessToken, SendMessage msg){
 
             String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
-            Map<String, Object> params = buildSendAllParams(msg);
+            Map<String, Object> params = buildSendParams(msg);
 
             Map<String, Object> resp = Http.post(url)
                     .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
@@ -1120,7 +1128,7 @@ public class Wechat {
             return (Integer)resp.get("msg_id");
         }
 
-        private Map<String, Object> buildSendAllParams(SendMessage msg) {
+        private Map<String, Object> buildSendParams(SendMessage msg) {
             Map<String, Object> params = new HashMap<>();
 
             if (SendMessageScope.GROUP == msg.getScope()){
@@ -1158,6 +1166,88 @@ public class Wechat {
             }
 
             return params;
+        }
+
+        /**
+         * 发送预览消息
+         * @param accessToken accessToken
+         * @param msg 预览消息
+         * @return 消息ID，或抛WechatException
+         */
+        public Integer previewSend(String accessToken, SendPreviewMessage msg){
+            String url = PREVIEW_SEND + accessToken;
+
+            Map<String, Object> params = buildPreviewParams(msg);
+
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+
+            return (Integer)resp.get("msg_id");
+        }
+
+        private Map<String, Object> buildPreviewParams(SendPreviewMessage msg) {
+            Map<String, Object> params = new HashMap<>();
+
+            params.put("touser", msg.getOpenId());
+
+            // send content
+            Map<String, Object> msgContent = new HashMap<>();
+            if (SendMessageType.TEXT == msg.getType()){
+                // 文本
+                msgContent.put("content", msg.getContent());
+            } else if (SendMessageType.CARD == msg.getType()){
+                // 卡券
+                msgContent.put("card_id", msg.getCardId());
+            } else {
+                // 图文，图片，语音，视频
+                msgContent.put("media_id", msg.getMediaId());
+            }
+            params.put(msg.getType().value(), msgContent);
+            params.put("msgtype", msg.getType().value());
+
+            return params;
+        }
+
+        /**
+         * 删除群发消息: 订阅号与服务号认证后均可用
+         * @param accessToken acessToken
+         * @param id 群发消息ID
+         * @return 删除成功，或抛WechatException
+         */
+        public Boolean deleteSend(String accessToken, Integer id){
+            String url = DELETE_SEND + accessToken;
+            Map<String, Object> params = new HashMap<>();
+            params.put("msg_id", id);
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+            return Boolean.TRUE;
+        }
+
+        /**
+         * 检查群发消息状态: 订阅号与服务号认证后均可用
+         * @param accessToken acessToken
+         * @param id 群发消息ID
+         * @return 群发消息状态，或抛WechatException
+         */
+        public String getSend(String accessToken, Integer id){
+            String url = GET_SEND + accessToken;
+            Map<String, Object> params = new HashMap<>();
+            params.put("msg_id", id);
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+            return (String)resp.get("msg_status");
         }
     }
 

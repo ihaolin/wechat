@@ -3,7 +3,9 @@
 一个简洁的微信基本接口工具包
 ---
 
-+ 包依赖，注意引入项目时是否需要**exclude**:
++ 包引入	
+
++ 依赖包，注意引入项目时是否需要**exclude**:
 
 	```xml
 	<!-- slf4j-api -->
@@ -20,4 +22,20 @@
     </dependency>
 	```
 
++ 基本使用:
+
+	```java
+	Wechat wechat = Wechat.newWechat("appId", "appSecret");
+	wecaht.{component}.{api};
+	```	
+
++ ``Wechat``中包含几个基本组件:
+
+	+ 基础API: ```BASE```
+	+ 用户API: ```USER```
+	+ 菜单API: ```MENU```
+	+ 多客服API: ```CS```
+	+ 消息API: ```MESSAGE```
+	+ 素材API: ```MATERIAL```
+	
         
