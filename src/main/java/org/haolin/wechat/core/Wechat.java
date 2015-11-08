@@ -10,8 +10,11 @@ import org.haolin.wechat.model.customer.WaitingSession;
 import org.haolin.wechat.model.menu.Menu;
 import org.haolin.wechat.model.menu.MenuType;
 import org.haolin.wechat.model.message.Article;
+import org.haolin.wechat.model.message.SendMessage;
+import org.haolin.wechat.model.message.SendMessageScope;
+import org.haolin.wechat.model.message.SendMessageType;
 import org.haolin.wechat.model.message.TemplateField;
-import org.haolin.wechat.model.message.MessageType;
+import org.haolin.wechat.model.message.RespMessageType;
 import org.haolin.wechat.model.user.Group;
 import org.haolin.wechat.model.user.User;
 import org.haolin.wechat.utils.MD5;
@@ -903,6 +906,32 @@ public class Wechat {
          */
         private final String TEMPLATE_SEND = "http://api.weixin.qq.com/cgi-bin/message/template/send?access_token=";
 
+        /**
+         * 分组群发消息
+         */
+        private final String SEND_ALL = "https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token=";
+
+        /**
+         * 按openId列表群发消息
+         */
+        private final String SEND = "https://api.weixin.qq.com/cgi-bin/message/mass/send?access_token=";
+
+        /**
+         * 删除群发消息
+         */
+        private final String DELETE_SEND = "https://api.weixin.qq.com/cgi-bin/message/mass/delete?access_token=";
+
+        /**
+         * 预览群发消息
+         */
+        private final String PREVIEW_SEND = "https://api.weixin.qq.com/cgi-bin/message/mass/preview?access_token=";
+
+        /**
+         * 查询群发消息状态
+         */
+        private final String GET_SEND = "https://api.weixin.qq.com/cgi-bin/message/mass/get?access_token=";
+
+
         private Messages(){}
 
         /**
@@ -912,7 +941,7 @@ public class Wechat {
          * @return XML文本消息
          */
         public String responseText(String openId, String content){
-            Xmls msg = responseCommonElements(openId, MessageType.TEXT);
+            Xmls msg = responseCommonElements(openId, RespMessageType.TEXT);
             msg.element("Content", content);
             return msg.build();
         }
@@ -924,7 +953,7 @@ public class Wechat {
          * @return XML图片消息
          */
         public String responseImage(String openId, String mediaId){
-            Xmls msg = responseCommonElements(openId, MessageType.IMAGE);
+            Xmls msg = responseCommonElements(openId, RespMessageType.IMAGE);
             msg.element("Image", "MediaId", mediaId);
             return msg.build();
         }
@@ -936,7 +965,7 @@ public class Wechat {
          * @return XML语音消息
          */
         public String responseVoice(String openId, String mediaId){
-            Xmls msg = responseCommonElements(openId, MessageType.VOICE);
+            Xmls msg = responseCommonElements(openId, RespMessageType.VOICE);
             msg.element("Voice", "MediaId", mediaId);
             return msg.build();
         }
@@ -950,7 +979,7 @@ public class Wechat {
          * @return XML视频消息
          */
         public String responseVideo(String openId, String mediaId, String title, String desc){
-            Xmls msg = responseCommonElements(openId, MessageType.VIDEO);
+            Xmls msg = responseCommonElements(openId, RespMessageType.VIDEO);
             msg.element("Video", "MediaId", mediaId, "Title", title, "Description", desc);
             return msg.build();
         }
@@ -967,7 +996,7 @@ public class Wechat {
          */
         public String responseMusic(String openId, String mediaId,
                                     String title, String desc, String url, String hqUrl){
-            Xmls msg = responseCommonElements(openId, MessageType.MUSIC);
+            Xmls msg = responseCommonElements(openId, RespMessageType.MUSIC);
             msg.element("Music",
                     "Title", title,
                     "Description", desc,
@@ -987,23 +1016,23 @@ public class Wechat {
             if (articles.size() > 10){
                 articles = articles.subList(0, 10);
             }
-            Xmls xmls = responseCommonElements(openId, MessageType.NEWS);
+            Xmls xmls = responseCommonElements(openId, RespMessageType.NEWS);
             xmls.element("ArticleCount", articles.size());
             List<Xmls.E> items = new ArrayList<>();
             Xmls.E item;
             for (Article article : articles){
                 item = xmls.newElement("item",
-                                            "Title", article.getTitle(),
-                                            "Description", article.getDesc(),
-                                            "PicUrl", article.getPicUrl(),
-                                            "Url", article.getUrl());
+                                        "Title", article.getTitle(),
+                                        "Description", article.getDesc(),
+                                        "PicUrl", article.getPicUrl(),
+                                        "Url", article.getUrl());
                 items.add(item);
             }
             xmls.element("Articles", items);
             return xmls.build();
         }
 
-        private Xmls responseCommonElements(String openId, MessageType type) {
+        private Xmls responseCommonElements(String openId, RespMessageType type) {
             Xmls xmls = Xmls.create();
             xmls.element("ToUserName", openId)
                 .element("FromUserName", appId)
@@ -1036,12 +1065,15 @@ public class Wechat {
         public Integer sendTemplate(String accessToken, String openId, String templateId, String link, List<TemplateField> fields){
             String url = TEMPLATE_SEND + accessToken;
             Map<String, Object> params = buildTemplateParams(openId, templateId, link, fields);
+
             Map<String, Object> resp = Http.post(url)
                     .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+
             Integer errcode = (Integer)resp.get(ERROR_CODE);
             if (errcode != null && errcode != 0){
                 throw new WechatException(resp);
             }
+
             return (Integer)resp.get("msgid");
         }
 
@@ -1065,5 +1097,76 @@ public class Wechat {
             }
             return params;
         }
+
+        /**
+         * 群发消息:
+         *  @see org.haolin.wechat.model.message.SendMessageScope
+         * @param accessToken accessToken
+         * @param msg 消息
+         * @return 消息ID，或抛WechatException
+         */
+        public Integer send(String accessToken, SendMessage msg){
+
+            String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
+            Map<String, Object> params = buildSendAllParams(msg);
+
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+
+            return (Integer)resp.get("msg_id");
+        }
+
+        private Map<String, Object> buildSendAllParams(SendMessage msg) {
+            Map<String, Object> params = new HashMap<>();
+
+            if (SendMessageScope.GROUP == msg.getScope()){
+                Map<String, Object> scope = new HashMap<>();
+                scope.put("is_to_all", msg.getIsToAll());
+                scope.put("group_id", msg.getGroupId());
+                params.put("filter", scope);
+            } else {
+                params.put("touser", msg.getOpenIds());
+            }
+
+            // send content
+            Map<String, Object> msgContent = new HashMap<>();
+            if (SendMessageType.TEXT == msg.getType()){
+                // 文本
+                msgContent.put("content", msg.getContent());
+            } else if (SendMessageType.CARD == msg.getType()){
+                // 卡券
+                msgContent.put("card_id", msg.getCardId());
+            } else {
+                // 图文，图片，语音，视频
+                msgContent.put("media_id", msg.getMediaId());
+            }
+            params.put(msg.getType().value(), msgContent);
+            params.put("msgtype", msg.getType().value());
+
+            if (!Strings.isNullOrEmpty(msg.getTitle())){
+                params.put("title", msg.getTitle());
+            }
+            if (!Strings.isNullOrEmpty(msg.getDescription())){
+                params.put("description", msg.getDescription());
+            }
+            if (!Strings.isNullOrEmpty(msg.getThumbMediaId())){
+                params.put("thumb_media_id", msg.getThumbMediaId());
+            }
+
+            return params;
+        }
+    }
+
+    /**
+     * 素材API
+     */
+    public final class Materials {
+
+        private Materials(){}
+
     }
 }
