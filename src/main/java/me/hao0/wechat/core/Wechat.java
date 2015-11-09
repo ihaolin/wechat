@@ -95,6 +95,11 @@ public class Wechat {
     public final Messages MESSAGE = new Messages();
 
     /**
+     * 二维码API
+     */
+    public final QrCodes QRCODE = new QrCodes();
+
+    /**
      * 素材API
      */
     public final Materials MATERIAL = new Materials();
@@ -1275,7 +1280,7 @@ public class Wechat {
          * @param msg 消息
          * @return 消息ID，或抛WechatException
          */
-        public Integer send(String accessToken, SendMessage msg){
+        public Long send(String accessToken, SendMessage msg){
 
             String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
             Map<String, Object> params = buildSendParams(msg);
@@ -1287,7 +1292,7 @@ public class Wechat {
                 throw new WechatException(resp);
             }
 
-            return (Integer)resp.get("msg_id");
+            return (Long)resp.get("msg_id");
         }
 
         private Map<String, Object> buildSendParams(SendMessage msg) {
@@ -1334,9 +1339,9 @@ public class Wechat {
          * 发送预览消息
          * @param accessToken accessToken
          * @param msg 预览消息
-         * @return 消息ID，或抛WechatException
+         * @return 发送成功返回true，或抛WechatException
          */
-        public Integer previewSend(String accessToken, SendPreviewMessage msg){
+        public Boolean previewSend(String accessToken, SendPreviewMessage msg){
             String url = PREVIEW_SEND + accessToken;
 
             Map<String, Object> params = buildPreviewParams(msg);
@@ -1348,7 +1353,7 @@ public class Wechat {
                 throw new WechatException(resp);
             }
 
-            return (Integer)resp.get("msg_id");
+            return Boolean.TRUE;
         }
 
         private Map<String, Object> buildPreviewParams(SendPreviewMessage msg) {
@@ -1375,12 +1380,16 @@ public class Wechat {
         }
 
         /**
-         * 删除群发消息: 订阅号与服务号认证后均可用
+         * 删除群发消息: 订阅号与服务号认证后均可用:
+             1、只有已经发送成功的消息才能删除
+             2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
+             3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
+             4、如果多次群发发送的是一个图文消息，那么删除其中一次群发，就会删除掉这个图文消息也，导致所有群发都失效
          * @param accessToken acessToken
          * @param id 群发消息ID
          * @return 删除成功，或抛WechatException
          */
-        public Boolean deleteSend(String accessToken, Integer id){
+        public Boolean deleteSend(String accessToken, Long id){
             String url = DELETE_SEND + accessToken;
             Map<String, Object> params = new HashMap<>();
             params.put("msg_id", id);
@@ -1399,7 +1408,7 @@ public class Wechat {
          * @param id 群发消息ID
          * @return 群发消息状态，或抛WechatException
          */
-        public String getSend(String accessToken, Integer id){
+        public String getSend(String accessToken, Long id){
             String url = GET_SEND + accessToken;
             Map<String, Object> params = new HashMap<>();
             params.put("msg_id", id);
@@ -1411,6 +1420,15 @@ public class Wechat {
             }
             return (String)resp.get("msg_status");
         }
+    }
+
+    /**
+     * 二维码API
+     */
+    public final class QrCodes {
+
+        private QrCodes(){}
+
     }
 
     /**

@@ -1,5 +1,7 @@
 package me.hao0.wechat.model.message.receive;
 
+import me.hao0.wechat.exception.EventException;
+
 import java.util.Objects;
 
 /**
@@ -46,7 +48,7 @@ public enum RecvMessageType {
                 return t;
             }
         }
-        throw new IllegalArgumentException("非法的消息类型");
+        throw new EventException("unknown message type");
     }
 
     @Override

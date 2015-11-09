@@ -19,6 +19,10 @@ import me.hao0.wechat.model.message.receive.msg.RecvTextMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvVideoMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvVoiceMessage;
 import me.hao0.wechat.model.message.resp.Article;
+import me.hao0.wechat.model.message.send.SendMessage;
+import me.hao0.wechat.model.message.send.SendMessageScope;
+import me.hao0.wechat.model.message.send.SendMessageType;
+import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import org.junit.Test;
 import java.util.Arrays;
@@ -35,7 +39,7 @@ public class WechatTests {
 
     private Wechat wechat = Wechat.newWechat("appId", "appSecret");
 
-    private String accessToken = "M0imM0RdVRiFC_6n-jKXjj2iXJvT0fPMf3LkDfk51qKeN4dnQWH8dBLoLCeOqDTOU9pnh2EDGt8R3yQpF_6uukIL_XNzMfpBGYBwhcG7BMEQASeACAFPH";
+    private String accessToken = "2leLznsHaxqpfzRi_iyk-SKMXiiINOK3rdPubNo5Dgk4oWzacyg-3-DBsH9mt7f1lw4DRUWtg76Sin2NraXxwjByzg-otPiUmcI3w_ZPn7AJJOeAHABBG";
 
     private String testDomain = "xxx";
 
@@ -376,5 +380,44 @@ public class WechatTests {
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvMenuEvent);
         System.out.println(message);
+    }
+
+    @Test
+    public void testMessagePreview(){
+        SendPreviewMessage msg = new SendPreviewMessage();
+        msg.setOpenId(openId);
+        msg.setType(SendMessageType.TEXT);
+        msg.setContent("你好吗");
+        System.out.println(wechat.MESSAGE.previewSend(accessToken, msg));
+    }
+
+    @Test
+    public void testMessageSendByOpenIds(){
+        SendMessage msg = new SendMessage();
+        msg.setScope(SendMessageScope.OPEN_ID);
+        msg.setType(SendMessageType.TEXT);
+        msg.setContent("这是测试，openId列表群发");
+        msg.setOpenIds(Arrays.asList(openId, openId));
+        System.out.println(wechat.MESSAGE.send(accessToken, msg));
+    }
+
+    @Test
+    public void testMessageSendByGroupId(){
+        SendMessage msg = new SendMessage();
+        msg.setScope(SendMessageScope.GROUP);
+        msg.setGroupId(100);
+        msg.setType(SendMessageType.TEXT);
+        msg.setContent("这是测试，groupId群发");
+        System.out.println(wechat.MESSAGE.send(accessToken, msg));
+    }
+
+    @Test
+    public void testMessageStatus(){
+        System.out.println(wechat.MESSAGE.getSend(accessToken, 2547931045L));
+    }
+
+    @Test
+    public void testMessageDelete(){
+        assertTrue(wechat.MESSAGE.deleteSend(accessToken, 2547931045L));
     }
 }
