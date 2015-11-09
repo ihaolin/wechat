@@ -22,6 +22,8 @@ import me.hao0.wechat.model.message.receive.msg.RecvShortVideoMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvTextMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvVideoMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvVoiceMessage;
+import me.hao0.wechat.model.qrcode.Qrcode;
+import me.hao0.wechat.model.qrcode.QrcodeType;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
 import me.hao0.wechat.model.base.AuthType;
@@ -1427,8 +1429,102 @@ public class Wechat {
      */
     public final class QrCodes {
 
+        /**
+         * 获取Ticket
+         */
+        private final String TICKET_GET = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=";
+
+        /**
+         * 显示二维码链接
+         */
+        private final String SHOW_QRCODE = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=";
+
+        /**
+         * 将原长链接通过此接口转成短链接
+         */
+        private final String LONG_TO_SHORT = "https://api.weixin.qq.com/cgi-bin/shorturl?access_token=";
+
         private QrCodes(){}
 
+        /**
+         * 获取临时二维码
+         * @param accessToken accessToken
+         * @param sceneId 业务场景ID，32位非0整型
+         * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
+         * @return 临时二维码链接，或抛WechatException
+         */
+        public String getTempQrcode(String accessToken, String sceneId, Integer expire){
+            String url = TICKET_GET + accessToken;
+            Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_SCENE);
+            params.put("expire_seconds", expire);
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+            Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
+            return showQrcode(qr.getTicket());
+        }
+
+        /**
+         * 获取永久二维码
+         * @param accessToken accessToken
+         * @param sceneId 业务场景ID，最大值为100000（目前参数只支持1--100000）
+         * @return 永久二维码链接，或抛WechatException
+         */
+        public String getPermQrcode(String accessToken, String sceneId){
+            String url = TICKET_GET + accessToken;
+            Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+            Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
+            return showQrcode(qr.getTicket());
+        }
+
+        private Map<String, Object> buildQrcodeParams(String sceneId, QrcodeType type) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("action_name", type.value());
+            Map<String, Object> sceneIdMap = new HashMap<>();
+            sceneIdMap.put("scene_id", sceneId);
+            Map<String, Object> scene = new HashMap<>();
+            scene.put("scene", sceneIdMap);
+            params.put("action_info", scene);
+            return params;
+        }
+
+        /**
+         * 获取二维码链接
+         * @param ticket 二维码的ticket
+         * @return 二维码链接
+         */
+        private String showQrcode(String ticket){
+            return SHOW_QRCODE + URLEncoder.encode(ticket);
+        }
+
+        /**
+         * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率
+         * @param accessToken accessToken
+         * @param longUrl 长链接
+         * @return 短链接，或抛WechatException
+         */
+        public String shortUrl(String accessToken, String longUrl){
+            String url = LONG_TO_SHORT + accessToken;
+            Map<String, Object> params = new HashMap<>();
+            params.put("action", "long2short");
+            params.put("long_url", longUrl);
+            Map<String, Object> resp = Http.post(url)
+                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
+            Integer errcode = (Integer)resp.get(ERROR_CODE);
+            if (errcode != null && errcode != 0){
+                throw new WechatException(resp);
+            }
+            return (String)resp.get("short_url");
+        }
     }
 
     /**

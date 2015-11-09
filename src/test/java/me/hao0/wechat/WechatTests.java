@@ -39,7 +39,7 @@ public class WechatTests {
 
     private Wechat wechat = Wechat.newWechat("appId", "appSecret");
 
-    private String accessToken = "2leLznsHaxqpfzRi_iyk-SKMXiiINOK3rdPubNo5Dgk4oWzacyg-3-DBsH9mt7f1lw4DRUWtg76Sin2NraXxwjByzg-otPiUmcI3w_ZPn7AJJOeAHABBG";
+    private String accessToken = "CDg5ENPqbkMndmz8yMddwxGuQtJANKOmuksygsR-wwqgMhjGF8HUzojfJb2b2fWqp4-6xIXAq_V8oBNckpM20eVxdIG3xGtJI9SJGnwD10gUMQfAAAJBF";
 
     private String testDomain = "xxx";
 
@@ -419,5 +419,20 @@ public class WechatTests {
     @Test
     public void testMessageDelete(){
         assertTrue(wechat.MESSAGE.deleteSend(accessToken, 2547931045L));
+    }
+
+    @Test
+    public void testGetTempQrcode(){
+        System.out.println(wechat.QRCODE.getTempQrcode(accessToken, "1234", 3600));
+    }
+
+    @Test
+    public void testGetPermQrcode(){
+        System.out.println(wechat.QRCODE.getPermQrcode(accessToken, "12345"));
+    }
+
+    @Test
+    public void testShortUrl(){
+        System.out.println(wechat.QRCODE.shortUrl(accessToken, "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=xxxx%3D%3D"));
     }
 }
