@@ -1,6 +1,6 @@
 # Wechat
 
-一个简洁的微信基本接口工具包
+一个简单基本的微信公众号接口工具包
 ---
 
 + 包引入	
@@ -26,7 +26,7 @@
 
 	```java
 	Wechat wechat = Wechat.newWechat("appId", "appSecret");
-	wecaht.{component}.{api};
+	wechat.{component}.{api};
 	```	
 
 + ``Wechat``中包含几个基本组件:
