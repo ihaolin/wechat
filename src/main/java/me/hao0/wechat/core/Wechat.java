@@ -833,6 +833,13 @@ public class Wechat {
             return Boolean.TRUE;
         }
 
+        /**
+         * 更新分组名称
+         * @param accessToken accessToken
+         * @param id 分组ID
+         * @param newName 分组新名称
+         * @return 更新成功返回true，或抛WechatException
+         */
         public Boolean updateGroup(String accessToken, Integer id, String newName){
             String url = UPDATE_GROUP + accessToken;
             Group g = new Group();
@@ -967,7 +974,7 @@ public class Wechat {
         private Messages(){}
 
         /**
-         * 被动回复微信服务器
+         * 被动回复微信服务器文本消息
          * @return XML文本消息
          */
         public String respText(String openId, String content){
@@ -977,7 +984,7 @@ public class Wechat {
         }
 
         /**
-         * 构建XML图片消息，以响应微信服务器
+         * 被动回复微信服务器图片消息
          * @param openId 用户openId
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @return XML图片消息
@@ -989,7 +996,7 @@ public class Wechat {
         }
 
         /**
-         * 构建XML语音消息，以响应微信服务器
+         * 被动回复微信服务器语音消息
          * @param openId 用户openId
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @return XML语音消息
@@ -1001,7 +1008,7 @@ public class Wechat {
         }
 
         /**
-         * 构建XML视频消息，以响应微信服务器
+         * 被动回复微信服务器视频消息
          * @param openId 用户openId
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @param title 标题
@@ -1015,7 +1022,7 @@ public class Wechat {
         }
 
         /**
-         * 构建XML音乐消息，以响应微信服务器
+         * 被动回复微信服务器音乐消息
          * @param openId 用户openId
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @param title 标题
@@ -1037,7 +1044,7 @@ public class Wechat {
         }
 
         /**
-         * 构建XML图文消息，以响应微信服务器
+         * 被动回复微信服务器图文消息
          * @param openId 用户openId
          * @param articles 图片消息对象列表，长度 <= 10
          * @return XML图文消息
