@@ -5,25 +5,44 @@ import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.customer.WaitingSession;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.wechat.model.menu.MenuType;
+import me.hao0.wechat.model.message.receive.RecvMessage;
+import me.hao0.wechat.model.message.receive.RecvMessageType;
+import me.hao0.wechat.model.message.receive.event.RecvEvent;
+import me.hao0.wechat.model.message.receive.event.RecvEventType;
+import me.hao0.wechat.model.message.receive.event.RecvLocationEvent;
+import me.hao0.wechat.model.message.receive.event.RecvMenuEvent;
+import me.hao0.wechat.model.message.receive.event.RecvScanEvent;
+import me.hao0.wechat.model.message.receive.event.RecvSubscribeEvent;
+import me.hao0.wechat.model.message.receive.event.RecvUnSubscribeEvent;
+import me.hao0.wechat.model.message.receive.msg.RecvImageMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvLinkMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvLocationMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvMsg;
+import me.hao0.wechat.model.message.receive.msg.RecvShortVideoMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvTextMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvVideoMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvVoiceMessage;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
 import me.hao0.wechat.model.base.AuthType;
 import me.hao0.wechat.model.customer.CsSession;
 import me.hao0.wechat.model.customer.MsgRecord;
 import me.hao0.wechat.model.customer.UserSession;
-import me.hao0.wechat.model.message.Article;
-import me.hao0.wechat.model.message.SendMessage;
-import me.hao0.wechat.model.message.SendMessageScope;
-import me.hao0.wechat.model.message.SendMessageType;
-import me.hao0.wechat.model.message.SendPreviewMessage;
-import me.hao0.wechat.model.message.TemplateField;
-import me.hao0.wechat.model.message.RespMessageType;
+import me.hao0.wechat.model.message.resp.Article;
+import me.hao0.wechat.model.message.send.SendMessage;
+import me.hao0.wechat.model.message.send.SendMessageScope;
+import me.hao0.wechat.model.message.send.SendMessageType;
+import me.hao0.wechat.model.message.send.SendPreviewMessage;
+import me.hao0.wechat.model.message.send.TemplateField;
+import me.hao0.wechat.model.message.resp.RespMessageType;
 import me.hao0.wechat.utils.MD5;
 import me.hao0.wechat.utils.Jsons;
-import me.hao0.wechat.utils.Xmls;
+import me.hao0.wechat.utils.XmlReaders;
+import me.hao0.wechat.utils.XmlWriters;
 import me.hao0.wechat.utils.Http;
 import me.hao0.wechat.utils.Strings;
 import me.hao0.wechat.utils.Types;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -330,18 +349,18 @@ public class Wechat {
          * @return 转发客服的XML消息
          */
         public String forward(String openId, String kfAccount){
-            Xmls xmls = Xmls.create();
+            XmlWriters xmlWriters = XmlWriters.create();
 
-            xmls.element("ToUserName", openId)
+            xmlWriters.element("ToUserName", openId)
                 .element("FromUserName", appId)
                 .element("CreateTime", System.currentTimeMillis() / 1000);
 
             if (!Strings.isNullOrEmpty(kfAccount)){
-                xmls.element("TransInfo", "KfAccount", kfAccount);
+                xmlWriters.element("TransInfo", "KfAccount", kfAccount);
             }
-            xmls.element("MsgType", "transfer_customer_service");
+            xmlWriters.element("MsgType", "transfer_customer_service");
 
-            return xmls.build();
+            return xmlWriters.build();
         }
 
         /**
@@ -941,13 +960,11 @@ public class Wechat {
         private Messages(){}
 
         /**
-         * 构建XML文本消息，以响应微信服务器
-         * @param openId 用户openId
-         * @param content 消息内容
+         * 被动回复微信服务器
          * @return XML文本消息
          */
-        public String responseText(String openId, String content){
-            Xmls msg = responseCommonElements(openId, RespMessageType.TEXT);
+        public String respText(String openId, String content){
+            XmlWriters msg = respCommonElements(openId, RespMessageType.TEXT);
             msg.element("Content", content);
             return msg.build();
         }
@@ -958,8 +975,8 @@ public class Wechat {
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @return XML图片消息
          */
-        public String responseImage(String openId, String mediaId){
-            Xmls msg = responseCommonElements(openId, RespMessageType.IMAGE);
+        public String respImage(String openId, String mediaId){
+            XmlWriters msg = respCommonElements(openId, RespMessageType.IMAGE);
             msg.element("Image", "MediaId", mediaId);
             return msg.build();
         }
@@ -970,8 +987,8 @@ public class Wechat {
          * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
          * @return XML语音消息
          */
-        public String responseVoice(String openId, String mediaId){
-            Xmls msg = responseCommonElements(openId, RespMessageType.VOICE);
+        public String respVoice(String openId, String mediaId){
+            XmlWriters msg = respCommonElements(openId, RespMessageType.VOICE);
             msg.element("Voice", "MediaId", mediaId);
             return msg.build();
         }
@@ -984,8 +1001,8 @@ public class Wechat {
          * @param desc 描述
          * @return XML视频消息
          */
-        public String responseVideo(String openId, String mediaId, String title, String desc){
-            Xmls msg = responseCommonElements(openId, RespMessageType.VIDEO);
+        public String respVideo(String openId, String mediaId, String title, String desc){
+            XmlWriters msg = respCommonElements(openId, RespMessageType.VIDEO);
             msg.element("Video", "MediaId", mediaId, "Title", title, "Description", desc);
             return msg.build();
         }
@@ -1000,9 +1017,9 @@ public class Wechat {
          * @param hqUrl 高质量音乐链接，WIFI环境优先使用该链接播放音乐
          * @return XML音乐消息
          */
-        public String responseMusic(String openId, String mediaId,
-                                    String title, String desc, String url, String hqUrl){
-            Xmls msg = responseCommonElements(openId, RespMessageType.MUSIC);
+        public String respMusic(String openId, String mediaId,
+                                String title, String desc, String url, String hqUrl){
+            XmlWriters msg = respCommonElements(openId, RespMessageType.MUSIC);
             msg.element("Music",
                     "Title", title,
                     "Description", desc,
@@ -1018,33 +1035,178 @@ public class Wechat {
          * @param articles 图片消息对象列表，长度 <= 10
          * @return XML图文消息
          */
-        public String responseNews(String openId, List<Article> articles){
+        public String respNews(String openId, List<Article> articles){
             if (articles.size() > 10){
                 articles = articles.subList(0, 10);
             }
-            Xmls xmls = responseCommonElements(openId, RespMessageType.NEWS);
-            xmls.element("ArticleCount", articles.size());
-            List<Xmls.E> items = new ArrayList<>();
-            Xmls.E item;
+            XmlWriters xmlWriters = respCommonElements(openId, RespMessageType.NEWS);
+            xmlWriters.element("ArticleCount", articles.size());
+            List<XmlWriters.E> items = new ArrayList<>();
+            XmlWriters.E item;
             for (Article article : articles){
-                item = xmls.newElement("item",
+                item = xmlWriters.newElement("item",
                                         "Title", article.getTitle(),
                                         "Description", article.getDesc(),
                                         "PicUrl", article.getPicUrl(),
                                         "Url", article.getUrl());
                 items.add(item);
             }
-            xmls.element("Articles", items);
-            return xmls.build();
+            xmlWriters.element("Articles", items);
+            return xmlWriters.build();
         }
 
-        private Xmls responseCommonElements(String openId, RespMessageType type) {
-            Xmls xmls = Xmls.create();
-            xmls.element("ToUserName", openId)
+        private XmlWriters respCommonElements(String openId, RespMessageType type) {
+            XmlWriters xmlWriters = XmlWriters.create();
+            xmlWriters.element("ToUserName", openId)
                 .element("FromUserName", appId)
                 .element("CreateTime", System.currentTimeMillis() / 1000)
                 .element("MsgType", type.value());
-            return xmls;
+            return xmlWriters;
+        }
+
+        /**
+         * 接收微信服务器发来的XML消息
+         * @param xml xml字符串
+         * @return 消息类，或抛WechatException
+         */
+        public RecvMessage receive(String xml){
+            XmlReaders readers = XmlReaders.create(xml);
+            return receiveRecvMessage(readers);
+        }
+
+        /**
+         * 接收微信服务器发来的XML消息
+         * @param xml xml字符串
+         * @return 消息类，或抛WechatException
+         */
+        public RecvMessage receive(InputStream xml){
+            XmlReaders readers = XmlReaders.create(xml);
+            return receiveRecvMessage(readers);
+        }
+
+        private RecvMessage receiveRecvMessage(XmlReaders readers) {
+            RecvMessage msg = parse2RecvMessage(readers);
+            RecvMessageType type = RecvMessageType.from(msg.getMsgType());
+            if (RecvMessageType.EVENT == type){
+                return parse2RecvEvent(readers, msg);
+            } else {
+                return parse2RecvMsg(readers, msg);
+            }
+        }
+
+        private RecvMessage parse2RecvMessage(XmlReaders readers) {
+            RecvMessage m = new RecvMessage();
+            m.setFromUserName(readers.getNodeStr("FromUserName"));
+            m.setToUserName(readers.getNodeStr("ToUserName"));
+            m.setCreateTime(readers.getNodeInt("CreateTime"));
+            m.setMsgType(readers.getNodeStr("MsgType"));
+            return m;
+        }
+
+        /**
+         * 接收事件消息
+         */
+        private RecvMessage parse2RecvEvent(XmlReaders readers, RecvMessage msg) {
+
+            String eventValue = readers.getNodeStr("Event");
+            RecvEvent event = new RecvEvent(msg);
+            event.setEventType(eventValue);
+
+            RecvEventType type = RecvEventType.from(eventValue);
+            switch (type){
+
+                case SUBSCRIBE:
+                    RecvSubscribeEvent subscribe = new RecvSubscribeEvent(event);
+                    // 用户未关注时，扫码关注后会有这两个属性
+                    subscribe.setEventKey(readers.getNodeStr("EventKey"));
+                    subscribe.setTicket(readers.getNodeStr("Ticket"));
+                    return subscribe;
+
+                case UN_SUBSCRIBE:
+                    return new RecvUnSubscribeEvent(event);
+
+                case MENU_CLICK:
+                case MENU_VIEW:
+                    RecvMenuEvent menu = new RecvMenuEvent(event);
+                    menu.setEventKey(readers.getNodeStr("EventKey"));
+                    return menu;
+
+                case LOCATION:
+                    RecvLocationEvent location = new RecvLocationEvent(event);
+                    location.setLatitude(readers.getNodeStr("Latitude"));
+                    location.setLongitude(readers.getNodeStr("Longitude"));
+                    location.setPrecision(readers.getNodeStr("Precision"));
+                    return location;
+
+                case SCAN:
+                    RecvScanEvent scan = new RecvScanEvent(event);
+                    scan.setEventKey(readers.getNodeStr("EventKey"));
+                    scan.setTicket(readers.getNodeStr("Ticket"));
+                    return scan;
+
+                default:
+                    throw new IllegalArgumentException("unknown event msg");
+            }
+        }
+
+        /**
+         * 接收普通消息
+         */
+        private RecvMessage parse2RecvMsg(XmlReaders readers, RecvMessage message) {
+
+            RecvMessageType type = RecvMessageType.from(message.getMsgType());
+            RecvMsg msg = new RecvMsg(message);
+            msg.setMsgId(readers.getNodeLong("MsgId"));
+
+            switch (type){
+                case TEXT:
+                    RecvTextMessage text = new RecvTextMessage(msg);
+                    text.setContent(readers.getNodeStr("Content"));
+                    return text;
+
+                case IMAGE:
+                    RecvImageMessage image = new RecvImageMessage(msg);
+                    image.setPicUrl(readers.getNodeStr("PicUrl"));
+                    image.setMediaId(readers.getNodeStr("MediaId"));
+                    return image;
+
+                case VOICE:
+                    RecvVoiceMessage voice = new RecvVoiceMessage(msg);
+                    voice.setFormat(readers.getNodeStr("Format"));
+                    voice.setMediaId(readers.getNodeStr("MediaId"));
+                    voice.setRecognition(readers.getNodeStr("Recognition"));
+                    return voice;
+
+                case VIDEO:
+                    RecvVideoMessage video = new RecvVideoMessage(msg);
+                    video.setMediaId(readers.getNodeStr("MediaId"));
+                    video.setThumbMediaId(readers.getNodeStr("ThumbMediaId"));
+                    return video;
+
+                case SHORT_VIDEO:
+                    RecvShortVideoMessage svideo = new RecvShortVideoMessage(msg);
+                    svideo.setMediaId(readers.getNodeStr("MediaId"));
+                    svideo.setThumbMediaId(readers.getNodeStr("ThumbMediaId"));
+                    return svideo;
+
+                case LINK:
+                    RecvLinkMessage link = new RecvLinkMessage(msg);
+                    link.setTitle(readers.getNodeStr("Title"));
+                    link.setDescription(readers.getNodeStr("Description"));
+                    link.setUrl(readers.getNodeStr("Url"));
+                    return link;
+
+                case LOCATION:
+                    RecvLocationMessage location = new RecvLocationMessage(msg);
+                    location.setLabel(readers.getNodeStr("Label"));
+                    location.setLocationX(readers.getNodeStr("LocationX"));
+                    location.setLocationY(readers.getNodeStr("LocationY"));
+                    location.setScale(readers.getNodeInt("Scale"));
+                    return location;
+
+                default:
+                    throw new IllegalArgumentException("unknown msg type");
+            }
         }
 
         /**
@@ -1108,7 +1270,7 @@ public class Wechat {
          * 群发消息:
          *  1. 分组群发:【订阅号与服务号认证后均可用】
          *  2. 按OpenId列表发: 订阅号不可用，服务号认证后可用
-         *  @see me.hao0.wechat.model.message.SendMessageScope
+         *  @see me.hao0.wechat.model.message.send.SendMessageScope
          * @param accessToken accessToken
          * @param msg 消息
          * @return 消息ID，或抛WechatException

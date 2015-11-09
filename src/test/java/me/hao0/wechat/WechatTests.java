@@ -4,10 +4,23 @@ import me.hao0.wechat.core.Wechat;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.customer.MsgRecord;
 import me.hao0.wechat.model.menu.Menu;
-import me.hao0.wechat.model.message.Article;
-import me.hao0.wechat.model.message.TemplateField;
+import me.hao0.wechat.model.message.receive.RecvMessage;
+import me.hao0.wechat.model.message.receive.event.RecvEvent;
+import me.hao0.wechat.model.message.receive.event.RecvLocationEvent;
+import me.hao0.wechat.model.message.receive.event.RecvMenuEvent;
+import me.hao0.wechat.model.message.receive.event.RecvScanEvent;
+import me.hao0.wechat.model.message.receive.event.RecvSubscribeEvent;
+import me.hao0.wechat.model.message.receive.msg.RecvImageMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvLinkMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvLocationMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvMsg;
+import me.hao0.wechat.model.message.receive.msg.RecvShortVideoMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvTextMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvVideoMessage;
+import me.hao0.wechat.model.message.receive.msg.RecvVoiceMessage;
+import me.hao0.wechat.model.message.resp.Article;
+import me.hao0.wechat.model.message.send.TemplateField;
 import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -153,18 +166,18 @@ public class WechatTests {
 
     @Test
     public void testMessageResp(){
-        System.out.println(wechat.MESSAGE.responseText("bcsdafafasdf", "你好"));
-        System.out.println(wechat.MESSAGE.responseImage("bcsdafafasdf", "oijwefoiioefjiwfiwf"));
-        System.out.println(wechat.MESSAGE.responseVoice("bcsdafafasdf", "9823r8f9h8f239hf293fh"));
-        System.out.println(wechat.MESSAGE.responseVideo("bcsdafafasdf", "nowefwifjwopefjiwe", "视频标题", "视频描述"));
-        System.out.println(wechat.MESSAGE.responseMusic("bcsdafafasdf", "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
-        System.out.println(wechat.MESSAGE.responseNews("bcsdafafasdf",
-            Arrays.asList(
-                new Article("图文标题", "图文描述", "图片链接", "链接"),
-                new Article("图文标题", "图文描述", "图片链接", "链接"),
-                new Article("图文标题", "图文描述", "图片链接", "链接"),
-                new Article("图文标题", "图文描述", "图片链接", "链接")
-            ))
+        System.out.println(wechat.MESSAGE.respText("bcsdafafasdf", "你好"));
+        System.out.println(wechat.MESSAGE.respImage("bcsdafafasdf", "oijwefoiioefjiwfiwf"));
+        System.out.println(wechat.MESSAGE.respVoice("bcsdafafasdf", "9823r8f9h8f239hf293fh"));
+        System.out.println(wechat.MESSAGE.respVideo("bcsdafafasdf", "nowefwifjwopefjiwe", "视频标题", "视频描述"));
+        System.out.println(wechat.MESSAGE.respMusic("bcsdafafasdf", "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
+        System.out.println(wechat.MESSAGE.respNews("bcsdafafasdf",
+                        Arrays.asList(
+                                new Article("图文标题", "图文描述", "图片链接", "链接"),
+                                new Article("图文标题", "图文描述", "图片链接", "链接"),
+                                new Article("图文标题", "图文描述", "图片链接", "链接"),
+                                new Article("图文标题", "图文描述", "图片链接", "链接")
+                        ))
         );
     }
 
@@ -181,5 +194,187 @@ public class WechatTests {
                         new TemplateField("keyword3", "123456")
                     ))
         );
+    }
+
+    @Test
+    public void testMessageReceive(){
+        String xml = "<xml>\n" +
+                " <ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                " <FromUserName><![CDATA[fromUser]]></FromUserName> \n" +
+                " <CreateTime>1348831860</CreateTime>\n" +
+                " <MsgType><![CDATA[text]]></MsgType>\n" +
+                " <Content><![CDATA[this is a test]]></Content>\n" +
+                " <MsgId>1234567890123456</MsgId>\n" +
+                " </xml>";
+        RecvMessage message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvTextMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                " <ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                " <FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                " <CreateTime>1348831860</CreateTime>\n" +
+                " <MsgType><![CDATA[image]]></MsgType>\n" +
+                " <PicUrl><![CDATA[this is a url]]></PicUrl>\n" +
+                " <MediaId><![CDATA[media_id]]></MediaId>\n" +
+                " <MsgId>1234567890123456</MsgId>\n" +
+                " </xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvImageMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>1357290913</CreateTime>\n" +
+                "<MsgType><![CDATA[voice]]></MsgType>\n" +
+                "<MediaId><![CDATA[media_id]]></MediaId>\n" +
+                "<Format><![CDATA[Format]]></Format>\n" +
+                "<MsgId>1234567890123456</MsgId>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvVoiceMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>1357290913</CreateTime>\n" +
+                "<MsgType><![CDATA[video]]></MsgType>\n" +
+                "<MediaId><![CDATA[media_id]]></MediaId>\n" +
+                "<ThumbMediaId><![CDATA[thumb_media_id]]></ThumbMediaId>\n" +
+                "<MsgId>1234567890123456</MsgId>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvVideoMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>1357290913</CreateTime>\n" +
+                "<MsgType><![CDATA[shortvideo]]></MsgType>\n" +
+                "<MediaId><![CDATA[media_id]]></MediaId>\n" +
+                "<ThumbMediaId><![CDATA[thumb_media_id]]></ThumbMediaId>\n" +
+                "<MsgId>1234567890123456</MsgId>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvShortVideoMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>1351776360</CreateTime>\n" +
+                "<MsgType><![CDATA[location]]></MsgType>\n" +
+                "<Location_X>23.134521</Location_X>\n" +
+                "<Location_Y>113.358803</Location_Y>\n" +
+                "<Scale>20</Scale>\n" +
+                "<Label><![CDATA[位置信息]]></Label>\n" +
+                "<MsgId>1234567890123456</MsgId>\n" +
+                "</xml> ";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvLocationMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>1351776360</CreateTime>\n" +
+                "<MsgType><![CDATA[link]]></MsgType>\n" +
+                "<Title><![CDATA[公众平台官网链接]]></Title>\n" +
+                "<Description><![CDATA[公众平台官网链接]]></Description>\n" +
+                "<Url><![CDATA[url]]></Url>\n" +
+                "<MsgId>1234567890123456</MsgId>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvMsg && message instanceof RecvLinkMessage);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[subscribe]]></Event>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvSubscribeEvent);
+        System.out.println(message);
+
+
+        xml = "<xml><ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[subscribe]]></Event>\n" +
+                "<EventKey><![CDATA[qrscene_123123]]></EventKey>\n" +
+                "<Ticket><![CDATA[TICKET]]></Ticket>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvSubscribeEvent);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[SCAN]]></Event>\n" +
+                "<EventKey><![CDATA[SCENE_VALUE]]></EventKey>\n" +
+                "<Ticket><![CDATA[TICKET]]></Ticket>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvScanEvent);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[fromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[LOCATION]]></Event>\n" +
+                "<Latitude>23.137466</Latitude>\n" +
+                "<Longitude>113.352425</Longitude>\n" +
+                "<Precision>119.385040</Precision>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvLocationEvent);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[CLICK]]></Event>\n" +
+                "<EventKey><![CDATA[EVENTKEY]]></EventKey>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvMenuEvent);
+        System.out.println(message);
+
+
+        xml = "<xml>\n" +
+                "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
+                "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
+                "<CreateTime>123456789</CreateTime>\n" +
+                "<MsgType><![CDATA[event]]></MsgType>\n" +
+                "<Event><![CDATA[VIEW]]></Event>\n" +
+                "<EventKey><![CDATA[www.qq.com]]></EventKey>\n" +
+                "</xml>";
+        message = wechat.MESSAGE.receive(xml);
+        assertTrue(message instanceof RecvEvent && message instanceof RecvMenuEvent);
+        System.out.println(message);
     }
 }

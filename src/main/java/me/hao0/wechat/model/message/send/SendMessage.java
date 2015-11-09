@@ -1,4 +1,4 @@
-package me.hao0.wechat.model.message;
+package me.hao0.wechat.model.message.send;
 
 import java.io.Serializable;
 import java.util.List;

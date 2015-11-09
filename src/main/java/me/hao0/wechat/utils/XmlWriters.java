@@ -1,7 +1,6 @@
 package me.hao0.wechat.utils;
 
 import me.hao0.wechat.exception.XmlException;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,34 +11,33 @@ import java.util.List;
  * Email: haolin.h0@gmail.com
  * Date: 6/11/15
  */
-public class Xmls {
-
+public class XmlWriters {
 
     List<E> es = new ArrayList<>();
 
-    private Xmls(){}
+    private XmlWriters(){}
 
-    public static Xmls create(){
-        return new Xmls();
+    public static XmlWriters create(){
+        return new XmlWriters();
     }
 
-    public Xmls element(String name, String text){
+    public XmlWriters element(String name, String text){
         E e = new TextE(name, text);
         es.add(e);
         return this;
     }
 
-    public Xmls element(String name, Number number){
+    public XmlWriters element(String name, Number number){
         E e = new NumberE(name, number);
         es.add(e);
         return this;
     }
 
-    public Xmls element(String parentName, String childName, String childText){
+    public XmlWriters element(String parentName, String childName, String childText){
         return element(parentName, new TextE(childName, childText));
     }
 
-    public Xmls element(String parentName, String childName, Number childNumber){
+    public XmlWriters element(String parentName, String childName, Number childNumber){
         return element(parentName, new NumberE(childName, childNumber));
     }
 
@@ -48,7 +46,7 @@ public class Xmls {
      * @param parentName 父元素标签名
      * @param childPairs childName1, childValue1, childName2, childValu2, ...，长度必读为2的倍数
      */
-    public Xmls element(String parentName, Object... childPairs){
+    public XmlWriters element(String parentName, Object... childPairs){
         if (childPairs.length % 2 != 0){
             throw new XmlException("var args's length must % 2 = 0");
         }
@@ -68,14 +66,14 @@ public class Xmls {
         return this;
     }
 
-    public Xmls element(String parentName, E child){
+    public XmlWriters element(String parentName, E child){
         E e = new TextE(parentName, null);
         e.children = Arrays.asList(child);
         es.add(e);
         return this;
     }
 
-    public Xmls element(String parentName, List<E> children){
+    public XmlWriters element(String parentName, List<E> children){
         E e = new TextE(parentName, null);
         e.children = children;
         es.add(e);

@@ -1,6 +1,6 @@
 package me.hao0.wechat;
 
-import me.hao0.wechat.utils.Xmls;
+import me.hao0.wechat.utils.XmlWriters;
 import org.junit.Test;
 
 /**
@@ -8,31 +8,31 @@ import org.junit.Test;
  * Email: haolin.h0@gmail.com
  * Date: 6/11/15
  */
-public class XmlsTest {
+public class XmlWritersTest {
 
     @Test
     public void testOneLevel(){
-        Xmls xmls = Xmls.create();
+        XmlWriters xmlWriters = XmlWriters.create();
 
-        xmls.element("ToUserName", "123456")
+        xmlWriters.element("ToUserName", "123456")
             .element("FromUserName", "me")
             .element("CreateTime", System.currentTimeMillis())
             .element("MsgType", "transfer_customer_service");
 
-        System.out.println(xmls.build());
+        System.out.println(xmlWriters.build());
     }
 
     @Test
     public void testMultiLevel(){
-        Xmls xmls = Xmls.create();
+        XmlWriters xmlWriters = XmlWriters.create();
 
-        xmls.element("ToUserName", "123456")
+        xmlWriters.element("ToUserName", "123456")
             .element("FromUserName", "me")
             .element("CreateTime", System.currentTimeMillis())
             .element("TransInfo", "KfAccount", "test1@test")
             .element("MsgType", "transfer_customer_service");
 
-        System.out.println(xmls.build());
+        System.out.println(xmlWriters.build());
     }
 
 }

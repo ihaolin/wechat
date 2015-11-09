@@ -1,6 +1,5 @@
 package me.hao0.wechat.exception;
 
-
 /**
  * Author: haolin
  * Email: haolin.h0@gmail.com
