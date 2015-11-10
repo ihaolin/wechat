@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.util.JSONPObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import me.hao0.wechat.exception.JsonException;
 import java.io.IOException;
 
 /**
@@ -14,8 +13,6 @@ import java.io.IOException;
  * On: 11/8/14
  */
 public class Jsons {
-
-    private static Logger logger = LoggerFactory.getLogger(Jsons.class);
 
     /**
      * 忽略对象中值为NULL或""的属性
@@ -57,8 +54,7 @@ public class Jsons {
         try {
             return mapper.writeValueAsString(target);
         } catch (IOException e) {
-            logger.error("write to json string error:" + target, e);
-            return null;
+            throw new JsonException(e);
         }
     }
 
@@ -76,8 +72,7 @@ public class Jsons {
         try {
             return mapper.readValue(json, target);
         } catch (IOException e) {
-            logger.warn("parse json string error:" + json, e);
-            return null;
+            throw new JsonException(e);
         }
     }
 
@@ -98,8 +93,7 @@ public class Jsons {
         try {
             return (T) mapper.readValue(jsonString, javaType);
         } catch (Exception e) {
-            logger.warn("parse json string error:" + jsonString, e);
-            return null;
+            throw new JsonException(e);
         }
     }
 
@@ -150,12 +144,9 @@ public class Jsons {
     public <T> T update(String json, T target) {
         try {
             return (T) mapper.readerForUpdating(target).readValue(json);
-        } catch (JsonProcessingException e) {
-            logger.warn("update json string:" + json + " to object:" + target + " error.", e);
-        } catch (IOException e) {
-            logger.warn("update json string:" + json + " to object:" + target + " error.", e);
+        } catch (Exception e) {
+            throw new JsonException(e);
         }
-        return null;
     }
 
     /**

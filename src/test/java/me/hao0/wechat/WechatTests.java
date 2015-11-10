@@ -155,12 +155,12 @@ public class WechatTests {
 
     @Test
     public void testMoveUserGroup(){
-        assertTrue(wechat.USER.moveUserGroup(accessToken, openId, 100));
+        assertTrue(wechat.USER.mvUserGroup(accessToken, openId, 100));
     }
 
     @Test
     public void testGetUserInfo(){
-        System.out.println(wechat.USER.getUserInfo(accessToken, openId));
+        System.out.println(wechat.USER.getUser(accessToken, openId));
     }
 
     @Test
@@ -434,5 +434,11 @@ public class WechatTests {
     @Test
     public void testShortUrl(){
         System.out.println(wechat.QRCODE.shortUrl(accessToken, "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=xxxx%3D%3D"));
+    }
+
+    @Test
+    public void testLoadToken(){
+        System.out.println(wechat.USER.getGroup());
+        System.out.println(wechat.USER.getUserGroup(openId));
     }
 }

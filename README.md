@@ -124,7 +124,7 @@
          * @param groupId 组ID
          * @return 移动成功返回true，或抛WechatException
          */
-        Boolean moveUserGroup(String accessToken, String openId, Integer groupId)
+        Boolean mvUserGroup(String accessToken, String openId, Integer groupId)
         
         /**
          * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
@@ -132,7 +132,7 @@
          * @param openId 用户openId
          * @return 用户信息，或抛WechatException
          */
-        User getUserInfo(String accessToken, String openId)
+        User getUser(String accessToken, String openId)
         
         /**
          * 备注用户
@@ -409,6 +409,43 @@
 	
 	+ <span id="material-api">**```MATERIAL```**</span>(待码): 
 
++ AccessToken管理:
+	
+	> 由于微信服务器限制**AccessToken**请求次数，并且频繁请求**AccessToken**并不是一个明智之举，需要将获取的**AccessToken**保存下来，待过期时，再去请求新的**AccessToken**，所以以上API均提供了无accessToken版本，如:
+	
+	```java
+	List<String> ip();
+	List<String> ip(String accessToken);
+	```
+
++ 实现AccessTokenLoader: 
+
+	```java
+	public interface AccessTokenLoader {
+
+	    /**
+	     * 获取accessToken
+	     * @return accessToken，若""或NULL会重新从微信服务器获取，并进行refresh
+	     */
+	    String get();
+	
+	    /**
+	     * 刷新accessToken，实现时需要保存一段时间，以免频繁从微信服务器获取
+	     * @param token 从微信服务器获取AccessToken
+	     */
+	    void refresh(AccessToken token);
+	}
+	
+	// 默认的AccessTokenLoader:
+	
+	```
+
++ 默认的AccessTokenLoader(<font color="red">**使用内存加载AccessToken，生产环境不推荐使用**</font>):
+
+	```
+	
+	```
+
 + 具体例子，可见[测试用例](https://github.com/ihaolin/wechat/blob/master/src/test/java/me/hao0/wechat/WechatTests.java)。
 
 + 微信相关文档
@@ -420,11 +457,11 @@
 
 + 你是好人
 
-	+ 倘若你钱多人傻花不完，小弟乐意效劳😊，掏出你的微信神器做回好人吧:
+	+ 倘若你钱多人傻花不完，小弟乐意效劳😊，掏出你的**微信神器**做回好人吧:
 		
 		<img src="wechat.png" width="200">
 	
-	+ 倘若你还不够尽兴，继续掏出你的支付宝神器，疯狂扫吧:
+	+ 倘若你还不够尽兴，继续掏出你的**支付宝神器**，疯狂扫吧:
 
 		<img src="alipay.png" width="200">
         

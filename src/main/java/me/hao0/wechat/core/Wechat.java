@@ -2,6 +2,7 @@ package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import me.hao0.wechat.exception.WechatException;
+import me.hao0.wechat.model.base.AccessToken;
 import me.hao0.wechat.model.customer.WaitingSession;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.wechat.model.menu.MenuType;
@@ -72,6 +73,11 @@ public class Wechat {
     private String appSecret;
 
     /**
+     * AccessToken加载器
+     */
+    private final AccessTokenLoader tokenLoader;
+
+    /**
      * 基础API
      */
     public final Bases BASE = new Bases();
@@ -108,13 +114,21 @@ public class Wechat {
 
     private final String ERROR_CODE = "errcode";
 
-    private Wechat(){}
+    private Wechat(String appId, String appSecret, AccessTokenLoader tokenLoader){
+        if (tokenLoader == null){
+            throw new NullPointerException("access token loader can't be null");
+        }
+        this.appId = appId;
+        this.appSecret = appSecret;
+        this.tokenLoader = tokenLoader;
+    }
 
     public static Wechat newWechat(String appId, String appSecret){
-        Wechat w = new Wechat();
-        w.appId = appId;
-        w.appSecret = appSecret;
-        return w;
+        return newWechat(appId, appSecret, new DefaultAccessTokenLoader());
+    }
+
+    public static Wechat newWechat(String appId, String appSecret, AccessTokenLoader tokenLoader){
+        return new Wechat(appId, appSecret, tokenLoader);
     }
 
     /**
@@ -194,10 +208,10 @@ public class Wechat {
         }
 
         /**
-         * 获取accessToken(失效为2小时，应该尽量临时保存一个地方，每隔一段时间来获取)
+         * 获取accessToken(应该尽量临时保存一个地方，每隔一段时间来获取)
          * @return accessToken，或抛WechatException
          */
-        public String accessToken(){
+        public AccessToken accessToken(){
             StringBuilder url = new StringBuilder(ACCESS_TOKEN_URL);
             url.append("&appid=").append(appId)
                .append("&secret=").append(appSecret);
@@ -206,8 +220,16 @@ public class Wechat {
             if (resp.containsKey(ERROR_CODE)){
                 throw new WechatException(resp);
             } else {
-                return (String)resp.get("access_token");
+                return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), AccessToken.class);
             }
+        }
+
+        /**
+         * 获取微信服务器IP列表
+         * @return 微信服务器IP列表，或抛WechatException
+         */
+        public List<String> ip(){
+            return ip(loadToken());
         }
 
         /**
@@ -283,6 +305,17 @@ public class Wechat {
 
         /**
          * 添加客服账户
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @return 添加成功返回true，反之false
+         */
+        public Boolean createAccount(String account, String nickName, String password){
+            return createAccount(loadToken(), account, nickName, password);
+        }
+
+        /**
+         * 添加客服账户
          * @param accessToken accessToken
          * @param account 登录帐号(包含域名)
          * @param nickName 昵称
@@ -292,6 +325,17 @@ public class Wechat {
         public Boolean createAccount(String accessToken, String account, String nickName, String password){
             String url = CREATE_ACCOUNT + accessToken;
             return createOrUpdateAccount(account, nickName, password, url);
+        }
+
+        /**
+         * 更新客服账户
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @return 添加成功返回true，或抛WechatException
+         */
+        public Boolean updateAccount(String account, String nickName, String password){
+            return updateAccount(loadToken(), account, nickName, password);
         }
 
         /**
@@ -320,6 +364,15 @@ public class Wechat {
                 throw new WechatException(resp);
             }
             return Boolean.TRUE;
+        }
+
+        /**
+         * 删除客服账户
+         * @param kfAccount 客服登录帐号(包含域名)
+         * @return 添加成功返回true，或抛WechatException
+         */
+        public Boolean deleteAccount(String kfAccount){
+            return deleteAccount(loadToken(), kfAccount);
         }
 
         /**
@@ -372,6 +425,18 @@ public class Wechat {
 
         /**
          * 查询客服聊天记录
+         * @param pageNo 页码
+         * @param pageSize 分页大小
+         * @param startTime 起始时间
+         * @param endTime 结束时间
+         * @return 客服聊天记录，或抛WechatException
+         */
+        public List<MsgRecord> getMsgRecords(Integer pageNo, Integer pageSize, Date startTime, Date endTime){
+            return getMsgRecords(loadToken(), pageNo, pageSize, startTime, endTime);
+        }
+
+        /**
+         * 查询客服聊天记录
          * @param accessToken accessToken
          * @param pageNo 页码
          * @param pageSize 分页大小
@@ -416,6 +481,16 @@ public class Wechat {
 
         /**
          * 创建会话(该客服必需在线)
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @return 创建成功返回true，或抛WechatException
+         */
+        public Boolean createSession(String openId, String kfAccount, String text){
+            return createSession(loadToken(), openId, kfAccount, text);
+        }
+
+        /**
+         * 创建会话(该客服必需在线)
          * @param openId 用户openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
@@ -423,6 +498,16 @@ public class Wechat {
          */
         public Boolean createSession(String accessToken, String openId, String kfAccount, String text){
             return createOrCloseSession(openId, kfAccount, text, CREATE_SESSION + accessToken);
+        }
+
+        /**
+         * 关闭会话
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @return 关闭成功返回true，或抛WechatException
+         */
+        public Boolean closeSession(String openId, String kfAccount, String text){
+            return closeSession(loadToken(), openId, kfAccount, text);
         }
 
         /**
@@ -452,6 +537,15 @@ public class Wechat {
 
         /**
          * 获取用户的会话状态
+         * @param openId 用户openId
+         * @return 客户的会话状态，或抛WechatException
+         */
+        public UserSession getUserSession(String openId){
+            return getUserSession(loadToken(), openId);
+        }
+
+        /**
+         * 获取用户的会话状态
          * @param accessToken accessToken
          * @param openId 用户openId
          * @return 客户的会话状态，或抛WechatException
@@ -468,6 +562,15 @@ public class Wechat {
             status.setKfAccount(String.valueOf(resp.get("kf_account")));
             status.setCreateTime(new Date((Integer)resp.get("createtime") * 1000L));
             return status;
+        }
+
+        /**
+         * 获取客服的会话列表
+         * @param kfAccount 客服帐号(包含域名)
+         * @return 客服的会话列表，或抛WechatException
+         */
+        public List<CsSession> getCsSessions(String kfAccount){
+            return getCsSessions(loadToken(), kfAccount);
         }
 
         /**
@@ -501,6 +604,14 @@ public class Wechat {
             s.setOpenId((String)session.get("openid"));
             s.setCreateTime(new Date((Integer)session.get("createtime") * 1000L));
             return s;
+        }
+
+        /**
+         * 获取未接入的会话列表
+         * @return 未接入的会话列表，或抛WechatException
+         */
+        public List<WaitingSession> getWaitingSessions(){
+            return getWaitingSessions(loadToken());
         }
 
         /**
@@ -560,6 +671,14 @@ public class Wechat {
 
         /**
          * 查询菜单
+         * @return 菜单列表
+         */
+        public List<Menu> get(){
+            return get(loadToken());
+        }
+
+        /**
+         * 查询菜单
          * @param accessToken accessToken
          * @return 菜单列表
          */
@@ -572,6 +691,15 @@ public class Wechat {
             }
             String jsonMenu = Jsons.DEFAULT.toJson(((Map) resp.get("menu")).get("button"));
             return Jsons.EXCLUDE_DEFAULT.fromJson(jsonMenu, Types.ARRAY_LIST_MENU_TYPE);
+        }
+
+        /**
+         * 创建菜单
+         * @param jsonMenu 菜单json
+         * @return 创建成功返回true，或抛WechatException
+         */
+        public Boolean create(String jsonMenu){
+            return create(loadToken(), jsonMenu);
         }
 
         /**
@@ -589,6 +717,14 @@ public class Wechat {
                 throw new WechatException(resp);
             }
             return Boolean.TRUE;
+        }
+
+        /**
+         * 删除菜单
+         * @return 删除成功返回true，或抛WechatException
+         */
+        public Boolean delete(){
+            return delete(loadToken());
         }
 
         /**
@@ -775,6 +911,15 @@ public class Wechat {
 
         /**
          * 创建用户分组
+         * @param name 名称
+         * @return 分组ID，或抛WechatException
+         */
+        public Integer createGroup(String name){
+            return createGroup(loadToken(), name);
+        }
+
+        /**
+         * 创建用户分组
          * @param accessToken accessToken
          * @param name 名称
          * @return 分组ID，或抛WechatException
@@ -797,6 +942,14 @@ public class Wechat {
 
         /**
          * 获取所有分组列表
+         * @return 分组列表，或抛WechatException
+         */
+        public List<Group> getGroup(){
+            return getGroup(loadToken());
+        }
+
+        /**
+         * 获取所有分组列表
          * @param accessToken accessToken
          * @return 分组列表，或抛WechatException
          */
@@ -810,6 +963,15 @@ public class Wechat {
             }
             return Jsons.EXCLUDE_DEFAULT
                         .fromJson(Jsons.DEFAULT.toJson(resp.get("groups")), Types.ARRAY_LIST_GROUP_TYPE);
+        }
+
+        /**
+         * 删除分组
+         * @param id 分组ID
+         * @return 删除成功返回true，或抛WechatException
+         */
+        public Boolean deleteGroup(Integer id){
+            return deleteGroup(loadToken(), id);
         }
 
         /**
@@ -831,6 +993,16 @@ public class Wechat {
                 throw new WechatException(resp);
             }
             return Boolean.TRUE;
+        }
+
+        /**
+         * 更新分组名称
+         * @param id 分组ID
+         * @param newName 分组新名称
+         * @return 更新成功返回true，或抛WechatException
+         */
+        public Boolean updateGroup(Integer id, String newName){
+            return updateGroup(loadToken(), id, newName);
         }
 
         /**
@@ -858,6 +1030,15 @@ public class Wechat {
 
         /**
          * 获取用户所在组
+         * @param openId 用户openId
+         * @return 组ID，或抛WechatException
+         */
+        public Integer getUserGroup(String openId){
+            return getUserGroup(loadToken(), openId);
+        }
+
+        /**
+         * 获取用户所在组
          * @param accessToken accessToken
          * @param openId 用户openId
          * @return 组ID，或抛WechatException
@@ -877,12 +1058,22 @@ public class Wechat {
 
         /**
          * 移动用户所在组
-         * @param accessToken accessToken
          * @param openId 用户openId
-         * @param groupId 组ID
+         * @param groupId 新组ID
          * @return 移动成功返回true，或抛WechatException
          */
-        public Boolean moveUserGroup(String accessToken, String openId, Integer groupId){
+        public Boolean mvUserGroup(String openId, Integer groupId){
+            return mvUserGroup(loadToken(), openId, groupId);
+        }
+
+        /**
+         * 移动用户所在组
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param groupId 新组ID
+         * @return 移动成功返回true，或抛WechatException
+         */
+        public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
             String url = MOVE_USER_GROUP + accessToken;
             Map<String, Object> params = new HashMap<>();
             params.put("openid", openId);
@@ -898,11 +1089,20 @@ public class Wechat {
 
         /**
          * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+         * @param openId 用户openId
+         * @return 用户信息，或抛WechatException
+         */
+        public User getUser(String openId){
+            return getUser(loadToken(), openId);
+        }
+
+        /**
+         * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
          * @param accessToken accessToken
          * @param openId 用户openId
          * @return 用户信息，或抛WechatException
          */
-        public User getUserInfo(String accessToken, String openId){
+        public User getUser(String accessToken, String openId){
             StringBuilder url = new StringBuilder(GET_USER_INFO);
             url.append(accessToken).append("&openid=").append(openId);
             Map<String, Object> resp =
@@ -912,6 +1112,16 @@ public class Wechat {
                 throw new WechatException(resp);
             }
             return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
+        }
+
+        /**
+         * 备注用户
+         * @param openId 用户openId
+         * @param remark 备注
+         * @return 备注成功返回true，或抛WechatException
+         */
+        public Boolean remarkUser(String openId, String remark){
+            return remarkUser(loadToken(), openId, remark);
         }
 
         /**
@@ -1225,6 +1435,17 @@ public class Wechat {
 
         /**
          * 向用户发送模版消息
+         * @param openId 用户openId
+         * @param templateId 模版ID
+         * @param fields 字段列表
+         * @return 消息ID，或抛WechatException
+         */
+        public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields){
+            return sendTemplate(loadToken(), openId, templateId, null, fields);
+        }
+
+        /**
+         * 向用户发送模版消息
          * @param accessToken accessToken
          * @param openId 用户openId
          * @param templateId 模版ID
@@ -1233,6 +1454,18 @@ public class Wechat {
          */
         public Integer sendTemplate(String accessToken, String openId, String templateId, List<TemplateField> fields){
             return sendTemplate(accessToken, openId, templateId, null, fields);
+        }
+
+        /**
+         * 向用户发送模版消息
+         * @param openId 用户openId
+         * @param templateId 模版ID
+         * @param fields 字段列表
+         * @param link 点击链接
+         * @return 消息ID，或抛WechatException
+         */
+        public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields, String link){
+            return sendTemplate(loadToken(), openId, templateId, link, fields);
         }
 
         /**
@@ -1278,6 +1511,18 @@ public class Wechat {
                 params.put("data", data);
             }
             return params;
+        }
+
+        /**
+         * 群发消息:
+         *  1. 分组群发:【订阅号与服务号认证后均可用】
+         *  2. 按OpenId列表发: 订阅号不可用，服务号认证后可用
+         *  @see me.hao0.wechat.model.message.send.SendMessageScope
+         * @param msg 消息
+         * @return 消息ID，或抛WechatException
+         */
+        public Long send(SendMessage msg){
+            return send(loadToken(), msg);
         }
 
         /**
@@ -1346,6 +1591,15 @@ public class Wechat {
 
         /**
          * 发送预览消息
+         * @param msg 预览消息
+         * @return 发送成功返回true，或抛WechatException
+         */
+        public Boolean previewSend(SendPreviewMessage msg){
+            return previewSend(loadToken(), msg);
+        }
+
+        /**
+         * 发送预览消息
          * @param accessToken accessToken
          * @param msg 预览消息
          * @return 发送成功返回true，或抛WechatException
@@ -1390,6 +1644,19 @@ public class Wechat {
 
         /**
          * 删除群发消息: 订阅号与服务号认证后均可用:
+         1、只有已经发送成功的消息才能删除
+         2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
+         3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
+         4、如果多次群发发送的是一个图文消息，那么删除其中一次群发，就会删除掉这个图文消息也，导致所有群发都失效
+         * @param id 群发消息ID
+         * @return 删除成功，或抛WechatException
+         */
+        public Boolean deleteSend(Long id){
+            return deleteSend(loadToken(), id);
+        }
+
+        /**
+         * 删除群发消息: 订阅号与服务号认证后均可用:
              1、只有已经发送成功的消息才能删除
              2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
              3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
@@ -1409,6 +1676,15 @@ public class Wechat {
                 throw new WechatException(resp);
             }
             return Boolean.TRUE;
+        }
+
+        /**
+         * 检查群发消息状态: 订阅号与服务号认证后均可用
+         * @param id 群发消息ID
+         * @return 群发消息状态，或抛WechatException
+         */
+        public String getSend(Long id){
+            return getSend(loadToken(), id);
         }
 
         /**
@@ -1455,6 +1731,16 @@ public class Wechat {
 
         /**
          * 获取临时二维码
+         * @param sceneId 业务场景ID，32位非0整型
+         * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
+         * @return 临时二维码链接，或抛WechatException
+         */
+        public String getTempQrcode(String sceneId, Integer expire){
+            return getTempQrcode(loadToken(), sceneId, expire);
+        }
+
+        /**
+         * 获取临时二维码
          * @param accessToken accessToken
          * @param sceneId 业务场景ID，32位非0整型
          * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
@@ -1472,6 +1758,15 @@ public class Wechat {
             }
             Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
             return showQrcode(qr.getTicket());
+        }
+
+        /**
+         * 获取永久二维码
+         * @param sceneId 业务场景ID，最大值为100000（目前参数只支持1--100000）
+         * @return 永久二维码链接，或抛WechatException
+         */
+        public String getPermQrcode(String sceneId){
+            return getPermQrcode(loadToken(), sceneId);
         }
 
         /**
@@ -1515,6 +1810,15 @@ public class Wechat {
 
         /**
          * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率
+         * @param longUrl 长链接
+         * @return 短链接，或抛WechatException
+         */
+        public String shortUrl(String longUrl){
+            return shortUrl(loadToken(), longUrl);
+        }
+
+        /**
+         * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率
          * @param accessToken accessToken
          * @param longUrl 长链接
          * @return 短链接，或抛WechatException
@@ -1541,5 +1845,15 @@ public class Wechat {
 
         private Materials(){}
 
+    }
+
+    private String loadToken(){
+        String accessToken = tokenLoader.get();
+        if (Strings.isNullOrEmpty(accessToken)){
+            AccessToken token = BASE.accessToken();
+            tokenLoader.refresh(token);
+            accessToken = token.getAccessToken();
+        }
+        return accessToken;
     }
 }
