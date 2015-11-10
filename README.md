@@ -3,18 +3,24 @@
 一个简单基本的微信公众号接口工具包
 ---
 
-+ 包引入	
-
++ 包引入
+	
+	```xml
+	<dependency>
+        <groupId>me.hao0</groupId>
+        <artifactId>wechat</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+	```
+	
 + 依赖包，注意引入项目时是否需要**exclude**:
 
 	```xml
-	<!-- slf4j-api -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.2</version>
+	<dependency>
+        <groupId>com.github.kevinsawicki</groupId>
+        <artifactId>http-request</artifactId>
+        <version>6.0</version>
     </dependency>
-    <!-- jackson -->
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
@@ -435,15 +441,33 @@
 	     */
 	    void refresh(AccessToken token);
 	}
-	
-	// 默认的AccessTokenLoader:
-	
-	```
+	```	
 
 + 默认的AccessTokenLoader(<font color="red">**使用内存加载AccessToken，生产环境不推荐使用**</font>):
 
-	```
+	```java
+	public class DefaultAccessTokenLoader implements AccessTokenLoader {
 	
+	    private Long expiredAt;
+	
+	    private AccessToken validToken;
+	
+	    @Override
+	    public String get() {
+	        if (expiredAt == null
+	                || System.currentTimeMillis() > expiredAt
+	                || validToken == null){
+	            return null;
+	        }
+	        return validToken.getAccessToken();
+	    }
+	
+	    @Override
+	    public void refresh(AccessToken token) {
+	        validToken = token;
+	        expiredAt = System.currentTimeMillis() + (token.getExpire() * 1000L);
+	    }
+	}
 	```
 
 + 具体例子，可见[测试用例](https://github.com/ihaolin/wechat/blob/master/src/test/java/me/hao0/wechat/WechatTests.java)。

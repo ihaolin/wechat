@@ -1,25 +1,7 @@
 package me.hao0.wechat.model.message.receive.event;
 
 /**
- * 关注事件:
- *  1. 普通关注:
-     <xml>
-         <ToUserName><![CDATA[toUser]]></ToUserName>
-         <FromUserName><![CDATA[FromUser]]></FromUserName>
-         <CreateTime>123456789</CreateTime>
-         <MsgType><![CDATA[event]]></MsgType>
-         <Event><![CDATA[subscribe]]></Event>
-     </xml>
- *  2. (扫码时)用户未关注时，进行关注后的事件推送:
-     <xml>
-         <ToUserName><![CDATA[toUser]]></ToUserName>
-         <FromUserName><![CDATA[FromUser]]></FromUserName>
-         <CreateTime>123456789</CreateTime>
-         <MsgType><![CDATA[event]]></MsgType>
-         <Event><![CDATA[subscribe]]></Event>
-         <EventKey><![CDATA[qrscene_123123]]></EventKey>
-         <Ticket><![CDATA[TICKET]]></Ticket>
-     </xml>
+ * 关注事件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 9/11/15

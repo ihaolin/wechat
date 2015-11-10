@@ -1,9 +1,7 @@
 package me.hao0.wechat.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import me.hao0.wechat.exception.JsonException;
 import java.io.IOException;
 
@@ -49,6 +47,7 @@ public class Jsons {
      * convert an object(POJO, Collection, ...) to json string
      * @param target target object
      * @return json string
+     * @throws me.hao0.wechat.exception.JsonException the exception for json
      */
     public String toJson(Object target) {
         try {
@@ -62,11 +61,12 @@ public class Jsons {
      * deserialize a json to target class object
      * @param json json string
      * @param target target class
-     * @param <T>
+     * @param <T> the generic type
      * @return target object
+     * @throws me.hao0.wechat.exception.JsonException the exception for json
      */
     public <T> T fromJson(String json, Class<T> target) {
-        if (isNullOrEmpty(json)) {
+        if (Strings.isNullOrEmpty(json)) {
             return null;
         }
         try {
@@ -76,18 +76,18 @@ public class Jsons {
         }
     }
 
-    private boolean isNullOrEmpty(String json) {
-        return json == null || "".equals(json);
-    }
-
     /**
-     * 反序列化复杂Collection如List<Bean>, 先使用函數createCollectionType构造类型,然后调用本函数.
-     *
+     * 反序列化
+     * @param javaType JavaType
+     * @param jsonString json string
+     * @param <T> the generic type
      * @see #createCollectionType(Class, Class...)
+     * @return the javaType's object
+     * @throws me.hao0.wechat.exception.JsonException the exception for json
      */
     @SuppressWarnings("unchecked")
     public <T> T fromJson(String jsonString, JavaType javaType) {
-        if (isNullOrEmpty(jsonString)) {
+        if (Strings.isNullOrEmpty(jsonString)) {
             return null;
         }
         try {
@@ -98,76 +98,12 @@ public class Jsons {
     }
 
     /**
-     * read a json to JsonNode Tree
-     * @param json source json string
-     * @return JsonNode Tree
-     * @throws java.io.IOException
-     */
-    public JsonNode treeFromJson(String json) throws IOException {
-        return mapper.readTree(json);
-    }
-
-    /**
-     * convert a JsonNode to target class object
-     * @param node source node
-     * @param target target class
-     * @param <T>
-     * @return target class object
-     * @throws com.fasterxml.jackson.core.JsonProcessingException
-     */
-    public <T> T treeToValue(JsonNode node, Class<T> target) throws JsonProcessingException {
-        return mapper.treeToValue(node, target);
-    }
-
-    /**
      * construct collection type
      * @param collectionClass collection class, such as ArrayList, HashMap, ...
      * @param elementClasses element class
-     *     ArrayList<T>:
-     *                  createCollectionType(ArrayList.class, T.class)
-     *     HashMap<String, T>:
-     *                  createCollectionType(HashMap.class, String.class, T.class)
      * @return JavaType
      */
     public JavaType createCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
         return mapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
-    }
-
-    /**
-     * update a target object's attributes from json
-     * @param json source json string
-     * @param target target object
-     * @param <T>
-     * @return updated target object
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T update(String json, T target) {
-        try {
-            return (T) mapper.readerForUpdating(target).readValue(json);
-        } catch (Exception e) {
-            throw new JsonException(e);
-        }
-    }
-
-    /**
-     * output JSONP style string
-     */
-    public String toJsonP(String functionName, Object object) {
-        return toJson(new JSONPObject(functionName, object));
-    }
-
-    /**
-     * enable enumable, make enum attribute read or write as string
-     */
-    public void enumable() {
-        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
-        mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
-    }
-
-    /**
-     * return a common json mapper
-     */
-    public ObjectMapper getMapper() {
-        return mapper;
     }
 }

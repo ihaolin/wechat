@@ -1,6 +1,7 @@
 package me.hao0.wechat.utils;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.github.kevinsawicki.http.HttpRequest;
 import java.util.Collections;
 import java.util.Map;
 
@@ -77,6 +78,8 @@ public class Http {
 
     /**
      * 请求body
+     * @param body request body
+     * @return this
      */
     public Http body(String body){
         this.body = body;
@@ -106,6 +109,7 @@ public class Http {
     /**
      * set connect timeout
      * @param connectTimeout (s)
+     * @return this
      */
     public Http connTimeout(Integer connectTimeout){
         this.connectTimeout = connectTimeout * 1000;
@@ -115,6 +119,7 @@ public class Http {
     /**
      * set read timeout
      * @param readTimeout (s)
+     * @return this
      */
     public Http readTimeout(Integer readTimeout){
         this.readTimeout = readTimeout * 1000;

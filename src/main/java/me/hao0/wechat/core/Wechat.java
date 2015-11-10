@@ -1185,6 +1185,8 @@ public class Wechat {
 
         /**
          * 被动回复微信服务器文本消息
+         * @param openId 用户openId
+         * @param content 文本内容
          * @return XML文本消息
          */
         public String respText(String openId, String content){
@@ -1256,7 +1258,7 @@ public class Wechat {
         /**
          * 被动回复微信服务器图文消息
          * @param openId 用户openId
-         * @param articles 图片消息对象列表，长度 <= 10
+         * @param articles 图片消息对象列表，长度小于10
          * @return XML图文消息
          */
         public String respNews(String openId, List<Article> articles){

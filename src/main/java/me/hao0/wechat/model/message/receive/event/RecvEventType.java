@@ -16,24 +16,6 @@ public enum RecvEventType {
     UN_SUBSCRIBE("unsubscribe", "取消关注公众号"),
     /**
      *  1. 用户未关注时，进行关注后的事件推送:
-        <xml><ToUserName><![CDATA[toUser]]></ToUserName>
-             <FromUserName><![CDATA[FromUser]]></FromUserName>
-             <CreateTime>123456789</CreateTime>
-             <MsgType><![CDATA[event]]></MsgType>
-             <Event><![CDATA[subscribe]]></Event>
-             <EventKey><![CDATA[qrscene_123123]]></EventKey>
-             <Ticket><![CDATA[TICKET]]></Ticket>
-        </xml>
-        2. 用户已关注时的事件推送:
-         <xml>
-             <ToUserName><![CDATA[toUser]]></ToUserName>
-             <FromUserName><![CDATA[FromUser]]></FromUserName>
-             <CreateTime>123456789</CreateTime>
-             <MsgType><![CDATA[event]]></MsgType>
-             <Event><![CDATA[SCAN]]></Event>
-             <EventKey><![CDATA[SCENE_VALUE]]></EventKey>
-             <Ticket><![CDATA[TICKET]]></Ticket>
-         </xml>
      */
     SCAN("SCAN", "扫码"),
     LOCATION("LOCATION", "上报地理位置信息"),
