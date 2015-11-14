@@ -2,7 +2,13 @@ package me.hao0.wechat;
 
 import me.hao0.wechat.core.Wechat;
 import me.hao0.wechat.exception.WechatException;
-import me.hao0.wechat.model.customer.MsgRecord;
+import me.hao0.wechat.model.Page;
+import me.hao0.wechat.model.material.CommonMaterial;
+import me.hao0.wechat.model.material.MaterialType;
+import me.hao0.wechat.model.material.MaterialUploadType;
+import me.hao0.wechat.model.material.NewsContentItem;
+import me.hao0.wechat.model.material.NewsMaterial;
+import me.hao0.wechat.model.material.PermMaterial;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.wechat.model.message.receive.RecvMessage;
 import me.hao0.wechat.model.message.receive.event.RecvEvent;
@@ -25,6 +31,11 @@ import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import org.junit.Test;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +50,7 @@ public class WechatTests {
 
     private Wechat wechat = Wechat.newWechat("appId", "appSecret");
 
-    private String accessToken = "CDg5ENPqbkMndmz8yMddwxGuQtJANKOmuksygsR-wwqgMhjGF8HUzojfJb2b2fWqp4-6xIXAq_V8oBNckpM20eVxdIG3xGtJI9SJGnwD10gUMQfAAAJBF";
+    private String accessToken = "9l23BUNe5v3qvZeJs3N5nxgrO-FICLziYsSjhWJOQIrJS2CRTcVB3yuBD9a6MhSwgOSbVaiTKVAHgWYejqhZQac1h9205xr5U9sQKwV9YLEVNLhADAJBZ";
 
     private String testDomain = "xxx";
 
@@ -47,17 +58,17 @@ public class WechatTests {
 
     @Test
     public void testAccessToken(){
-        System.out.println(wechat.BASE.accessToken());
+        assertNotNull(wechat.BASE.accessToken());
     }
 
     @Test
     public void testGetIps(){
-        System.out.println(wechat.BASE.ip(accessToken));
+        assertNotNull(wechat.BASE.ip(accessToken));
     }
 
     @Test(expected = WechatException.class)
     public void testGetIpsErr(){
-        System.out.println(wechat.BASE.ip(accessToken + "xxx"));
+        wechat.BASE.ip(accessToken + "xxx");
     }
 
     @Test
@@ -79,10 +90,7 @@ public class WechatTests {
     public void testGetCsRecords(){
         Date startTime = new Date(1439434683);
         Date endTime = new Date(1439481483);
-        List<MsgRecord> records = wechat.CS.getMsgRecords("ZL0gV5PVZy_fuTRRdMlJFFYebGpNHJNAWk71KlR0LA_sxGRp5wSHfRopva2TGAGnFyiDlL-Dr-FYjZ7eMg9nXkmNVyx-TPnC-vA4OVX2chgCAPjAIATRG", 1, 10, startTime, endTime);
-        for (MsgRecord record : records){
-            System.out.println(record);
-        }
+        assertNotNull(wechat.CS.getMsgRecords("ZL0gV5PVZy_fuTRRdMlJFFYebGpNHJNAWk71KlR0LA_sxGRp5wSHfRopva2TGAGnFyiDlL-Dr-FYjZ7eMg9nXkmNVyx-TPnC-vA4OVX2chgCAPjAIATRG", 1, 10, startTime, endTime));
     }
 
     @Test
@@ -92,17 +100,17 @@ public class WechatTests {
 
     @Test
     public void testGetUserSession(){
-        System.out.println(wechat.CS.getUserSession(accessToken, "onN_8trIW7PSoXLMzMSWySb5jfdY"));
+        assertNotNull(wechat.CS.getUserSession(accessToken, "onN_8trIW7PSoXLMzMSWySb5jfdY"));
     }
 
     @Test
     public void testGetCsSession(){
-        System.out.println(wechat.CS.getCsSessions(accessToken, "haolin007@" + testDomain));
+        assertNotNull(wechat.CS.getCsSessions(accessToken, "haolin007@" + testDomain));
     }
 
     @Test
     public void testGetWaitingSession(){
-        System.out.println(wechat.CS.getWaitingSessions(accessToken));
+        assertNotNull(wechat.CS.getWaitingSessions(accessToken));
     }
 
     @Test
@@ -120,22 +128,22 @@ public class WechatTests {
         menuBuilder.menu(more);
 
         String jsonMenu = menuBuilder.build();
-        System.out.println(jsonMenu);
+        assertEquals("{\"button\":[{\"name\":\"我要下单\",\"type\":\"view\",\"url\":\"http://www.hao0.me\"},{\"name\":\"优惠活动\",\"type\":\"click\",\"key\":\"ACTIVITIES\"},{\"name\":\"更多\",\"sub_button\":[{\"name\":\"关于我们\",\"type\":\"click\",\"key\":\"http://www.hao0.me\"},{\"name\":\"我的订单\",\"type\":\"view\",\"url\":\"http://www.hao0.me\"}]}]}", jsonMenu);
     }
 
     @Test
     public void testMenuGet(){
-        System.out.println(wechat.MENU.get("QNmbpGXSMvZbNFg0fbLeHhIdxf2O-hl9F5H9QiEYTF6c1uUznVEFVoV9zIoomTAVS6gDCwEI8euJo8BggUiQYBoUFP4iV2bYr27JtII-0_sODTiAJAKZP"));
+        assertNotNull(wechat.MENU.get(accessToken));
     }
 
     @Test
     public void testGroupCreate(){
-        System.out.println(wechat.USER.createGroup(accessToken, "测试分组2"));
+        assertTrue(wechat.USER.createGroup(accessToken, "测试分组2") > 0);
     }
 
     @Test
     public void testGroupGet(){
-        System.out.println(wechat.USER.getGroup(accessToken));
+        assertNotNull(wechat.USER.getGroup(accessToken));
     }
 
     @Test
@@ -150,7 +158,7 @@ public class WechatTests {
 
     @Test
     public void testGetUserGroup(){
-        System.out.println(wechat.USER.getUserGroup(accessToken, openId));
+        assertTrue(wechat.USER.getUserGroup(accessToken, openId) > 0);
     }
 
     @Test
@@ -160,7 +168,7 @@ public class WechatTests {
 
     @Test
     public void testGetUserInfo(){
-        System.out.println(wechat.USER.getUser(accessToken, openId));
+        assertNotNull(wechat.USER.getUser(accessToken, openId));
     }
 
     @Test
@@ -170,12 +178,12 @@ public class WechatTests {
 
     @Test
     public void testMessageResp(){
-        System.out.println(wechat.MESSAGE.respText("bcsdafafasdf", "你好"));
-        System.out.println(wechat.MESSAGE.respImage("bcsdafafasdf", "oijwefoiioefjiwfiwf"));
-        System.out.println(wechat.MESSAGE.respVoice("bcsdafafasdf", "9823r8f9h8f239hf293fh"));
-        System.out.println(wechat.MESSAGE.respVideo("bcsdafafasdf", "nowefwifjwopefjiwe", "视频标题", "视频描述"));
-        System.out.println(wechat.MESSAGE.respMusic("bcsdafafasdf", "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
-        System.out.println(wechat.MESSAGE.respNews("bcsdafafasdf",
+        assertNotNull(wechat.MESSAGE.respText("bcsdafafasdf", "你好"));
+        assertNotNull(wechat.MESSAGE.respImage("bcsdafafasdf", "oijwefoiioefjiwfiwf"));
+        assertNotNull(wechat.MESSAGE.respVoice("bcsdafafasdf", "9823r8f9h8f239hf293fh"));
+        assertNotNull(wechat.MESSAGE.respVideo("bcsdafafasdf", "nowefwifjwopefjiwe", "视频标题", "视频描述"));
+        assertNotNull(wechat.MESSAGE.respMusic("bcsdafafasdf", "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
+        assertNotNull(wechat.MESSAGE.respNews("bcsdafafasdf",
                         Arrays.asList(
                                 new Article("图文标题", "图文描述", "图片链接", "链接"),
                                 new Article("图文标题", "图文描述", "图片链接", "链接"),
@@ -187,16 +195,16 @@ public class WechatTests {
 
     @Test
     public void testSendTemplate(){
-        System.out.println(
-            wechat.MESSAGE.sendTemplate(accessToken,
-                    openId, "vxjR2DrT-I5-Edzc3vgWV-CgMoG0cAWISAxQIMLmYk4", "http://www.hao0.me",
-                    Arrays.asList(
-                        new TemplateField("first", "下单成功"),
-                        new TemplateField("remark", "感谢您的使用。"),
-                        new TemplateField("keyword1", "TD113123123"),
-                        new TemplateField("keyword2", "2015-11-11 11:11:11"),
-                        new TemplateField("keyword3", "123456")
-                    ))
+        assertTrue(
+                wechat.MESSAGE.sendTemplate(accessToken,
+                        openId, "vxjR2DrT-I5-Edzc3vgWV-CgMoG0cAWISAxQIMLmYk4", "http://www.hao0.me",
+                        Arrays.asList(
+                                new TemplateField("first", "下单成功"),
+                                new TemplateField("remark", "感谢您的使用。"),
+                                new TemplateField("keyword1", "TD113123123"),
+                                new TemplateField("keyword2", "2015-11-11 11:11:11"),
+                                new TemplateField("keyword3", "123456")
+                        )) > 0
         );
     }
 
@@ -212,8 +220,6 @@ public class WechatTests {
                 " </xml>";
         RecvMessage message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvTextMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 " <ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -226,8 +232,6 @@ public class WechatTests {
                 " </xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvImageMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -240,8 +244,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvVoiceMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -254,8 +256,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvVideoMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -268,8 +268,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvShortVideoMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -284,8 +282,6 @@ public class WechatTests {
                 "</xml> ";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvLocationMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -299,8 +295,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvMsg && message instanceof RecvLinkMessage);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -311,8 +305,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvSubscribeEvent);
-        System.out.println(message);
-
 
         xml = "<xml><ToUserName><![CDATA[toUser]]></ToUserName>\n" +
                 "<FromUserName><![CDATA[FromUser]]></FromUserName>\n" +
@@ -324,8 +316,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvSubscribeEvent);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -338,8 +328,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvScanEvent);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -353,8 +341,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvLocationEvent);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -366,8 +352,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvMenuEvent);
-        System.out.println(message);
-
 
         xml = "<xml>\n" +
                 "<ToUserName><![CDATA[toUser]]></ToUserName>\n" +
@@ -379,7 +363,6 @@ public class WechatTests {
                 "</xml>";
         message = wechat.MESSAGE.receive(xml);
         assertTrue(message instanceof RecvEvent && message instanceof RecvMenuEvent);
-        System.out.println(message);
     }
 
     @Test
@@ -388,7 +371,7 @@ public class WechatTests {
         msg.setOpenId(openId);
         msg.setType(SendMessageType.TEXT);
         msg.setContent("你好吗");
-        System.out.println(wechat.MESSAGE.previewSend(accessToken, msg));
+        assertTrue(wechat.MESSAGE.previewSend(accessToken, msg));
     }
 
     @Test
@@ -398,7 +381,7 @@ public class WechatTests {
         msg.setType(SendMessageType.TEXT);
         msg.setContent("这是测试，openId列表群发");
         msg.setOpenIds(Arrays.asList(openId, openId));
-        System.out.println(wechat.MESSAGE.send(accessToken, msg));
+        assertTrue(wechat.MESSAGE.send(accessToken, msg) > 0L);
     }
 
     @Test
@@ -408,12 +391,12 @@ public class WechatTests {
         msg.setGroupId(100);
         msg.setType(SendMessageType.TEXT);
         msg.setContent("这是测试，groupId群发");
-        System.out.println(wechat.MESSAGE.send(accessToken, msg));
+        assertTrue(wechat.MESSAGE.send(accessToken, msg) > 0L);
     }
 
     @Test
     public void testMessageStatus(){
-        System.out.println(wechat.MESSAGE.getSend(accessToken, 2547931045L));
+        assertNotNull(wechat.MESSAGE.getSend(accessToken, 2547931045L));
     }
 
     @Test
@@ -423,22 +406,106 @@ public class WechatTests {
 
     @Test
     public void testGetTempQrcode(){
-        System.out.println(wechat.QRCODE.getTempQrcode(accessToken, "1234", 3600));
+        assertNotNull(wechat.QRCODE.getTempQrcode(accessToken, "1234", 3600));
     }
 
     @Test
     public void testGetPermQrcode(){
-        System.out.println(wechat.QRCODE.getPermQrcode(accessToken, "12345"));
+        assertNotNull(wechat.QRCODE.getPermQrcode(accessToken, "12345"));
     }
 
     @Test
     public void testShortUrl(){
-        System.out.println(wechat.QRCODE.shortUrl(accessToken, "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=xxxx%3D%3D"));
+        assertNotNull(wechat.QRCODE.shortUrl(accessToken, "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=xxxx%3D%3D"));
     }
 
     @Test
     public void testLoadToken(){
-        System.out.println(wechat.USER.getGroup());
-        System.out.println(wechat.USER.getUserGroup(openId));
+        assertNotNull(wechat.USER.getGroup());
+        assertNotNull(wechat.USER.getUserGroup(openId));
+    }
+
+    @Test
+    public void testMaterialCount(){
+        assertNotNull(wechat.MATERIAL.count(accessToken));
+    }
+
+    @Test
+    public void testMaterialGets(){
+
+        Page<CommonMaterial> images = wechat.MATERIAL.gets(accessToken, MaterialType.IMAGE, 0, 10);
+        assertTrue(images.getTotal() == 2);
+
+        Page<CommonMaterial> videos = wechat.MATERIAL.gets(accessToken, MaterialType.VIDEO, 0, 10);
+        assertTrue(videos.getTotal() == 0);
+
+        Page<CommonMaterial> voices = wechat.MATERIAL.gets(accessToken, MaterialType.VOICE, 0, 10);
+        assertTrue(voices.getTotal() == 0);
+
+        Page<NewsMaterial> news = wechat.MATERIAL.gets(accessToken, MaterialType.NEWS, 0, 10);
+        assertTrue(news.getTotal() == 1);
+    }
+
+    @Test
+    public void testMediaUpload() throws FileNotFoundException {
+        wechat.MATERIAL.uploadTemp(accessToken, MaterialUploadType.IMAGE, new File("/Users/haolin/temp/user.png"));
+    }
+
+    @Test
+    public void testMediaDownload() throws IOException {
+        File output = new File("/Users/haolin/temp/user_2.png");
+        byte[] data = wechat.MATERIAL.downloadTemp(accessToken, "IT1E7HIXw69AWFeEXOLj0si5ufyTbCBwF8PlAkvK3Nj765RAZLkOPJS0zfKwItzG");
+        FileOutputStream out = new FileOutputStream(output);
+        out.write(data);
+    }
+
+    @Test
+    public void testUploadPerm(){
+        PermMaterial material = wechat.MATERIAL.uploadPerm(accessToken, MaterialUploadType.THUMB, new File("/Users/haolin/temp/user.png"));
+        assertNotNull(material);
+        // K74X6mIzSjUcRNfP5rjI8oERKkI_0_X8u16ZiY14ut4
+        // https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&token=649963139&lang=zh_CN
+    }
+
+    @Test
+    public void testUploadPermNews(){
+        List<NewsContentItem> items = new ArrayList<>();
+        NewsContentItem item;
+        for (int i=0; i<3; i++){
+            item = new NewsContentItem();
+            item.setTitle("测试标题" + i);
+            item.setAuthor("测试作者" + i);
+            item.setContent("测试作者" + i);
+            item.setDigest("这是测试啊" + i);
+            item.setShowCoverPic(1);
+            item.setThumbMediaId("K74X6mIzSjUcRNfP5rjI8oERKkI_0_X8u16ZiY14ut4");
+            item.setUrl("https://github.com/ihaolin/wechat");
+            item.setContentSourceUrl("https://github.com/ihaolin/wechat");
+            items.add(item);
+        }
+        String mediaId = wechat.MATERIAL.uploadPermNews(accessToken, items);
+        assertNotNull(mediaId);
+        // K74X6mIzSjUcRNfP5rjI8nT8utSktYKev5n56pR7L8k
+    }
+
+    @Test
+    public void testUpdatePermNews(){
+        NewsContentItem item = new NewsContentItem();
+        item.setTitle("测试标题");
+        item.setAuthor("测试作者");
+        item.setContent("测试作者");
+        item.setDigest("这是测试更新啊");
+        item.setShowCoverPic(1);
+        item.setThumbMediaId("K74X6mIzSjUcRNfP5rjI8oERKkI_0_X8u16ZiY14ut4");
+        item.setUrl("https://github.com/ihaolin/wechat");
+        item.setContentSourceUrl("https://github.com/ihaolin/wechat");
+        assertTrue(wechat.MATERIAL.updatePermNews(accessToken, "K74X6mIzSjUcRNfP5rjI8nT8utSktYKev5n56pR7L8k", 2, item));
+    }
+
+    @Test
+    public void testUploadPermVideo() throws FileNotFoundException {
+        PermMaterial material = wechat.MATERIAL.uploadPermVideo(accessToken, new File("/Users/haolin/temp/sport.mp4"), "运动", "动起来");
+        assertNotNull(material);
+        // K74X6mIzSjUcRNfP5rjI8uW0GM_jk0O_vauMXP9JWMg
     }
 }

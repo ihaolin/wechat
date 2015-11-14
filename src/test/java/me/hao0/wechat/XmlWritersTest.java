@@ -2,6 +2,7 @@ package me.hao0.wechat;
 
 import me.hao0.wechat.utils.XmlWriters;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Author: haolin
@@ -19,7 +20,7 @@ public class XmlWritersTest {
             .element("CreateTime", System.currentTimeMillis())
             .element("MsgType", "transfer_customer_service");
 
-        System.out.println(xmlWriters.build());
+        assertNotNull(xmlWriters.build());
     }
 
     @Test
@@ -32,7 +33,7 @@ public class XmlWritersTest {
             .element("TransInfo", "KfAccount", "test1@test")
             .element("MsgType", "transfer_customer_service");
 
-        System.out.println(xmlWriters.build());
+        assertNotNull(xmlWriters.build());
     }
 
 }

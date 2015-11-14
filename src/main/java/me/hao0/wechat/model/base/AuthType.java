@@ -9,9 +9,13 @@ public enum AuthType{
 
     USER_INFO("snsapi_userinfo");
 
-    public String scope;
+    private String scope;
 
     private AuthType(String scope){
         this.scope = scope;
+    }
+
+    public String scope(){
+        return scope;
     }
 }

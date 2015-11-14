@@ -2,7 +2,17 @@ package me.hao0.wechat.utils;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.github.kevinsawicki.http.HttpRequest;
+import me.hao0.wechat.exception.HttpException;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -203,6 +213,71 @@ public class Http {
 
     public static Http delete(String url){
         return new Http(url).method(HttpMethod.DELETE);
+    }
+
+    /**
+     * upload file
+     * @param url url
+     * @param fieldName field name
+     * @param params other params
+     * @return string response
+     */
+    public static String upload(String url, String fieldName, String fileName, byte[] data, Map<String, String> params){
+        return upload(url, fieldName, fileName, new ByteArrayInputStream(data), params);
+    }
+
+    /**
+     * upload file
+     * @param url url
+     * @param fieldName field name
+     * @param in InputStream
+     * @param params other params
+     * @return string response
+     */
+    public static String upload(String url, String fieldName, String fileName, InputStream in, Map<String, String> params){
+        try {
+            HttpRequest request = HttpRequest.post(url);
+            if (!params.isEmpty()){
+                for (Map.Entry<String, String> param : params.entrySet()){
+                    request.part(param.getKey(), param.getValue());
+                }
+            }
+            request.part(fieldName , fileName, null, in);
+            return request.body();
+        } catch (Exception e){
+            throw new HttpException(e);
+        }
+    }
+
+    /**
+     * download a file
+     * @param url http url
+     * @param into the file which downloaded content will fill into
+     */
+    public static void download(String url, File into){
+        try {
+            download(url, new FileOutputStream(into));
+        } catch (FileNotFoundException e) {
+            throw new HttpException(e);
+        }
+    }
+
+    /**
+     * download a file
+     * @param url http url
+     * @param output the output which downloaded content will fill into
+     */
+    public static void download(String url, OutputStream output){
+        try {
+            HttpRequest request =  HttpRequest.get(url);
+            if (request.ok()){
+                request.receive(output);
+            } else {
+                throw new HttpException("request isn't ok: " + request.body());
+            }
+        } catch (Exception e){
+            throw new HttpException(e);
+        }
     }
 
     private static enum HttpMethod {

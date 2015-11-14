@@ -1,6 +1,6 @@
 # Wechat
 
-一个简单基本的微信公众号接口工具包
+一个简单基础的微信公众号接口组件
 ---
 
 + 包引入
@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </dependency>
 	```
 	
@@ -35,19 +35,20 @@
 	wechat.{component}.{api};
 	```	
 
-+ ``Wechat``中包含几个基本组件:
++ ``Wechat``中包含几个组件:
 
-	+ [基础API](#base-api): ```BASE```
-	+ [用户API](#user-api): ```USER```
-	+ [菜单API](#menu-api): ```MENU```
-	+ [多客服API](#cs-api): ```CS```
-	+ [消息API](#message-api): ```MESSAGE```
-	+ [二维码API](#qr-api): ```QRCODE```
-	+ [素材API](#material-api): ```MATERIAL```
+	+ <a href="#base-api">基础</a>: ```BASE```
+	+ <a href="#user-api">用户</a>: ```USER```
+	+ <a href="#menu-api">菜单</a>: ```MENU```
+	+ <a href="#cs-api">多客服</a>: ```CS```
+	+ <a href="#message-api">消息</a>: ```MESSAGE```
+	+ <a href="#qr-api">二维码</a>: ```QRCODE```
+	+ <a href="#material-api">素材</a>: ```MATERIAL```
+	+ <a href="#data-api">数据统计</a>(待码): ```DATA```
 
-+ API使用:
++ API介绍:
 	
-	+ <span id="base-api">**```BASE```**</span>: 
+	+ <a id="base-api">**```BASE```**</a>: 
 		
 		```java
 		/**
@@ -80,7 +81,7 @@
 		List<String> ip(String accessToken);
 		```
 	
-	+ <span id="user-api">**```USER```**</span>: 
+	+ <a id="user-api">**```USER```**</a>: 
 		
 		```java
 		/**
@@ -150,7 +151,7 @@
         Boolean remarkUser(String accessToken, String openId, String remark)
 		```
 	
-	+ <span id="menu-api">**```MENU```**</span>: 
+	+ <a id="menu-api">**```MENU```**</a>: 
 		
 		```java
 		/**
@@ -176,7 +177,7 @@
         Boolean delete(String accessToken)
 		```
 	
-	+ <span id="cs-api">**```CS```**</span>: 
+	+ <a id="cs-api">**```CS```**</a>: 
 		
 		```java
 		/**
@@ -268,7 +269,7 @@
         List<WaitingSession> getWaitingSessions(String accessToken)
 		```
 	
-	+ <span id="message-api">**```MESSAGE```**</span>: 
+	+ <a id="message-api">**```MESSAGE```**</a>: 
 	
 		```java
 		/**
@@ -383,7 +384,7 @@
             
 		```
 	
-	+ <span id="qr-api">**```QRCODE```**</span>: 
+	+ <a id="qr-api">**```QRCODE```**</a>: 
 		
 		```java
 		
@@ -413,7 +414,108 @@
         String shortUrl(String accessToken, String longUrl)
 		```
 	
-	+ <span id="material-api">**```MATERIAL```**</span>(待码): 
+	+ <a id="material-api">**```MATERIAL```**</a>:
+
+		```java
+		/**
+         * 获取素材总数统计
+         * @param accessToken accessToken
+         * @return 素材总数统计，或抛WechatException
+         */
+        MaterialCount count(String accessToken)
+        
+        /**
+         * 获取素材列表
+         * @param accessToken accessToken
+         * @param type 素材类型
+         * @param offset 从全部素材的该偏移位置开始返回，0表示从第一个素材返回
+         * @param count 返回素材的数量，取值在1到20之间
+         * @param <T> Material范型
+         * @return 素材分页对象，或抛WechatException
+         */
+        <T> Page<T> gets(String accessToken, MaterialType type, Integer offset, Integer count)
+        
+        /**
+         * 删除永久素材
+         * @param accessToken accessToken
+         * @param mediaId 永久素材mediaId
+         * @return 删除成功返回true，或抛WechatException
+         */
+        Boolean delete(String accessToken, String mediaId)
+        
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param input 输入流
+         * @return TempMaterial对象，或抛WechatException
+         */
+        TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, InputStream input)
+        
+        /**
+         * 下载临时素材
+         * @param accessToken accessToken
+         * @param mediaId mediaId
+         * @return 文件二进制数据
+         */
+        byte[] downloadTemp(String accessToken, String mediaId)
+        
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param items 图文素材列表
+         * @return mediaId
+         */
+        String uploadPermNews(String accessToken, List<NewsContentItem> items)
+        
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param mediaId 图文mediaId
+         * @param itemIndex 对应图文素材中的第几个图文项，从0开始
+         * @param newItem 新的图文项
+         * @return 更新成功返回true，反之false
+         */
+        Boolean updatePermNews(String accessToken, String mediaId, Integer itemIndex, NewsContentItem newItem)
+        
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param in 文件输入流
+         * @return 微信内部图片链接
+         */
+        String uploadPermNewsImage(String accessToken, String fileName, InputStream in)
+        
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param file 文件
+         * @return PermMaterial对象，或抛WechatException
+         */
+        PermMaterial uploadPerm(String accessToken, MaterialUploadType type, File file)
+        
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param input 输入流
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc)
+		``` 
 
 + AccessToken管理:
 	
@@ -471,6 +573,19 @@
 	```
 
 + 具体例子，可见[测试用例](https://github.com/ihaolin/wechat/blob/master/src/test/java/me/hao0/wechat/WechatTests.java)。
+
++ PDF文档[下载](wiki.pdf)。
+
++ 历史版本
+
+	+ 1.0.0:
+		
+		* 基础功能实现。
+	
+	+ 1.1.0:
+		
+		* 实现代码简化，个别类访问权限修改;
+		* 素材API**``MATERIAL ``**实现。
 
 + 微信相关文档
 

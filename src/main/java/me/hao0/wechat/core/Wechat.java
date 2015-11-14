@@ -1,9 +1,19 @@
 package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JavaType;
 import me.hao0.wechat.exception.WechatException;
+import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.base.AccessToken;
 import me.hao0.wechat.model.customer.WaitingSession;
+import me.hao0.wechat.model.material.CommonMaterial;
+import me.hao0.wechat.model.material.MaterialCount;
+import me.hao0.wechat.model.material.MaterialType;
+import me.hao0.wechat.model.material.NewsContentItem;
+import me.hao0.wechat.model.material.PermMaterial;
+import me.hao0.wechat.model.material.TempMaterial;
+import me.hao0.wechat.model.material.MaterialUploadType;
+import me.hao0.wechat.model.material.NewsMaterial;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.wechat.model.menu.MenuType;
 import me.hao0.wechat.model.message.receive.RecvMessage;
@@ -44,7 +54,11 @@ import me.hao0.wechat.utils.XmlReaders;
 import me.hao0.wechat.utils.XmlWriters;
 import me.hao0.wechat.utils.Http;
 import me.hao0.wechat.utils.Strings;
-import me.hao0.wechat.utils.Types;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -112,6 +126,11 @@ public class Wechat {
      */
     public final Materials MATERIAL = new Materials();
 
+    /**
+     * 数据统计API
+     */
+    public final Datas DATA = new Datas();
+
     private final String ERROR_CODE = "errcode";
 
     private Wechat(String appId, String appSecret, AccessTokenLoader tokenLoader){
@@ -177,14 +196,12 @@ public class Wechat {
          */
         public String authUrl(String redirectUrl, Boolean quiet) throws UnsupportedEncodingException {
             redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
-            StringBuilder url = new StringBuilder(AUTH_URL);
-            url.append("appid=").append(appId)
-                    .append("&redirect_uri=").append(redirectUrl)
-                    .append("&response_type=code&scope=")
-                    .append(quiet ? AuthType.BASE.scope : AuthType.USER_INFO.scope)
-                    .append("&state=").append("1")
-                    .append("#wechat_redirect");
-            return url.toString();
+            return AUTH_URL +
+                    "appid=" + appId +
+                    "&redirect_uri=" + redirectUrl +
+                    "&response_type=code&scope=" +
+                    (quiet ? AuthType.BASE.scope() : AuthType.USER_INFO.scope())
+                    + "&state=1#wechat_redirect";
         }
 
         /**
@@ -193,18 +210,15 @@ public class Wechat {
          * @return 用户的openId，或抛WechatException
          */
         public String openId(String code){
-            StringBuilder url = new StringBuilder(OPEN_ID_URL);
-            url.append("appid=").append(appId)
-                    .append("&secret=").append(appSecret)
-                    .append("&code=").append(code)
-                    .append("&grant_type=").append("authorization_code");
-            Map<String, Object> resp = Http.get(url.toString())
-                    .ssl().request(Types.MAP_STRING_OBJ_TYPE);
-            if (resp.containsKey(ERROR_CODE)){
-                throw new WechatException(resp);
-            } else {
-                return (String)resp.get("openid");
-            }
+            String url = OPEN_ID_URL +
+                    "appid=" + appId +
+                    "&secret=" + appSecret +
+                    "&code=" + code +
+                    "&grant_type=authorization_code";
+
+            Map<String, Object> resp = doGet(url);
+
+            return (String)resp.get("openid");
         }
 
         /**
@@ -212,16 +226,11 @@ public class Wechat {
          * @return accessToken，或抛WechatException
          */
         public AccessToken accessToken(){
-            StringBuilder url = new StringBuilder(ACCESS_TOKEN_URL);
-            url.append("&appid=").append(appId)
-               .append("&secret=").append(appSecret);
-            Map<String, Object> resp = Http.get(url.toString())
-                    .ssl().request(Types.MAP_STRING_OBJ_TYPE);
-            if (resp.containsKey(ERROR_CODE)){
-                throw new WechatException(resp);
-            } else {
-                return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), AccessToken.class);
-            }
+            String url = ACCESS_TOKEN_URL + "&appid=" + appId + "&secret=" + appSecret;
+
+            Map<String, Object> resp = doGet(url);
+
+            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), AccessToken.class);
         }
 
         /**
@@ -229,7 +238,7 @@ public class Wechat {
          * @return 微信服务器IP列表，或抛WechatException
          */
         public List<String> ip(){
-            return ip(loadToken());
+            return ip(loadAccessToken());
         }
 
         /**
@@ -241,13 +250,10 @@ public class Wechat {
         @SuppressWarnings("unchecked")
         public List<String> ip(String accessToken){
             String url = WX_IP_URL + accessToken;
-            Map<String, Object> resp = Http.get(url)
-                    .ssl().request(Types.MAP_STRING_OBJ_TYPE);
-            if (resp.containsKey(ERROR_CODE)){
-                throw new WechatException(resp);
-            } else {
-                return (List<String>)resp.get("ip_list");
-            }
+
+            Map<String, Object> resp = doGet(url);
+
+            return (List<String>)resp.get("ip_list");
         }
     }
 
@@ -311,7 +317,7 @@ public class Wechat {
          * @return 添加成功返回true，反之false
          */
         public Boolean createAccount(String account, String nickName, String password){
-            return createAccount(loadToken(), account, nickName, password);
+            return createAccount(loadAccessToken(), account, nickName, password);
         }
 
         /**
@@ -335,7 +341,7 @@ public class Wechat {
          * @return 添加成功返回true，或抛WechatException
          */
         public Boolean updateAccount(String account, String nickName, String password){
-            return updateAccount(loadToken(), account, nickName, password);
+            return updateAccount(loadAccessToken(), account, nickName, password);
         }
 
         /**
@@ -356,13 +362,8 @@ public class Wechat {
             params.put("kf_account", account);
             params.put("nickname", nickName);
             params.put("password", MD5.generate(password, false));
-            Map<String, Object> resp = Http.post(url)
-                                           .body(Jsons.DEFAULT.toJson(params))
-                                           .request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -372,7 +373,7 @@ public class Wechat {
          * @return 添加成功返回true，或抛WechatException
          */
         public Boolean deleteAccount(String kfAccount){
-            return deleteAccount(loadToken(), kfAccount);
+            return deleteAccount(loadAccessToken(), kfAccount);
         }
 
         /**
@@ -382,14 +383,10 @@ public class Wechat {
          * @return 添加成功返回true，或抛WechatException
          */
         public Boolean deleteAccount(String accessToken, String kfAccount){
-            StringBuilder url = new StringBuilder(DELETE_ACCOUNT);
-            url.append(accessToken).append("&kf_account=").append(kfAccount);
-            Map<String, Object> resp = Http.get(url.toString())
-                                    .request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+            String url = DELETE_ACCOUNT + accessToken + "&kf_account=" + kfAccount;
+
+            doGet(url);
+
             return Boolean.TRUE;
         }
 
@@ -432,7 +429,7 @@ public class Wechat {
          * @return 客服聊天记录，或抛WechatException
          */
         public List<MsgRecord> getMsgRecords(Integer pageNo, Integer pageSize, Date startTime, Date endTime){
-            return getMsgRecords(loadToken(), pageNo, pageSize, startTime, endTime);
+            return getMsgRecords(loadAccessToken(), pageNo, pageSize, startTime, endTime);
         }
 
         /**
@@ -447,17 +444,14 @@ public class Wechat {
         @SuppressWarnings("unchecked")
         public List<MsgRecord> getMsgRecords(String accessToken, Integer pageNo, Integer pageSize, Date startTime, Date endTime){
             String url = RECORD + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("pageindex", pageNo);
             params.put("pagesize", pageSize);
             params.put("starttime", startTime.getTime());
             params.put("endtime", endTime.getTime());
-            Map<String, Object> resp = Http.post(url)
-                                            .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             List<Map<String, Object>> records = (List<Map<String, Object>>)resp.get("recordlist");
             if (records.isEmpty()){
                 return Collections.EMPTY_LIST;
@@ -486,7 +480,7 @@ public class Wechat {
          * @return 创建成功返回true，或抛WechatException
          */
         public Boolean createSession(String openId, String kfAccount, String text){
-            return createSession(loadToken(), openId, kfAccount, text);
+            return createSession(loadAccessToken(), openId, kfAccount, text);
         }
 
         /**
@@ -507,7 +501,7 @@ public class Wechat {
          * @return 关闭成功返回true，或抛WechatException
          */
         public Boolean closeSession(String openId, String kfAccount, String text){
-            return closeSession(loadToken(), openId, kfAccount, text);
+            return closeSession(loadAccessToken(), openId, kfAccount, text);
         }
 
         /**
@@ -522,16 +516,13 @@ public class Wechat {
         }
 
         private Boolean createOrCloseSession(String openId, String kfAccount, String text, String url){
+
             Map<String, Object> params = new HashMap<>();
             params.put("openid", openId);
             params.put("kf_account", kfAccount);
             params.put("text", text);
-            Map<String, Object> resp = Http.post(url)
-                                .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -541,7 +532,7 @@ public class Wechat {
          * @return 客户的会话状态，或抛WechatException
          */
         public UserSession getUserSession(String openId){
-            return getUserSession(loadToken(), openId);
+            return getUserSession(loadAccessToken(), openId);
         }
 
         /**
@@ -551,16 +542,13 @@ public class Wechat {
          * @return 客户的会话状态，或抛WechatException
          */
         public UserSession getUserSession(String accessToken, String openId){
-            StringBuilder url = new StringBuilder(USER_SESSION_STATUS);
-            url.append(accessToken).append("&openid=").append(openId);
-            Map<String, Object> resp = Http.get(url.toString()).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+            String url = USER_SESSION_STATUS + accessToken + "&openid=" + openId;
+
+            Map<String, Object> resp = doGet(url);
             UserSession status = new UserSession();
             status.setKfAccount(String.valueOf(resp.get("kf_account")));
             status.setCreateTime(new Date((Integer)resp.get("createtime") * 1000L));
+
             return status;
         }
 
@@ -570,7 +558,7 @@ public class Wechat {
          * @return 客服的会话列表，或抛WechatException
          */
         public List<CsSession> getCsSessions(String kfAccount){
-            return getCsSessions(loadToken(), kfAccount);
+            return getCsSessions(loadAccessToken(), kfAccount);
         }
 
         /**
@@ -581,13 +569,9 @@ public class Wechat {
          */
         @SuppressWarnings("unchecked")
         public List<CsSession> getCsSessions(String accessToken, String kfAccount){
-            StringBuilder url = new StringBuilder(CS_SESSION_STATUS);
-            url.append(accessToken).append("&kf_account=").append(kfAccount);
-            Map<String, Object> resp = Http.get(url.toString()).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+            String url = CS_SESSION_STATUS + accessToken + "&kf_account=" + kfAccount;
+
+            Map<String, Object> resp = doGet(url);
             List<Map<String, Object>> sessions = (List<Map<String, Object>>)resp.get("sessionlist");
             if (sessions.isEmpty()){
                 return Collections.emptyList();
@@ -596,6 +580,7 @@ public class Wechat {
             for (Map<String, Object> session : sessions){
                 ss.add(renderCsSession(session));
             }
+
             return ss;
         }
 
@@ -611,7 +596,7 @@ public class Wechat {
          * @return 未接入的会话列表，或抛WechatException
          */
         public List<WaitingSession> getWaitingSessions(){
-            return getWaitingSessions(loadToken());
+            return getWaitingSessions(loadAccessToken());
         }
 
         /**
@@ -622,11 +607,8 @@ public class Wechat {
         @SuppressWarnings("unchecked")
         public List<WaitingSession> getWaitingSessions(String accessToken){
             String url = WAITING_SESSION + accessToken;
-            Map<String, Object> resp = Http.get(url).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doGet(url);
             List<Map<String, Object>> sessions = (List<Map<String, Object>>)resp.get("waitcaselist");
             if (sessions.isEmpty()){
                 return Collections.emptyList();
@@ -635,6 +617,7 @@ public class Wechat {
             for (Map<String, Object> session : sessions){
                 ss.add(renderWaitingSession(session));
             }
+
             return ss;
         }
 
@@ -674,7 +657,7 @@ public class Wechat {
          * @return 菜单列表
          */
         public List<Menu> get(){
-            return get(loadToken());
+            return get(loadAccessToken());
         }
 
         /**
@@ -699,7 +682,7 @@ public class Wechat {
          * @return 创建成功返回true，或抛WechatException
          */
         public Boolean create(String jsonMenu){
-            return create(loadToken(), jsonMenu);
+            return create(loadAccessToken(), jsonMenu);
         }
 
         /**
@@ -724,7 +707,7 @@ public class Wechat {
          * @return 删除成功返回true，或抛WechatException
          */
         public Boolean delete(){
-            return delete(loadToken());
+            return delete(loadAccessToken());
         }
 
         /**
@@ -750,14 +733,6 @@ public class Wechat {
         private List<Menu> menus = new ArrayList<>();
 
         private MenuBuilder(){}
-
-        public List<Menu> getMenus() {
-            return menus;
-        }
-
-        public void setMenus(List<Menu> menus) {
-            this.menus = menus;
-        }
 
         public static MenuBuilder newBuilder(){
             return new MenuBuilder();
@@ -915,7 +890,7 @@ public class Wechat {
          * @return 分组ID，或抛WechatException
          */
         public Integer createGroup(String name){
-            return createGroup(loadToken(), name);
+            return createGroup(loadAccessToken(), name);
         }
 
         /**
@@ -926,17 +901,13 @@ public class Wechat {
          */
         public Integer createGroup(String accessToken, String name){
             String url = CREATE_GROUP + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             Group g = new Group();
             g.setName(name);
             params.put("group", g);
-            Map<String, Object> resp =
-                    Http.post(url).body(Jsons.EXCLUDE_EMPTY.toJson(params))
-                        .request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return (Integer)((Map)resp.get("group")).get("id");
         }
 
@@ -945,7 +916,7 @@ public class Wechat {
          * @return 分组列表，或抛WechatException
          */
         public List<Group> getGroup(){
-            return getGroup(loadToken());
+            return getGroup(loadAccessToken());
         }
 
         /**
@@ -955,12 +926,9 @@ public class Wechat {
          */
         public List<Group> getGroup(String accessToken){
             String url = GET_GROUP + accessToken;
-            Map<String, Object> resp =
-                    Http.get(url).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doGet(url);
+
             return Jsons.EXCLUDE_DEFAULT
                         .fromJson(Jsons.DEFAULT.toJson(resp.get("groups")), Types.ARRAY_LIST_GROUP_TYPE);
         }
@@ -971,7 +939,7 @@ public class Wechat {
          * @return 删除成功返回true，或抛WechatException
          */
         public Boolean deleteGroup(Integer id){
-            return deleteGroup(loadToken(), id);
+            return deleteGroup(loadAccessToken(), id);
         }
 
         /**
@@ -982,16 +950,13 @@ public class Wechat {
          */
         public Boolean deleteGroup(String accessToken, Integer id){
             String url = DELETE_GROUP + accessToken;
+
             Group g = new Group();
             g.setId(id);
             Map<String, Object> params = new HashMap<>();
             params.put("group", g);
-            Map<String, Object> resp =
-                    Http.post(url).body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1002,7 +967,7 @@ public class Wechat {
          * @return 更新成功返回true，或抛WechatException
          */
         public Boolean updateGroup(Integer id, String newName){
-            return updateGroup(loadToken(), id, newName);
+            return updateGroup(loadAccessToken(), id, newName);
         }
 
         /**
@@ -1014,17 +979,14 @@ public class Wechat {
          */
         public Boolean updateGroup(String accessToken, Integer id, String newName){
             String url = UPDATE_GROUP + accessToken;
+
             Group g = new Group();
             g.setId(id);
             g.setName(newName);
             Map<String, Object> params = new HashMap<>();
             params.put("group", g);
-            Map<String, Object> resp =
-                    Http.post(url).body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1034,7 +996,7 @@ public class Wechat {
          * @return 组ID，或抛WechatException
          */
         public Integer getUserGroup(String openId){
-            return getUserGroup(loadToken(), openId);
+            return getUserGroup(loadAccessToken(), openId);
         }
 
         /**
@@ -1045,14 +1007,11 @@ public class Wechat {
          */
         public Integer getUserGroup(String accessToken, String openId){
             String url = GROUP_OF_USER + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("openid", openId);
-            Map<String, Object> resp =
-                    Http.post(url).body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return (Integer)resp.get("groupid");
         }
 
@@ -1063,7 +1022,7 @@ public class Wechat {
          * @return 移动成功返回true，或抛WechatException
          */
         public Boolean mvUserGroup(String openId, Integer groupId){
-            return mvUserGroup(loadToken(), openId, groupId);
+            return mvUserGroup(loadAccessToken(), openId, groupId);
         }
 
         /**
@@ -1075,15 +1034,12 @@ public class Wechat {
          */
         public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
             String url = MOVE_USER_GROUP + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("openid", openId);
             params.put("to_groupid", groupId);
-            Map<String, Object> resp =
-                    Http.post(url).body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1093,7 +1049,7 @@ public class Wechat {
          * @return 用户信息，或抛WechatException
          */
         public User getUser(String openId){
-            return getUser(loadToken(), openId);
+            return getUser(loadAccessToken(), openId);
         }
 
         /**
@@ -1103,14 +1059,10 @@ public class Wechat {
          * @return 用户信息，或抛WechatException
          */
         public User getUser(String accessToken, String openId){
-            StringBuilder url = new StringBuilder(GET_USER_INFO);
-            url.append(accessToken).append("&openid=").append(openId);
-            Map<String, Object> resp =
-                    Http.get(url.toString()).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+            String url = GET_USER_INFO + accessToken + "&openid=" + openId;
+
+            Map<String, Object> resp = doGet(url);
+
             return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
         }
 
@@ -1121,7 +1073,7 @@ public class Wechat {
          * @return 备注成功返回true，或抛WechatException
          */
         public Boolean remarkUser(String openId, String remark){
-            return remarkUser(loadToken(), openId, remark);
+            return remarkUser(loadAccessToken(), openId, remark);
         }
 
         /**
@@ -1133,14 +1085,12 @@ public class Wechat {
          */
         public Boolean remarkUser(String accessToken, String openId, String remark){
             String url = REMARK_USER + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("openid", openId);
             params.put("remark", remark);
-            Map<String, Object> resp = Http.post(url).body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            doPost(url, params);
             return Boolean.TRUE;
         }
     }
@@ -1443,7 +1393,7 @@ public class Wechat {
          * @return 消息ID，或抛WechatException
          */
         public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields){
-            return sendTemplate(loadToken(), openId, templateId, null, fields);
+            return sendTemplate(loadAccessToken(), openId, templateId, null, fields);
         }
 
         /**
@@ -1467,7 +1417,7 @@ public class Wechat {
          * @return 消息ID，或抛WechatException
          */
         public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields, String link){
-            return sendTemplate(loadToken(), openId, templateId, link, fields);
+            return sendTemplate(loadAccessToken(), openId, templateId, link, fields);
         }
 
         /**
@@ -1481,16 +1431,10 @@ public class Wechat {
          */
         public Integer sendTemplate(String accessToken, String openId, String templateId, String link, List<TemplateField> fields){
             String url = TEMPLATE_SEND + accessToken;
+
             Map<String, Object> params = buildTemplateParams(openId, templateId, link, fields);
 
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
-
+            Map<String, Object> resp = doPost(url, params);
             return (Integer)resp.get("msgid");
         }
 
@@ -1524,7 +1468,7 @@ public class Wechat {
          * @return 消息ID，或抛WechatException
          */
         public Long send(SendMessage msg){
-            return send(loadToken(), msg);
+            return send(loadAccessToken(), msg);
         }
 
         /**
@@ -1537,17 +1481,10 @@ public class Wechat {
          * @return 消息ID，或抛WechatException
          */
         public Long send(String accessToken, SendMessage msg){
-
             String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
             Map<String, Object> params = buildSendParams(msg);
 
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
-
+            Map<String, Object> resp = doPost(url, params);
             return (Long)resp.get("msg_id");
         }
 
@@ -1597,7 +1534,7 @@ public class Wechat {
          * @return 发送成功返回true，或抛WechatException
          */
         public Boolean previewSend(SendPreviewMessage msg){
-            return previewSend(loadToken(), msg);
+            return previewSend(loadAccessToken(), msg);
         }
 
         /**
@@ -1608,16 +1545,9 @@ public class Wechat {
          */
         public Boolean previewSend(String accessToken, SendPreviewMessage msg){
             String url = PREVIEW_SEND + accessToken;
-
             Map<String, Object> params = buildPreviewParams(msg);
 
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.EXCLUDE_EMPTY.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
-
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1654,7 +1584,7 @@ public class Wechat {
          * @return 删除成功，或抛WechatException
          */
         public Boolean deleteSend(Long id){
-            return deleteSend(loadToken(), id);
+            return deleteSend(loadAccessToken(), id);
         }
 
         /**
@@ -1669,14 +1599,11 @@ public class Wechat {
          */
         public Boolean deleteSend(String accessToken, Long id){
             String url = DELETE_SEND + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("msg_id", id);
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1686,7 +1613,7 @@ public class Wechat {
          * @return 群发消息状态，或抛WechatException
          */
         public String getSend(Long id){
-            return getSend(loadToken(), id);
+            return getSend(loadAccessToken(), id);
         }
 
         /**
@@ -1697,14 +1624,11 @@ public class Wechat {
          */
         public String getSend(String accessToken, Long id){
             String url = GET_SEND + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("msg_id", id);
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return (String)resp.get("msg_status");
         }
     }
@@ -1738,7 +1662,7 @@ public class Wechat {
          * @return 临时二维码链接，或抛WechatException
          */
         public String getTempQrcode(String sceneId, Integer expire){
-            return getTempQrcode(loadToken(), sceneId, expire);
+            return getTempQrcode(loadAccessToken(), sceneId, expire);
         }
 
         /**
@@ -1750,14 +1674,11 @@ public class Wechat {
          */
         public String getTempQrcode(String accessToken, String sceneId, Integer expire){
             String url = TICKET_GET + accessToken;
+
             Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_SCENE);
             params.put("expire_seconds", expire);
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
             return showQrcode(qr.getTicket());
         }
@@ -1768,7 +1689,7 @@ public class Wechat {
          * @return 永久二维码链接，或抛WechatException
          */
         public String getPermQrcode(String sceneId){
-            return getPermQrcode(loadToken(), sceneId);
+            return getPermQrcode(loadAccessToken(), sceneId);
         }
 
         /**
@@ -1779,24 +1700,25 @@ public class Wechat {
          */
         public String getPermQrcode(String accessToken, String sceneId){
             String url = TICKET_GET + accessToken;
+
             Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
+
             return showQrcode(qr.getTicket());
         }
 
         private Map<String, Object> buildQrcodeParams(String sceneId, QrcodeType type) {
             Map<String, Object> params = new HashMap<>();
             params.put("action_name", type.value());
+
             Map<String, Object> sceneIdMap = new HashMap<>();
             sceneIdMap.put("scene_id", sceneId);
+
             Map<String, Object> scene = new HashMap<>();
             scene.put("scene", sceneIdMap);
+
             params.put("action_info", scene);
             return params;
         }
@@ -1804,10 +1726,14 @@ public class Wechat {
         /**
          * 获取二维码链接
          * @param ticket 二维码的ticket
-         * @return 二维码链接
+         * @return 二维码链接，或抛WechatException
          */
         private String showQrcode(String ticket){
-            return SHOW_QRCODE + URLEncoder.encode(ticket);
+            try {
+                return SHOW_QRCODE + URLEncoder.encode(ticket, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new WechatException(e);
+            }
         }
 
         /**
@@ -1816,7 +1742,7 @@ public class Wechat {
          * @return 短链接，或抛WechatException
          */
         public String shortUrl(String longUrl){
-            return shortUrl(loadToken(), longUrl);
+            return shortUrl(loadAccessToken(), longUrl);
         }
 
         /**
@@ -1827,15 +1753,12 @@ public class Wechat {
          */
         public String shortUrl(String accessToken, String longUrl){
             String url = LONG_TO_SHORT + accessToken;
+
             Map<String, Object> params = new HashMap<>();
             params.put("action", "long2short");
             params.put("long_url", longUrl);
-            Map<String, Object> resp = Http.post(url)
-                    .body(Jsons.DEFAULT.toJson(params)).request(Types.MAP_STRING_OBJ_TYPE);
-            Integer errcode = (Integer)resp.get(ERROR_CODE);
-            if (errcode != null && errcode != 0){
-                throw new WechatException(resp);
-            }
+
+            Map<String, Object> resp = doPost(url, params);
             return (String)resp.get("short_url");
         }
     }
@@ -1845,11 +1768,448 @@ public class Wechat {
      */
     public final class Materials {
 
+        /**
+         * 素材总数
+         */
+        private final String COUNT = "https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=";
+
+        /**
+         * 素材列表
+         */
+        private final String GETS = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=";
+
+        /**
+         * 删除永久素材
+         */
+        private final String DELETE = "https://api.weixin.qq.com/cgi-bin/material/del_material?access_token=";
+
+        /**
+         * 临时素材上传
+         */
+        private final String UPLOAD_TEMP = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=";
+
+        /**
+         * 临时素材下载
+         */
+        private final String DOWNLOAD_TEMP = "https://api.weixin.qq.com/cgi-bin/media/get?access_token=";
+
+        /**
+         * 添加永久图文素材
+         */
+        private final String ADD_NEWS = "https://api.weixin.qq.com/cgi-bin/material/add_news?access_token=";
+
+        /**
+         * 更新永久图文素材
+         */
+        private final String UPDATE_NEWS = "https://api.weixin.qq.com/cgi-bin/material/update_news?access_token=";
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         */
+        private final String UPLOAD_NEWS_IMAGE = "https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=";
+
+        /**
+         * 上传永久素材(图片，语音，视频)
+         */
+        private final String UPLOAD_PERM = "https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=";
+
         private Materials(){}
+
+        /**
+         * 获取素材总数统计
+         * @return 素材总数统计
+         */
+        public MaterialCount count(){
+            return count(loadAccessToken());
+        }
+
+        /**
+         * 获取素材总数统计
+         * @param accessToken accessToken
+         * @return 素材总数统计，或抛WechatException
+         */
+        public MaterialCount count(String accessToken){
+            String url = COUNT + accessToken;
+
+            Map<String, Object> resp = doGet(url);
+
+            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), MaterialCount.class);
+        }
+
+        /**
+         * 获取素材列表
+         * @param type 素材类型
+         * @param offset 从全部素材的该偏移位置开始返回，0表示从第一个素材返回
+         * @param count 返回素材的数量，取值在1到20之间
+         * @param <T> Material范型
+         * @return 素材分页对象，或抛WechatException
+         */
+        public <T> Page<T> gets(MaterialType type, Integer offset, Integer count){
+            return gets(loadAccessToken(), type, offset, count);
+        }
+
+        /**
+         * 获取素材列表
+         * @param accessToken accessToken
+         * @param type 素材类型
+         * @param offset 从全部素材的该偏移位置开始返回，0表示从第一个素材返回
+         * @param count 返回素材的数量，取值在1到20之间
+         * @param <T> Material范型
+         * @return 素材分页对象，或抛WechatException
+         */
+        public <T> Page<T> gets(String accessToken, MaterialType type, Integer offset, Integer count){
+            String url = GETS + accessToken;
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("type", type.value());
+            params.put("offset", offset);
+            params.put("count", count);
+
+            Map<String, Object> resp = doPost(url, params);
+            return renderMaterialPage(type, resp);
+        }
+
+        private <T> Page<T> renderMaterialPage(MaterialType type, Map<String, Object> resp) {
+            Integer itemCount = (Integer)resp.get("item_count");
+            if (itemCount == null || itemCount <= 0){
+                return Page.empty();
+            }
+
+            Integer itemTotal = (Integer)resp.get("total_count");
+
+            JavaType materialType = MaterialType.NEWS == type ?
+                    Types.ARRAY_LIST_NEWS_MATERIAL_TYPE :Types.ARRAY_LIST_COMMON_MATERIAL_TYPE ;
+            List<T> materials = Jsons.DEFAULT.fromJson(
+                    Jsons.DEFAULT.toJson(resp.get("item")), materialType);
+
+            return new Page<>(itemTotal, materials);
+        }
+
+        /**
+         * 删除永久素材
+         * @param mediaId 永久素材mediaId
+         * @return 删除成功返回true，或抛WechatException
+         */
+        public Boolean delete(String mediaId){
+            return delete(loadAccessToken(), mediaId);
+        }
+
+        /**
+         * 删除永久素材
+         * @param accessToken accessToken
+         * @param mediaId 永久素材mediaId
+         * @return 删除成功返回true，或抛WechatException
+         */
+        public Boolean delete(String accessToken, String mediaId){
+            String url = DELETE + accessToken;
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("media_id", mediaId);
+            doPost(url, params);
+
+            return Boolean.TRUE;
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param fileData 文件数据
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(MaterialUploadType type, String fileName, byte[] fileData) {
+            return uploadTemp(loadAccessToken(), type, fileName, new ByteArrayInputStream(fileData));
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param fileData 文件数据
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, byte[] fileData) {
+            return uploadTemp(accessToken, type, fileName, new ByteArrayInputStream(fileData));
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param type 文件类型
+         * @param media 媒体文件输入流
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(MaterialUploadType type, File media) {
+            return uploadTemp(loadAccessToken(), type, media);
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param media 媒体文件输入流
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, File media) {
+            try {
+                return uploadTemp(accessToken, type, media.getName(), new FileInputStream(media));
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param type 文件类型
+         * @param input 输入流
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(MaterialUploadType type, String fileName, InputStream input) {
+            return uploadTemp(loadAccessToken(), type, fileName, input);
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param input 输入流
+         * @return TempMaterial对象，或抛WechatException
+         */
+        public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
+            String url = UPLOAD_TEMP + accessToken;
+
+            Map<String, String> params = new HashMap<>();
+            params.put("type", type.value());
+
+            Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
+            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), TempMaterial.class);
+        }
+
+        /**
+         * 下载临时素材
+         * @param mediaId mediaId
+         * @return 文件二进制数据
+         */
+        public byte[] downloadTemp(String mediaId){
+            return downloadTemp(loadAccessToken(), mediaId);
+        }
+
+        /**
+         * 下载临时素材
+         * @param accessToken accessToken
+         * @param mediaId mediaId
+         * @return 文件二进制数据
+         */
+        public byte[] downloadTemp(String accessToken, String mediaId){
+            String url = DOWNLOAD_TEMP + accessToken + "&media_id=" + mediaId;
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream(1024);
+            Http.download(url, output);
+
+            return output.toByteArray();
+        }
+
+        /**
+         * 添加永久图文素材
+         * @param items 图文素材列表
+         * @return mediaId
+         */
+        public String uploadPermNews(List<NewsContentItem> items){
+            return uploadPermNews(loadAccessToken(), items);
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param items 图文素材列表
+         * @return mediaId
+         */
+        public String uploadPermNews(String accessToken, List<NewsContentItem> items){
+            String url = ADD_NEWS + accessToken;
+            Map<String, Object> params = new HashMap<>();
+            params.put("articles", items);
+            Map<String, Object> resp = doPost(url, params);
+            return (String)resp.get("media_id");
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param mediaId 图文mediaId
+         * @param itemIndex 对应图文素材中的第几个图文项，从0开始
+         * @param newItem 新的图文项
+         * @return 更新成功返回true，反之false
+         */
+        public Boolean updatePermNews(String accessToken, String mediaId, Integer itemIndex, NewsContentItem newItem){
+            String url = UPDATE_NEWS + accessToken;
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("media_id", mediaId);
+            params.put("index", itemIndex);
+            params.put("articles", newItem);
+
+            doPost(url, params);
+            return Boolean.TRUE;
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param image 图片对象
+         * @return 微信内部图片链接
+         */
+        public String uploadPermNewsImage(String accessToken, File image) throws FileNotFoundException {
+            String url = UPLOAD_NEWS_IMAGE + accessToken;
+            Map<String, Object> resp = doUpload(url, "media", image.getName(),
+                    new FileInputStream(image), Collections.<String, String>emptyMap());
+            return (String)resp.get("url");
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param data 文件二机制数据
+         * @return 微信内部图片链接
+         */
+        public String uploadPermNewsImage(String accessToken, String fileName, byte[] data) throws FileNotFoundException {
+            return uploadPermNewsImage(accessToken, fileName, new ByteArrayInputStream(data));
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param in 文件输入流
+         * @return 微信内部图片链接
+         */
+        public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) throws FileNotFoundException {
+            String url = UPLOAD_NEWS_IMAGE + accessToken;
+            Map<String, Object> resp = doUpload(url, "media", fileName, in, Collections.<String, String>emptyMap());
+            return (String)resp.get("url");
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param file 文件
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPerm(String accessToken, MaterialUploadType type, File file) {
+            try {
+                return uploadPerm(accessToken, type, file.getName(), new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+                 图片（image）: 1M，bmp/png/jpeg/jpg/gif
+                 语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+                 缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param input 输入流
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPerm(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
+            if (MaterialUploadType.VIDEO == type){
+                throw new IllegalArgumentException("type must be image, voice, or thumb, you should use uploadPermVideo method.");
+            }
+            String url = UPLOAD_PERM + accessToken;
+
+            Map<String, String> params = new HashMap<>();
+            params.put("type", type.value());
+
+            Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
+            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), PermMaterial.class);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param video 视频文件
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPermVideo(String accessToken, File video, String title, String desc) throws FileNotFoundException {
+            return uploadPermVideo(accessToken, video.getName(), new FileInputStream(video), title, desc);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param input 输入流
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc) {
+
+            String url = UPLOAD_PERM + accessToken;
+
+            Map<String, String> params = new HashMap<>();
+            params.put("type", MaterialUploadType.VIDEO.value());
+
+            Map<String, String> description = new HashMap<>();
+            description.put("title", title);
+            description.put("introduction", desc);
+            params.put("description", Jsons.DEFAULT.toJson(description));
+
+            Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
+            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), PermMaterial.class);
+        }
+    }
+
+    /**
+     * 数据统计
+     */
+    public final class Datas {
+
+        private Datas(){}
 
     }
 
-    private String loadToken(){
+    private String loadAccessToken(){
         String accessToken = tokenLoader.get();
         if (Strings.isNullOrEmpty(accessToken)){
             AccessToken token = BASE.accessToken();
@@ -1857,5 +2217,60 @@ public class Wechat {
             accessToken = token.getAccessToken();
         }
         return accessToken;
+    }
+
+    private Map<String, Object> doPost(String url, Map<String, Object> params) {
+        Http http = Http.post(url);
+        if (params != null && params.size() > 0){
+            http.body(Jsons.EXCLUDE_EMPTY.toJson(params));
+        }
+        Map<String, Object> resp = http.request(Types.MAP_STRING_OBJ_TYPE);
+        Integer errcode = (Integer)resp.get(ERROR_CODE);
+        if (errcode != null && errcode != 0){
+            throw new WechatException(resp);
+        }
+        return resp;
+    }
+
+    private Map<String, Object> doGet(String url) {
+        return doGet(url, null);
+    }
+
+    private Map<String, Object> doGet(String url, Map<String, Object> params) {
+        Http http = Http.get(url);
+        if (params != null && params.size() > 0){
+            http.body(Jsons.DEFAULT.toJson(params));
+        }
+        Map<String, Object> resp = http.request(Types.MAP_STRING_OBJ_TYPE);
+        Integer errcode = (Integer)resp.get(ERROR_CODE);
+        if (errcode != null && errcode != 0){
+            throw new WechatException(resp);
+        }
+        return resp;
+    }
+
+    private Map<String, Object> doUpload(String url, String fieldName, String fileName, InputStream input, Map<String, String> params){
+        String json = Http.upload(url, fieldName, fileName, input, params);
+        Map<String, Object> resp = Jsons.DEFAULT.fromJson(json, Types.MAP_STRING_OBJ_TYPE);
+        Integer errcode = (Integer)resp.get(ERROR_CODE);
+        if (errcode != null && errcode != 0){
+            throw new WechatException(resp);
+        }
+        return resp;
+    }
+
+    public static final class Types {
+
+        static final JavaType MAP_STRING_OBJ_TYPE = Jsons.DEFAULT.createCollectionType(Map.class, String.class, Object.class);
+
+        static final JavaType ARRAY_LIST_MENU_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, Menu.class);
+
+        static final JavaType ARRAY_LIST_GROUP_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, Group.class);
+
+        static final JavaType ARRAY_LIST_COMMON_MATERIAL_TYPE =
+                Jsons.DEFAULT.createCollectionType(ArrayList.class, CommonMaterial.class);
+
+        static final JavaType ARRAY_LIST_NEWS_MATERIAL_TYPE =
+                Jsons.DEFAULT.createCollectionType(ArrayList.class, NewsMaterial.class);
     }
 }

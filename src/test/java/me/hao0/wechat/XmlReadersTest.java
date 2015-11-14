@@ -2,6 +2,7 @@ package me.hao0.wechat;
 
 import me.hao0.wechat.utils.XmlReaders;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Author: haolin
@@ -21,6 +22,6 @@ public class XmlReadersTest {
                 "<Appellation>Mr. Wang</Appellation>" +
                 "</work-contact-info>";
         XmlReaders readers = XmlReaders.create(xml);
-        System.out.println(readers.getNodeStr("Tel"));
+        assertNotNull(readers.getNodeStr("Tel"));
     }
 }
