@@ -26,6 +26,11 @@
         <artifactId>jackson-databind</artifactId>
         <version>2.4.2</version>
     </dependency>
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>18.0</version>
+    </dependency>
 	```
 
 + 基本用法:
@@ -657,6 +662,11 @@
 		* ``*Loader``设置过期时刻。
 		* 实现<a href="#jssdk-api">JSSDK</a>组件。
 
+	+ 1.3.0:
+		
+		+ 引入[guava](https://github.com/google/guava)。
+		+ API异步化。
+		
 + 微信相关文档
 
 	+ [公众号接口权限说明](http://mp.weixin.qq.com/wiki/8/71e1908fa08e67c6251ebdd78fd6b6b4.html)

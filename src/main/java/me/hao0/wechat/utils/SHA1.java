@@ -3,6 +3,10 @@ package me.hao0.wechat.utils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Using Guava Hasing
+ */
+@Deprecated
 public class SHA1 {
 
     private static final char[] LETTERS = "0123456789ABCDEF".toCharArray();

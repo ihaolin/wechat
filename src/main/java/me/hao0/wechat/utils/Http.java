@@ -2,17 +2,15 @@ package me.hao0.wechat.utils;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.github.kevinsawicki.http.HttpRequest;
+import com.google.common.base.Strings;
 import me.hao0.wechat.exception.HttpException;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

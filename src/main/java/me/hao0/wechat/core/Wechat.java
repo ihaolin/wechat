@@ -2,6 +2,10 @@ package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.google.common.hash.Hashing;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.base.AccessToken;
@@ -51,13 +55,10 @@ import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import me.hao0.wechat.model.message.resp.RespMessageType;
-import me.hao0.wechat.utils.MD5;
 import me.hao0.wechat.utils.Jsons;
-import me.hao0.wechat.utils.SHA1;
 import me.hao0.wechat.utils.XmlReaders;
 import me.hao0.wechat.utils.XmlWriters;
 import me.hao0.wechat.utils.Http;
-import me.hao0.wechat.utils.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -396,10 +397,11 @@ public final class Wechat {
         }
 
         private Boolean createOrUpdateAccount(String account, String nickName, String password, String url) {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
+
             params.put("kf_account", account);
             params.put("nickname", nickName);
-            params.put("password", MD5.generate(password, false));
+            params.put("password", Hashing.md5().hashString(password, Charsets.UTF_8).toString());
 
             doPost(url, params);
             return Boolean.TRUE;
@@ -483,7 +485,7 @@ public final class Wechat {
         public List<MsgRecord> getMsgRecords(String accessToken, Integer pageNo, Integer pageSize, Date startTime, Date endTime){
             String url = RECORD + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(4);
             params.put("pageindex", pageNo);
             params.put("pagesize", pageSize);
             params.put("starttime", startTime.getTime());
@@ -555,7 +557,7 @@ public final class Wechat {
 
         private Boolean createOrCloseSession(String openId, String kfAccount, String text, String url){
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
             params.put("openid", openId);
             params.put("kf_account", kfAccount);
             params.put("text", text);
@@ -940,7 +942,7 @@ public final class Wechat {
         public Integer createGroup(String accessToken, String name){
             String url = CREATE_GROUP + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             Group g = new Group();
             g.setName(name);
             params.put("group", g);
@@ -991,7 +993,7 @@ public final class Wechat {
 
             Group g = new Group();
             g.setId(id);
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("group", g);
 
             Map<String, Object> resp = doPost(url, params);
@@ -1021,7 +1023,7 @@ public final class Wechat {
             Group g = new Group();
             g.setId(id);
             g.setName(newName);
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("group", g);
 
             doPost(url, params);
@@ -1046,7 +1048,7 @@ public final class Wechat {
         public Integer getUserGroup(String accessToken, String openId){
             String url = GROUP_OF_USER + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("openid", openId);
 
             Map<String, Object> resp = doPost(url, params);
@@ -1073,11 +1075,11 @@ public final class Wechat {
         public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
             String url = MOVE_USER_GROUP + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
             params.put("openid", openId);
             params.put("to_groupid", groupId);
 
-            Map<String, Object> resp = doPost(url, params);
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1124,7 +1126,7 @@ public final class Wechat {
         public Boolean remarkUser(String accessToken, String openId, String remark){
             String url = REMARK_USER + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
             params.put("openid", openId);
             params.put("remark", remark);
 
@@ -1477,17 +1479,17 @@ public final class Wechat {
         }
 
         private Map<String, Object> buildTemplateParams(String openId, String templateId, String link, List<TemplateField> fields) {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(4);
             params.put("touser", openId);
             params.put("template_id", templateId);
             if (!Strings.isNullOrEmpty(link)){
                 params.put("url", link);
             }
             if (fields != null && !fields.isEmpty()){
-                Map<String, Map<String, String>> data = new HashMap<>();
+                Map<String, Map<String, String>> data = Maps.newHashMapWithExpectedSize(fields.size());
                 Map<String, String> dataItem;
                 for (TemplateField field : fields){
-                    dataItem = new HashMap<>();
+                    dataItem = Maps.newHashMapWithExpectedSize(2);
                     dataItem.put("value", field.getValue());
                     dataItem.put("color", field.getColor());
                     data.put(field.getName(), dataItem);
@@ -1527,10 +1529,10 @@ public final class Wechat {
         }
 
         private Map<String, Object> buildSendParams(SendMessage msg) {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMap();
 
             if (SendMessageScope.GROUP == msg.getScope()){
-                Map<String, Object> scope = new HashMap<>();
+                Map<String, Object> scope = Maps.newHashMapWithExpectedSize(2);
                 scope.put("is_to_all", msg.getIsToAll());
                 scope.put("group_id", msg.getGroupId());
                 params.put("filter", scope);
@@ -1539,7 +1541,7 @@ public final class Wechat {
             }
 
             // send content
-            Map<String, Object> msgContent = new HashMap<>();
+            Map<String, Object> msgContent = Maps.newHashMapWithExpectedSize(1);
             if (SendMessageType.TEXT == msg.getType()){
                 // 文本
                 msgContent.put("content", msg.getContent());
@@ -1590,12 +1592,12 @@ public final class Wechat {
         }
 
         private Map<String, Object> buildPreviewParams(SendPreviewMessage msg) {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
 
             params.put("touser", msg.getOpenId());
 
             // send content
-            Map<String, Object> msgContent = new HashMap<>();
+            Map<String, Object> msgContent = Maps.newHashMapWithExpectedSize(1);
             if (SendMessageType.TEXT == msg.getType()){
                 // 文本
                 msgContent.put("content", msg.getContent());
@@ -1638,7 +1640,7 @@ public final class Wechat {
         public Boolean deleteSend(String accessToken, Long id){
             String url = DELETE_SEND + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("msg_id", id);
 
             doPost(url, params);
@@ -1663,7 +1665,7 @@ public final class Wechat {
         public String getSend(String accessToken, Long id){
             String url = GET_SEND + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("msg_id", id);
 
             Map<String, Object> resp = doPost(url, params);
@@ -1748,13 +1750,13 @@ public final class Wechat {
         }
 
         private Map<String, Object> buildQrcodeParams(String sceneId, QrcodeType type) {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
             params.put("action_name", type.value());
 
-            Map<String, Object> sceneIdMap = new HashMap<>();
+            Map<String, Object> sceneIdMap = Maps.newHashMapWithExpectedSize(1);
             sceneIdMap.put("scene_id", sceneId);
 
-            Map<String, Object> scene = new HashMap<>();
+            Map<String, Object> scene = Maps.newHashMapWithExpectedSize(1);
             scene.put("scene", sceneIdMap);
 
             params.put("action_info", scene);
@@ -1792,7 +1794,7 @@ public final class Wechat {
         public String shortUrl(String accessToken, String longUrl){
             String url = LONG_TO_SHORT + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
             params.put("action", "long2short");
             params.put("long_url", longUrl);
 
@@ -1898,7 +1900,7 @@ public final class Wechat {
         public <T> Page<T> gets(String accessToken, MaterialType type, Integer offset, Integer count){
             String url = GETS + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
             params.put("type", type.value());
             params.put("offset", offset);
             params.put("count", count);
@@ -1941,7 +1943,7 @@ public final class Wechat {
         public Boolean delete(String accessToken, String mediaId){
             String url = DELETE + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("media_id", mediaId);
             doPost(url, params);
 
@@ -2046,7 +2048,7 @@ public final class Wechat {
         public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
             String url = UPLOAD_TEMP + accessToken;
 
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
             params.put("type", type.value());
 
             Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
@@ -2094,7 +2096,7 @@ public final class Wechat {
          */
         public String uploadPermNews(String accessToken, List<NewsContentItem> items){
             String url = ADD_NEWS + accessToken;
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("articles", items);
             Map<String, Object> resp = doPost(url, params);
             return (String)resp.get("media_id");
@@ -2111,7 +2113,7 @@ public final class Wechat {
         public Boolean updatePermNews(String accessToken, String mediaId, Integer itemIndex, NewsContentItem newItem){
             String url = UPDATE_NEWS + accessToken;
 
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
             params.put("media_id", mediaId);
             params.put("index", itemIndex);
             params.put("articles", newItem);
@@ -2193,7 +2195,7 @@ public final class Wechat {
             }
             String url = UPLOAD_PERM + accessToken;
 
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
             params.put("type", type.value());
 
             Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
@@ -2225,10 +2227,10 @@ public final class Wechat {
 
             String url = UPLOAD_PERM + accessToken;
 
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
             params.put("type", MaterialUploadType.VIDEO.value());
 
-            Map<String, String> description = new HashMap<>();
+            Map<String, String> description = Maps.newHashMapWithExpectedSize(2);
             description.put("title", title);
             description.put("introduction", desc);
             params.put("description", Jsons.DEFAULT.toJson(description));
@@ -2334,7 +2336,7 @@ public final class Wechat {
         public Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url){
             String signStr = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s";
             signStr = String.format(signStr, jsApiTicket, nonStr, timestamp, url);
-            String sign = SHA1.generate(signStr).toLowerCase();
+            String sign = Hashing.sha1().hashString(signStr, Charsets.UTF_8).toString().toLowerCase();
             return new Config(appId, timestamp, nonStr, sign);
         }
     }

@@ -1,7 +1,7 @@
 package me.hao0.wechat.core;
 
+import com.google.common.base.Strings;
 import me.hao0.wechat.model.base.AccessToken;
-import me.hao0.wechat.utils.Strings;
 
 /**
  * 一个内存式AccessToken加载器

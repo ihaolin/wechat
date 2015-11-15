@@ -4,6 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Using Google Hasing
+ */
+@Deprecated
 public class MD5 {
 
     private static MessageDigest md5Digest = null;

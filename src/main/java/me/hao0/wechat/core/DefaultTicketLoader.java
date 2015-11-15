@@ -1,8 +1,8 @@
 package me.hao0.wechat.core;
 
+import com.google.common.base.Strings;
 import me.hao0.wechat.model.js.Ticket;
 import me.hao0.wechat.model.js.TicketType;
-import me.hao0.wechat.utils.Strings;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
