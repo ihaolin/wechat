@@ -1,6 +1,7 @@
 package me.hao0.wechat.core;
 
 import me.hao0.wechat.model.base.AccessToken;
+import me.hao0.wechat.utils.Strings;
 
 /**
  * 一个内存式AccessToken加载器
@@ -10,23 +11,17 @@ import me.hao0.wechat.model.base.AccessToken;
  */
 public class DefaultAccessTokenLoader implements AccessTokenLoader {
 
-    private Long expiredAt;
-
-    private AccessToken validToken;
+    private volatile AccessToken validToken;
 
     @Override
     public String get() {
-        if (expiredAt == null
-                || System.currentTimeMillis() > expiredAt
-                || validToken == null){
-            return null;
-        }
-        return validToken.getAccessToken();
+        return (validToken == null
+                || Strings.isNullOrEmpty(validToken.getAccessToken())
+                || System.currentTimeMillis() > validToken.getExpiredAt()) ? null : validToken.getAccessToken();
     }
 
     @Override
     public void refresh(AccessToken token) {
         validToken = token;
-        expiredAt = System.currentTimeMillis() + (token.getExpire() * 1000L);
     }
 }

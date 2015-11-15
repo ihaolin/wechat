@@ -1,8 +1,12 @@
 package me.hao0.wechat;
 
 import me.hao0.wechat.core.Wechat;
+import me.hao0.wechat.core.WechatBuilder;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.Page;
+import me.hao0.wechat.model.js.Ticket;
+import me.hao0.wechat.model.js.TicketType;
+import me.hao0.wechat.model.js.Config;
 import me.hao0.wechat.model.material.CommonMaterial;
 import me.hao0.wechat.model.material.MaterialType;
 import me.hao0.wechat.model.material.MaterialUploadType;
@@ -30,6 +34,7 @@ import me.hao0.wechat.model.message.send.SendMessageScope;
 import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
+import me.hao0.wechat.model.user.Group;
 import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,13 +53,15 @@ import static org.junit.Assert.*;
  */
 public class WechatTests {
 
-    private Wechat wechat = Wechat.newWechat("appId", "appSecret");
+    private Wechat wechat = WechatBuilder.newBuilder("wxf66ea2204a7a1c58", "5c9d2dc5a3c9209edfa76cb4893956f0").build();
 
-    private String accessToken = "9l23BUNe5v3qvZeJs3N5nxgrO-FICLziYsSjhWJOQIrJS2CRTcVB3yuBD9a6MhSwgOSbVaiTKVAHgWYejqhZQac1h9205xr5U9sQKwV9YLEVNLhADAJBZ";
+    private String accessToken = "ZklK6NRs488X7-kYbU3x-Nq2trL4DKHn-pzU6mEET7Wap2B74ZJlUnfpj0XWoReATRjJzNLVlm54fKgVefqrQR0yGqpEAQilnt3tVh9kGZQGBPgABABWK";
 
     private String testDomain = "xxx";
 
     private String openId = "onN_8trIW7PSoXLMzMSWySb5jfdY";
+
+    private String jsApiTicket = "sM4AOVdWfPE4DxkXGEs8VCGATNbUB_Oae4oi2hRmdEb_g8HSkXz8ZFP6vY96wdPqIgHpx9HYoIePo-tRG7pt1g";
 
     @Test
     public void testAccessToken(){
@@ -420,12 +427,6 @@ public class WechatTests {
     }
 
     @Test
-    public void testLoadToken(){
-        assertNotNull(wechat.USER.getGroup());
-        assertNotNull(wechat.USER.getUserGroup(openId));
-    }
-
-    @Test
     public void testMaterialCount(){
         assertNotNull(wechat.MATERIAL.count(accessToken));
     }
@@ -507,5 +508,39 @@ public class WechatTests {
         PermMaterial material = wechat.MATERIAL.uploadPermVideo(accessToken, new File("/Users/haolin/temp/sport.mp4"), "运动", "动起来");
         assertNotNull(material);
         // K74X6mIzSjUcRNfP5rjI8uW0GM_jk0O_vauMXP9JWMg
+    }
+
+    @Test
+    public void testGetTicket(){
+        Ticket t = wechat.JSSDK.getTicket(accessToken, TicketType.JSAPI);
+        assertNotNull(t);
+        System.out.println(t);
+
+        t = wechat.JSSDK.getTicket(accessToken, TicketType.CARD);
+        assertNotNull(t);
+        System.out.println(t);
+    }
+
+    @Test
+    public void testJsConfig(){
+        Config config = wechat.JSSDK.getConfig(jsApiTicket, "abcde", 12345678L, "http://m.bingex.com/demo");
+        assertNotNull(config);
+        assertEquals("ea570c3af8aa160441782ceaf7aecdfb55887b48", config.getSignature());
+    }
+
+    @Test
+    public void testLoadWithoutToken(){
+        List<Group> groups = wechat.USER.getGroup();
+        assertNotNull(groups);
+        System.out.println(groups);
+
+        Integer groupId = wechat.USER.getUserGroup(openId);
+        assertNotNull(groupId);
+        System.out.println(groupId);
+
+        Ticket ticket = wechat.JSSDK.getTicket(TicketType.JSAPI);
+        assertNotNull(ticket);
+        System.out.println(ticket);
+
     }
 }

@@ -1,6 +1,5 @@
 package me.hao0.wechat.model.base;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 
 /**
@@ -15,14 +14,17 @@ public class AccessToken implements Serializable {
     /**
      * accessToken
      */
-    @JsonProperty("access_token")
     private String accessToken;
 
     /**
-     * 有效时间(秒)
+     * 有效时间(s)
      */
-    @JsonProperty("expires_in")
     private Integer expire;
+
+    /**
+     * 过期时刻(ms)
+     */
+    private Long expiredAt;
 
     public String getAccessToken() {
         return accessToken;
@@ -40,11 +42,20 @@ public class AccessToken implements Serializable {
         this.expire = expire;
     }
 
+    public Long getExpiredAt() {
+        return expiredAt;
+    }
+
+    public void setExpiredAt(Long expiredAt) {
+        this.expiredAt = expiredAt;
+    }
+
     @Override
     public String toString() {
         return "AccessToken{" +
                 "accessToken='" + accessToken + '\'' +
                 ", expire=" + expire +
+                ", expiredAt=" + expiredAt +
                 '}';
     }
 }

@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JavaType;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.base.AccessToken;
+import me.hao0.wechat.model.js.Ticket;
+import me.hao0.wechat.model.js.TicketType;
 import me.hao0.wechat.model.customer.WaitingSession;
+import me.hao0.wechat.model.js.Config;
 import me.hao0.wechat.model.material.CommonMaterial;
 import me.hao0.wechat.model.material.MaterialCount;
 import me.hao0.wechat.model.material.MaterialType;
@@ -50,6 +53,7 @@ import me.hao0.wechat.model.message.send.TemplateField;
 import me.hao0.wechat.model.message.resp.RespMessageType;
 import me.hao0.wechat.utils.MD5;
 import me.hao0.wechat.utils.Jsons;
+import me.hao0.wechat.utils.SHA1;
 import me.hao0.wechat.utils.XmlReaders;
 import me.hao0.wechat.utils.XmlWriters;
 import me.hao0.wechat.utils.Http;
@@ -74,7 +78,7 @@ import java.util.Map;
  * Email: haolin.h0@gmail.com
  * Date: 5/11/15
  */
-public class Wechat {
+public final class Wechat {
 
     /**
      * 微信APP ID
@@ -87,9 +91,24 @@ public class Wechat {
     private String appSecret;
 
     /**
+     * 微信APP (令牌)Token
+     */
+    String appToken;
+
+    /**
+     * 消息加密Key
+     */
+    String msgKey;
+
+    /**
      * AccessToken加载器
      */
-    private final AccessTokenLoader tokenLoader;
+    AccessTokenLoader tokenLoader = DEFAULT_ACCESS_TOKEN_LOADER;
+
+    /**
+     * Ticket加载器
+     */
+    TicketLoader ticketLoader = DEFAULT_TICKET_LOADER;
 
     /**
      * 基础API
@@ -131,23 +150,36 @@ public class Wechat {
      */
     public final Datas DATA = new Datas();
 
+    /**
+     * JSSDK API
+     */
+    public final JsSdks JSSDK = new JsSdks();
+
     private final String ERROR_CODE = "errcode";
 
-    private Wechat(String appId, String appSecret, AccessTokenLoader tokenLoader){
-        if (tokenLoader == null){
-            throw new NullPointerException("access token loader can't be null");
-        }
+    private static final AccessTokenLoader DEFAULT_ACCESS_TOKEN_LOADER = new DefaultAccessTokenLoader();
+
+    private static final DefaultTicketLoader DEFAULT_TICKET_LOADER = new DefaultTicketLoader();
+
+    Wechat(String appId, String appSecret){
         this.appId = appId;
         this.appSecret = appSecret;
-        this.tokenLoader = tokenLoader;
     }
 
-    public static Wechat newWechat(String appId, String appSecret){
-        return newWechat(appId, appSecret, new DefaultAccessTokenLoader());
+    public String getAppId() {
+        return appId;
     }
 
-    public static Wechat newWechat(String appId, String appSecret, AccessTokenLoader tokenLoader){
-        return new Wechat(appId, appSecret, tokenLoader);
+    public String getAppSecret() {
+        return appSecret;
+    }
+
+    public String getAppToken() {
+        return appToken;
+    }
+
+    public String getMsgKey() {
+        return msgKey;
     }
 
     /**
@@ -230,7 +262,12 @@ public class Wechat {
 
             Map<String, Object> resp = doGet(url);
 
-            return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), AccessToken.class);
+            AccessToken token = new AccessToken();
+            token.setAccessToken((String)resp.get("access_token"));
+            Integer expire = (Integer)resp.get("expires_in");
+            token.setExpire(expire);
+            token.setExpiredAt(System.currentTimeMillis() + expire * 1000);
+            return token;
         }
 
         /**
@@ -255,6 +292,7 @@ public class Wechat {
 
             return (List<String>)resp.get("ip_list");
         }
+
     }
 
     /**
@@ -2209,6 +2247,98 @@ public class Wechat {
 
     }
 
+    /**
+     * JS SDK
+     */
+    public final class JsSdks {
+
+        /**
+         * 获取Ticket
+         */
+        private final String TICKET_GET = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=";
+
+        private JsSdks(){}
+
+        /**
+         * 获取临时凭证
+         * @param type 凭证类型
+         *             @see me.hao0.wechat.model.js.TicketType
+         * @return Ticket对象，或抛WechatException
+         */
+        public Ticket getTicket(TicketType type){
+            return getTicket(loadAccessToken(), type);
+        }
+
+        /**
+         * 获取临时凭证
+         * @param accessToken accessToken
+         * @param type 凭证类型
+         *             @see me.hao0.wechat.model.js.TicketType
+         * @return Ticket对象，或抛WechatException
+         */
+        public Ticket getTicket(String accessToken, TicketType type){
+            String url = TICKET_GET + accessToken + "&type=" + type.type();
+
+            Map<String, Object> resp = doGet(url);
+
+            Ticket t = new Ticket();
+            t.setTicket((String)resp.get("ticket"));
+            Integer expire = (Integer)resp.get("expires_in");
+            t.setExpire(expire);
+            t.setExpireAt(System.currentTimeMillis() + expire * 1000);
+            t.setType(type);
+
+            return t;
+        }
+
+        /**
+         * 获取JSSDK配置信息
+         * @param nonStr 随机字符串
+         * @param url 调用JSSDK的页面URL全路径(去除#后的)
+         * @return Config对象
+         */
+        public Config getConfig(String nonStr, String url){
+            return getConfig(loadTicket(TicketType.JSAPI), nonStr, url);
+        }
+
+        /**
+         * 获取JSSDK配置信息
+         * @param jsApiTicket jsapi凭证
+         * @param nonStr 随机字符串
+         * @param url 调用JSSDK的页面URL全路径(去除#后的)
+         * @return Config对象
+         */
+        public Config getConfig(String jsApiTicket, String nonStr, String url){
+            return getConfig(jsApiTicket, nonStr, System.currentTimeMillis() / 1000, url);
+        }
+
+        /**
+         * 获取JSSDK配置信息
+         * @param nonStr 随机字符串
+         * @param timestamp 时间戳(s)
+         * @param url 调用JSSDK的页面URL全路径(去除#后的)
+         * @return Config对象
+         */
+        public Config getConfig(String nonStr, Long timestamp, String url){
+            return getConfig(loadTicket(TicketType.JSAPI), nonStr, timestamp, url);
+        }
+
+        /**
+         * 获取JSSDK调用前的配置信息
+         * @param jsApiTicket jsapi凭证
+         * @param nonStr 随机字符串
+         * @param timestamp 时间戳(s)
+         * @param url 调用JSSDK的页面URL全路径(去除#后的)
+         * @return Config对象
+         */
+        public Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url){
+            String signStr = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s";
+            signStr = String.format(signStr, jsApiTicket, nonStr, timestamp, url);
+            String sign = SHA1.generate(signStr).toLowerCase();
+            return new Config(appId, timestamp, nonStr, sign);
+        }
+    }
+
     private String loadAccessToken(){
         String accessToken = tokenLoader.get();
         if (Strings.isNullOrEmpty(accessToken)){
@@ -2217,6 +2347,16 @@ public class Wechat {
             accessToken = token.getAccessToken();
         }
         return accessToken;
+    }
+
+    private String loadTicket(TicketType type){
+        String ticket = ticketLoader.get(type);
+        if (Strings.isNullOrEmpty(ticket)){
+            Ticket t = JSSDK.getTicket(type);
+            ticketLoader.refresh(t);
+            ticket = t.getTicket();
+        }
+        return ticket;
     }
 
     private Map<String, Object> doPost(String url, Map<String, Object> params) {

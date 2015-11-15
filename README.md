@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </dependency>
 	```
 	
@@ -31,7 +31,11 @@
 + 基本用法:
 
 	```java
-	Wechat wechat = Wechat.newWechat("appId", "appSecret");
+	Wechat wechat = 
+		WechatBuilder.newBuilder("appId", "appSecret")
+						.conf1()  // 其他可选配置
+						...
+						.build();
 	wechat.{component}.{api};
 	```	
 
@@ -44,6 +48,7 @@
 	+ <a href="#message-api">消息</a>: ```MESSAGE```
 	+ <a href="#qr-api">二维码</a>: ```QRCODE```
 	+ <a href="#material-api">素材</a>: ```MATERIAL```
+	+ <a href="#jssdk-api">JS调用相关</a>: ```JSSDK```
 	+ <a href="#data-api">数据统计</a>(待码): ```DATA```
 
 + API介绍:
@@ -516,8 +521,30 @@
          */
         PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc)
 		``` 
+	+ <a id="jssdk-api">**```JSSDK```**</a>:
 
-+ AccessToken管理:
+		```java
+		/**
+         * 获取临时凭证
+         * @param accessToken accessToken
+         * @param type 凭证类型
+         *             @see me.hao0.wechat.model.js.TicketType
+         * @return Ticket对象，或抛WechatException
+         */
+        Ticket getTicket(String accessToken, TicketType type)
+        
+        /**
+         * 获取JSSDK调用前的配置信息
+         * @param jsApiTicket jsapi凭证
+         * @param nonStr 随机字符串
+         * @param timestamp 时间戳(s)
+         * @param url 调用JSSDK的页面URL全路径(去除#后的)
+         * @return Config对象
+         */
+        Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url)
+		```
+
++ **AccessToken管理**:
 	
 	> 由于微信服务器限制**AccessToken**请求次数，并且频繁请求**AccessToken**并不是一个明智之举，需要将获取的**AccessToken**保存下来，待过期时，再去请求新的**AccessToken**，所以以上API均提供了无accessToken版本，如:
 	
@@ -526,7 +553,7 @@
 	List<String> ip(String accessToken);
 	```
 
-+ 实现AccessTokenLoader: 
++ 实现```AccessTokenLoader```: 
 
 	```java
 	public interface AccessTokenLoader {
@@ -545,29 +572,66 @@
 	}
 	```	
 
-+ 默认的AccessTokenLoader(<font color="red">**使用内存加载AccessToken，生产环境不推荐使用**</font>):
++ 默认的AccessTokenLoader实现(<font color="red">**生产环境不推荐使用**</font>):
 
 	```java
 	public class DefaultAccessTokenLoader implements AccessTokenLoader {
 	
-	    private Long expiredAt;
-	
-	    private AccessToken validToken;
+	    private volatile AccessToken validToken;
 	
 	    @Override
 	    public String get() {
-	        if (expiredAt == null
-	                || System.currentTimeMillis() > expiredAt
-	                || validToken == null){
-	            return null;
-	        }
-	        return validToken.getAccessToken();
+	        return (validToken == null
+	                || Strings.isNullOrEmpty(validToken.getAccessToken())
+	                || System.currentTimeMillis() > validToken.getExpiredAt()) ? null : validToken.getAccessToken();
 	    }
 	
 	    @Override
 	    public void refresh(AccessToken token) {
 	        validToken = token;
-	        expiredAt = System.currentTimeMillis() + (token.getExpire() * 1000L);
+	    }
+	}
+	```
+	
++ **Ticket管理**: 同AccessToken类似，需自己实现接口``TicketLoader``: 
+
+	```java
+	public interface TicketLoader {
+
+	    /**
+	     * 获取Ticket
+	     * @param type ticket类型
+	     *             @see me.hao0.wechat.model.js.TicketType
+	     * @return 有效的ticket，若返回""或null，则触发重新从微信请求Ticket的方法refresh
+	     */
+	    String get(TicketType type);
+	
+	    /**
+	     * 刷新Ticket
+	     * @param ticket 最新获取到的Ticket
+	     */
+	    void refresh(Ticket ticket);
+	}
+	```	
+
++ 默认的TicketLoader实现(<font color="red">**生产环境不推荐使用**</font>):
+
+	```java
+	public class DefaultTicketLoader implements TicketLoader {
+
+	    private final Map<TicketType, Ticket> tickets = new ConcurrentHashMap<>();
+	
+	    @Override
+	    public String get(TicketType type) {
+	        Ticket t = tickets.get(type);
+	        return (t == null
+	                || Strings.isNullOrEmpty(t.getTicket())
+	                || System.currentTimeMillis() > t.getExpireAt()) ? null : t.getTicket();
+	    }
+	
+	    @Override
+	    public void refresh(Ticket ticket) {
+	        tickets.put(ticket.getType(), ticket);
 	    }
 	}
 	```
@@ -585,7 +649,13 @@
 	+ 1.1.0:
 		
 		* 实现代码简化，个别类访问权限修改;
-		* 素材API**``MATERIAL ``**实现。
+		* 实现<a href="#material-api">MATERIAL</a>组件。
+
+	+ 1.2.0:
+
+		* 废弃~~``Wechat.newWechat``~~构建方法，替换为``WechatBuilder``方式。
+		* ``*Loader``设置过期时刻。
+		* 实现<a href="#jssdk-api">JSSDK</a>组件。
 
 + 微信相关文档
 
