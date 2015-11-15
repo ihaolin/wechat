@@ -560,13 +560,13 @@
 
 	    /**
 	     * 获取accessToken
-	     * @return accessToken，若""或NULL会重新从微信服务器获取，并进行refresh
+	     * @return accessToken，若""或NULL会重新从微信获取accessToken，并触发refresh方法
 	     */
 	    String get();
 	
 	    /**
 	     * 刷新accessToken，实现时需要保存一段时间，以免频繁从微信服务器获取
-	     * @param token 从微信服务器获取AccessToken
+	     * @param token 从微信获取的新AccessToken
 	     */
 	    void refresh(AccessToken token);
 	}
@@ -602,13 +602,13 @@
 	     * 获取Ticket
 	     * @param type ticket类型
 	     *             @see me.hao0.wechat.model.js.TicketType
-	     * @return 有效的ticket，若返回""或null，则触发重新从微信请求Ticket的方法refresh
+	     * @return 有效的ticket，若返回""或null，则重新从微信请求Ticket，并触发refresh方法
 	     */
 	    String get(TicketType type);
 	
 	    /**
 	     * 刷新Ticket
-	     * @param ticket 最新获取到的Ticket
+	     * @param ticket 从微信获取的新Ticket
 	     */
 	    void refresh(Ticket ticket);
 	}
