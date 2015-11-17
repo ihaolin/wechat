@@ -1,5 +1,6 @@
 package me.hao0.wechat;
 
+import me.hao0.wechat.core.Callback;
 import me.hao0.wechat.core.Wechat;
 import me.hao0.wechat.core.WechatBuilder;
 import me.hao0.wechat.exception.WechatException;
@@ -53,9 +54,9 @@ import static org.junit.Assert.*;
  */
 public class WechatTests {
 
-    private Wechat wechat = WechatBuilder.newBuilder("wxf66ea2204a7a1c58", "5c9d2dc5a3c9209edfa76cb4893956f0").build();
+    private Wechat wechat = WechatBuilder.newBuilder("wxff66ea2204a7ad1c58", "5c9d2dc5a3c9209eadfa76cbx4893956f0").build();
 
-    private String accessToken = "ZklK6NRs488X7-kYbU3x-Nq2trL4DKHn-pzU6mEET7Wap2B74ZJlUnfpj0XWoReATRjJzNLVlm54fKgVefqrQR0yGqpEAQilnt3tVh9kGZQGBPgABABWK";
+    private String accessToken = "MMo1RBVEJNSssyYf49QxlBkGxeA20MTsk5RTS5N-CeXIny1iqqSQYjalr_VXx7-GJdf3W-zLmnB_UVU0Ntio-jhbHRCqpmTas4pxyaK0U-UACCjAEAPRR";
 
     private String testDomain = "xxx";
 
@@ -541,6 +542,24 @@ public class WechatTests {
         Ticket ticket = wechat.JSSDK.getTicket(TicketType.JSAPI);
         assertNotNull(ticket);
         System.out.println(ticket);
+    }
 
+    @Test
+    public void testTicketCallback() throws InterruptedException {
+        wechat.JSSDK.getTicket(accessToken, TicketType.CARD, new Callback<Ticket>() {
+            @Override
+            public void onSuccess(Ticket ticket) {
+                assertNotNull(ticket);
+                System.out.println(ticket);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.err.println(e);
+            }
+        });
+        System.out.println("main");
+
+        Thread.sleep(1000000L);
     }
 }

@@ -70,9 +70,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Author: haolin
@@ -110,6 +112,30 @@ public final class Wechat {
      * Ticket加载器
      */
     TicketLoader ticketLoader = DEFAULT_TICKET_LOADER;
+
+    /**
+     * 异步执行器
+     */
+    ExecutorService executor = DEFAULT_EXECUTOR;
+
+    /**
+     * 微信错误码变量
+     */
+    private final String ERROR_CODE = "errcode";
+
+    private static final AccessTokenLoader DEFAULT_ACCESS_TOKEN_LOADER = new DefaultAccessTokenLoader();
+
+    private static final DefaultTicketLoader DEFAULT_TICKET_LOADER = new DefaultTicketLoader();
+
+    private static final ExecutorService DEFAULT_EXECUTOR = Executors.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors() + 1, new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r);
+                    t.setName("wechat");
+                    return t;
+                }
+            });
 
     /**
      * 基础API
@@ -155,12 +181,6 @@ public final class Wechat {
      * JSSDK API
      */
     public final JsSdks JSSDK = new JsSdks();
-
-    private final String ERROR_CODE = "errcode";
-
-    private static final AccessTokenLoader DEFAULT_ACCESS_TOKEN_LOADER = new DefaultAccessTokenLoader();
-
-    private static final DefaultTicketLoader DEFAULT_TICKET_LOADER = new DefaultTicketLoader();
 
     Wechat(String appId, String appSecret){
         this.appId = appId;
@@ -240,6 +260,21 @@ public final class Wechat {
         /**
          * 获取用户openId
          * @param code 用户授权的code
+         * @param cb 回调
+         * @return 用户的openId，或抛WechatException
+         */
+        public void openId(final String code, final Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return openId(code);
+                }
+            });
+        }
+
+        /**
+         * 获取用户openId
+         * @param code 用户授权的code
          * @return 用户的openId，或抛WechatException
          */
         public String openId(String code){
@@ -252,6 +287,19 @@ public final class Wechat {
             Map<String, Object> resp = doGet(url);
 
             return (String)resp.get("openid");
+        }
+
+        /**
+         * 获取accessToken(应该尽量临时保存一个地方，每隔一段时间来获取)
+         * @param cb 回调
+         */
+        public void accessToken(final Callback<AccessToken> cb){
+            doAsync(new AsyncFunction<AccessToken>(cb) {
+                @Override
+                public AccessToken execute() {
+                    return accessToken();
+                }
+            });
         }
 
         /**
@@ -277,6 +325,29 @@ public final class Wechat {
          */
         public List<String> ip(){
             return ip(loadAccessToken());
+        }
+
+        /**
+         * 获取微信服务器IP列表
+         * @param cb 回调
+         */
+        public void ip(Callback<List<String>> cb){
+            ip(loadAccessToken(), cb);
+        }
+
+        /**
+         * 获取微信服务器IP列表
+         * @param accessToken accessToken
+         *                  @see Wechat.Bases#accessToken()
+         * @param cb 回调
+         */
+        public void ip(final String accessToken, Callback<List<String>> cb){
+            doAsync(new AsyncFunction<List<String>>(cb) {
+                @Override
+                public List<String> execute() {
+                    return ip(accessToken);
+                }
+            });
         }
 
         /**
@@ -361,6 +432,34 @@ public final class Wechat {
 
         /**
          * 添加客服账户
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @param cb 回调
+         */
+        public void createAccount(final String account, final String nickName, final String password, final Callback<Boolean> cb){
+            createAccount(loadAccessToken(), account, nickName, password, cb);
+        }
+
+        /**
+         * 添加客服账户
+         * @param accessToken accessToken
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @param cb 回调
+         */
+        public void createAccount(final String accessToken, final String account, final String nickName, final String password, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return closeSession(accessToken, account, nickName, password);
+                }
+            });
+        }
+
+        /**
+         * 添加客服账户
          * @param accessToken accessToken
          * @param account 登录帐号(包含域名)
          * @param nickName 昵称
@@ -381,6 +480,34 @@ public final class Wechat {
          */
         public Boolean updateAccount(String account, String nickName, String password){
             return updateAccount(loadAccessToken(), account, nickName, password);
+        }
+
+        /**
+         * 更新客服账户
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @param cb 回调
+         */
+        public void updateAccount(final String account, final String nickName, final String password, Callback<Boolean> cb){
+            updateAccount(loadAccessToken(), account, nickName, password, cb);
+        }
+
+        /**
+         * 更新客服账户
+         * @param accessToken accessToken
+         * @param account 登录帐号(包含域名)
+         * @param nickName 昵称
+         * @param password 明文密码
+         * @param cb 回调
+         */
+        public void updateAccount(final String accessToken, final String account, final String nickName, final String password, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return updateAccount(accessToken, account, nickName, password);
+                }
+            });
         }
 
         /**
@@ -410,10 +537,34 @@ public final class Wechat {
         /**
          * 删除客服账户
          * @param kfAccount 客服登录帐号(包含域名)
+         * @param cb 回调
+         */
+        public void deleteAccount(String kfAccount, Callback<Boolean> cb){
+            deleteAccount(loadAccessToken(), kfAccount, cb);
+        }
+
+        /**
+         * 删除客服账户
+         * @param kfAccount 客服登录帐号(包含域名)
          * @return 添加成功返回true，或抛WechatException
          */
         public Boolean deleteAccount(String kfAccount){
             return deleteAccount(loadAccessToken(), kfAccount);
+        }
+
+        /**
+         * 删除客服账户
+         * @param accessToken accessToken
+         * @param kfAccount 客服登录帐号(包含域名)
+         * @param cb 回调
+         */
+        public void deleteAccount(final String accessToken, final String kfAccount, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return deleteAccount(accessToken, kfAccount);
+                }
+            });
         }
 
         /**
@@ -474,6 +625,34 @@ public final class Wechat {
 
         /**
          * 查询客服聊天记录
+         * @param pageNo 页码
+         * @param pageSize 分页大小
+         * @param startTime 起始时间
+         * @param endTime 结束时间
+         */
+        public void getMsgRecords(final Integer pageNo, final Integer pageSize, final Date startTime, final Date endTime, Callback<List<MsgRecord>> cb){
+            getMsgRecords(loadAccessToken(), pageNo, pageSize, startTime, endTime, cb);
+        }
+
+        /**
+         * 查询客服聊天记录
+         * @param accessToken accessToken
+         * @param pageNo 页码
+         * @param pageSize 分页大小
+         * @param startTime 起始时间
+         * @param endTime 结束时间
+         */
+        public void getMsgRecords(final String accessToken, final Integer pageNo, final Integer pageSize, final Date startTime, final Date endTime, Callback<List<MsgRecord>> cb){
+            doAsync(new AsyncFunction<List<MsgRecord>>(cb) {
+                @Override
+                public List<MsgRecord> execute() {
+                    return getMsgRecords(accessToken, pageNo, pageSize, startTime, endTime);
+                }
+            });
+        }
+
+        /**
+         * 查询客服聊天记录
          * @param accessToken accessToken
          * @param pageNo 页码
          * @param pageSize 分页大小
@@ -525,6 +704,33 @@ public final class Wechat {
 
         /**
          * 创建会话(该客服必需在线)
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @param cb 回调
+         */
+        public void createSession(final String openId, final String kfAccount, final String text, Callback<Boolean> cb){
+            createSession(loadAccessToken(), openId, kfAccount, text, cb);
+        }
+
+        /**
+         * 创建会话(该客服必需在线)
+         * @param accessToken accessToken
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @param cb 回调
+         */
+        public void createSession(final String accessToken, final String openId, final String kfAccount, final String text, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return createSession(accessToken, openId, kfAccount, text);
+                }
+            });
+        }
+
+        /**
+         * 创建会话(该客服必需在线)
+         * @param accessToken accessToken
          * @param openId 用户openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
@@ -542,6 +748,34 @@ public final class Wechat {
          */
         public Boolean closeSession(String openId, String kfAccount, String text){
             return closeSession(loadAccessToken(), openId, kfAccount, text);
+        }
+
+        /**
+         * 关闭会话
+         * @param openId 用户openId
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @param cb 回调
+         */
+        public void closeSession(final String openId, final String kfAccount, final String text, Callback<Boolean> cb){
+            closeSession(loadAccessToken(), openId, kfAccount, text, cb);
+        }
+
+        /**
+         * 关闭会话
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param kfAccount 客服帐号(包含域名)
+         * @param text 附加文本
+         * @param cb 回调
+         */
+        public void closeSession(final String accessToken, final String openId, final String kfAccount, final String text, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return closeSession(accessToken, openId, kfAccount, text);
+                }
+            });
         }
 
         /**
@@ -579,6 +813,30 @@ public final class Wechat {
          * 获取用户的会话状态
          * @param accessToken accessToken
          * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUserSession(final String accessToken, final String openId, Callback<UserSession> cb){
+            doAsync(new AsyncFunction<UserSession>(cb) {
+                @Override
+                public UserSession execute() {
+                    return getUserSession(accessToken, openId);
+                }
+            });
+        }
+
+        /**
+         * 获取用户的会话状态
+         * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUserSession(final String openId, Callback<UserSession> cb){
+            getUserSession(loadAccessToken(), openId, cb);
+        }
+
+        /**
+         * 获取用户的会话状态
+         * @param accessToken accessToken
+         * @param openId 用户openId
          * @return 客户的会话状态，或抛WechatException
          */
         public UserSession getUserSession(String accessToken, String openId){
@@ -599,6 +857,31 @@ public final class Wechat {
          */
         public List<CsSession> getCsSessions(String kfAccount){
             return getCsSessions(loadAccessToken(), kfAccount);
+        }
+
+        /**
+         * 获取客服的会话列表
+         * @param kfAccount 客服帐号(包含域名)
+         * @param cb 回调
+         */
+        public void getCsSessions(final String kfAccount, Callback<List<CsSession>> cb){
+            getCsSessions(loadAccessToken(), kfAccount, cb);
+        }
+
+
+        /**
+         * 获取客服的会话列表
+         * @param accessToken accessToken
+         * @param kfAccount 客服帐号(包含域名)
+         * @param cb 回调
+         */
+        public void getCsSessions(final String accessToken, final String kfAccount, Callback<List<CsSession>> cb){
+            doAsync(new AsyncFunction<List<CsSession>>(cb) {
+                @Override
+                public List<CsSession> execute() {
+                    return getCsSessions(accessToken, kfAccount);
+                }
+            });
         }
 
         /**
@@ -637,6 +920,28 @@ public final class Wechat {
          */
         public List<WaitingSession> getWaitingSessions(){
             return getWaitingSessions(loadAccessToken());
+        }
+
+        /**
+         * 获取未接入的会话列表
+         * @param cb 回调
+         */
+        public void getWaitingSessions(Callback<List<WaitingSession>> cb){
+            getWaitingSessions(loadAccessToken(), cb);
+        }
+
+        /**
+         * 获取未接入的会话列表
+         * @param accessToken accessToken
+         * @param cb 回调
+         */
+        public void getWaitingSessions(final String accessToken, Callback<List<WaitingSession>> cb){
+            doAsync(new AsyncFunction<List<WaitingSession>>(cb) {
+                @Override
+                public List<WaitingSession> execute() {
+                    return getWaitingSessions(accessToken);
+                }
+            });
         }
 
         /**
@@ -702,6 +1007,28 @@ public final class Wechat {
 
         /**
          * 查询菜单
+         * @param cb 回调
+         */
+        public void get(Callback<List<Menu>> cb){
+            get(loadAccessToken(), cb);
+        }
+
+        /**
+         * 查询菜单
+         * @param accessToken accessToken
+         * @param cb 回调
+         */
+        public void get(final String accessToken, Callback<List<Menu>> cb){
+            doAsync(new AsyncFunction<List<Menu>>(cb) {
+                @Override
+                public List<Menu> execute() {
+                    return get(accessToken);
+                }
+            });
+        }
+
+        /**
+         * 查询菜单
          * @param accessToken accessToken
          * @return 菜单列表
          */
@@ -729,6 +1056,30 @@ public final class Wechat {
          * 创建菜单
          * @param accessToken 访问token
          * @param jsonMenu 菜单json
+         * @param cb 回调
+         */
+        public void create(final String accessToken, final String jsonMenu, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return create(accessToken, jsonMenu);
+                }
+            });
+        }
+
+        /**
+         * 创建菜单
+         * @param jsonMenu 菜单json
+         * @param cb 回调
+         */
+        public void create(final String jsonMenu, Callback<Boolean> cb){
+            create(loadAccessToken(), jsonMenu, cb);
+        }
+
+        /**
+         * 创建菜单
+         * @param accessToken 访问token
+         * @param jsonMenu 菜单json
          * @return 创建成功返回true，或抛WechatException
          */
         public Boolean create(String accessToken, String jsonMenu){
@@ -748,6 +1099,28 @@ public final class Wechat {
          */
         public Boolean delete(){
             return delete(loadAccessToken());
+        }
+
+        /**
+         * 删除菜单
+         * @param cb 回调
+         */
+        public void delete(Callback<Boolean> cb){
+            delete(loadAccessToken(), cb);
+        }
+
+        /**
+         * 删除菜单
+         * @param accessToken accessToken
+         * @param cb 回调
+         */
+        public void delete(final String accessToken, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return delete(accessToken);
+                }
+            });
         }
 
         /**
@@ -935,6 +1308,30 @@ public final class Wechat {
 
         /**
          * 创建用户分组
+         * @param name 名称
+         * @param cb 回调
+         */
+        public void createGroup(final String name, Callback<Integer> cb){
+            createGroup(loadAccessToken(), name, cb);
+        }
+
+        /**
+         * 创建用户分组
+         * @param accessToken accessToken
+         * @param name 名称
+         * @param cb 回调
+         */
+        public void createGroup(final String accessToken, final String name, Callback<Integer> cb){
+            doAsync(new AsyncFunction<Integer>(cb) {
+                @Override
+                public Integer execute() {
+                    return createGroup(accessToken, name);
+                }
+            });
+        }
+
+        /**
+         * 创建用户分组
          * @param accessToken accessToken
          * @param name 名称
          * @return 分组ID，或抛WechatException
@@ -962,6 +1359,20 @@ public final class Wechat {
         /**
          * 获取所有分组列表
          * @param accessToken accessToken
+         * @param cb 回调
+         */
+        public void getGroup(final String accessToken, Callback<List<Group>> cb){
+            doAsync(new AsyncFunction<List<Group>>(cb) {
+                @Override
+                public List<Group> execute() {
+                    return getGroup(accessToken);
+                }
+            });
+        }
+
+        /**
+         * 获取所有分组列表
+         * @param accessToken accessToken
          * @return 分组列表，或抛WechatException
          */
         public List<Group> getGroup(String accessToken){
@@ -984,6 +1395,30 @@ public final class Wechat {
 
         /**
          * 删除分组
+         * @param id 分组ID
+         * @param cb 回调
+         */
+        public void deleteGroup(final Integer id, Callback<Boolean> cb){
+            deleteGroup(id, cb);
+        }
+
+        /**
+         * 删除分组
+         * @param accessToken accessToken
+         * @param id 分组ID
+         * @param cb 回调
+         */
+        public void deleteGroup(final String accessToken, final Integer id, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return deleteGroup(accessToken, id);
+                }
+            });
+        }
+
+        /**
+         * 删除分组
          * @param accessToken accessToken
          * @param id 分组ID
          * @return 删除成功返回true，或抛WechatException
@@ -996,7 +1431,7 @@ public final class Wechat {
             Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
             params.put("group", g);
 
-            Map<String, Object> resp = doPost(url, params);
+            doPost(url, params);
             return Boolean.TRUE;
         }
 
@@ -1008,6 +1443,32 @@ public final class Wechat {
          */
         public Boolean updateGroup(Integer id, String newName){
             return updateGroup(loadAccessToken(), id, newName);
+        }
+
+        /**
+         * 更新分组名称
+         * @param id 分组ID
+         * @param newName 分组新名称
+         * @param cb 回调
+         */
+        public void updateGroup(final Integer id, final String newName, Callback<Boolean> cb){
+            updateGroup(loadAccessToken(), id, newName, cb);
+        }
+
+        /**
+         * 更新分组名称
+         * @param accessToken accessToken
+         * @param id 分组ID
+         * @param newName 分组新名称
+         * @param cb 回调
+         */
+        public void updateGroup(final String accessToken, final Integer id, final String newName, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return updateGroup(accessToken, id, newName);
+                }
+            });
         }
 
         /**
@@ -1041,6 +1502,30 @@ public final class Wechat {
 
         /**
          * 获取用户所在组
+         * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUserGroup(final String openId, Callback<Integer> cb){
+            getUserGroup(loadAccessToken(), openId, cb);
+        }
+
+        /**
+         * 获取用户所在组
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUserGroup(final String accessToken, final String openId, Callback<Integer> cb){
+            doAsync(new AsyncFunction<Integer>(cb) {
+                @Override
+                public Integer execute() {
+                    return getUserGroup(accessToken, openId);
+                }
+            });
+        }
+
+        /**
+         * 获取用户所在组
          * @param accessToken accessToken
          * @param openId 用户openId
          * @return 组ID，或抛WechatException
@@ -1063,6 +1548,32 @@ public final class Wechat {
          */
         public Boolean mvUserGroup(String openId, Integer groupId){
             return mvUserGroup(loadAccessToken(), openId, groupId);
+        }
+
+        /**
+         * 移动用户所在组
+         * @param openId 用户openId
+         * @param groupId 新组ID
+         * @param cb 回调
+         */
+        public void mvUserGroup(final String openId, final Integer groupId, Callback<Boolean> cb){
+            mvUserGroup(loadAccessToken(), openId, groupId, cb);
+        }
+
+        /**
+         * 移动用户所在组
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param groupId 新组ID
+         * @param cb 回调
+         */
+        public void mvUserGroup(final String accessToken, final String openId, final Integer groupId, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return mvUserGroup(accessToken, openId, groupId);
+                }
+            });
         }
 
         /**
@@ -1094,6 +1605,30 @@ public final class Wechat {
 
         /**
          * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+         * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUser(final String openId, Callback<User> cb){
+            getUser(loadAccessToken(), openId, cb);
+        }
+
+        /**
+         * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param cb 回调
+         */
+        public void getUser(final String accessToken, final String openId, Callback<User> cb){
+            doAsync(new AsyncFunction<User>(cb) {
+                @Override
+                public User execute() {
+                    return getUser(accessToken, openId);
+                }
+            });
+        }
+
+        /**
+         * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
          * @param accessToken accessToken
          * @param openId 用户openId
          * @return 用户信息，或抛WechatException
@@ -1114,6 +1649,32 @@ public final class Wechat {
          */
         public Boolean remarkUser(String openId, String remark){
             return remarkUser(loadAccessToken(), openId, remark);
+        }
+
+        /**
+         * 备注用户
+         * @param openId 用户openId
+         * @param remark 备注
+         * @param cb 回调
+         */
+        public void remarkUser(final String openId, final String remark, Callback<Boolean> cb){
+            remarkUser(loadAccessToken(), openId, remark, cb);
+        }
+
+        /**
+         * 备注用户
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param remark 备注
+         * @param cb 回调
+         */
+        public void remarkUser(final String accessToken, final String openId, final String remark, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return remarkUser(accessToken, openId, remark);
+                }
+            });
         }
 
         /**
@@ -1462,6 +2023,49 @@ public final class Wechat {
 
         /**
          * 向用户发送模版消息
+         * @param openId 用户openId
+         * @param templateId 模版ID
+         * @param fields 字段列表
+         * @param cb 回调
+         */
+        public void sendTemplate(final String openId, final String templateId, final List<TemplateField> fields, Callback<Integer> cb){
+            sendTemplate(loadAccessToken(), openId, templateId, null, fields, cb);
+        }
+
+        /**
+         * 向用户发送模版消息
+         * @param openId 用户openId
+         * @param templateId 模版ID
+         * @param link 点击链接
+         * @param fields 字段列表
+         * @param cb 回调
+         */
+        public void sendTemplate(final String openId, final String templateId,
+                                 final String link, final List<TemplateField> fields, Callback<Integer> cb){
+            sendTemplate(loadAccessToken(), openId, templateId, link, fields, cb);
+        }
+
+        /**
+         * 向用户发送模版消息
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @param templateId 模版ID
+         * @param link 点击链接
+         * @param fields 字段列表
+         * @param cb 回调
+         */
+        public void sendTemplate(final String accessToken, final String openId, final String templateId,
+                                 final String link, final List<TemplateField> fields, Callback<Integer> cb){
+            doAsync(new AsyncFunction<Integer>(cb) {
+                @Override
+                public Integer execute() {
+                    return sendTemplate(accessToken, openId, templateId, link, fields);
+                }
+            });
+        }
+
+        /**
+         * 向用户发送模版消息
          * @param accessToken accessToken
          * @param openId 用户openId
          * @param templateId 模版ID
@@ -1509,6 +2113,36 @@ public final class Wechat {
          */
         public Long send(SendMessage msg){
             return send(loadAccessToken(), msg);
+        }
+
+        /**
+         * 群发消息:
+         *  1. 分组群发:【订阅号与服务号认证后均可用】
+         *  2. 按OpenId列表发: 订阅号不可用，服务号认证后可用
+         *  @see me.hao0.wechat.model.message.send.SendMessageScope
+         * @param msg 消息
+         * @param cb 回调
+         */
+        public void send(final SendMessage msg, Callback<Long> cb){
+            send(loadAccessToken(), msg, cb);
+        }
+
+        /**
+         * 群发消息:
+         *  1. 分组群发:【订阅号与服务号认证后均可用】
+         *  2. 按OpenId列表发: 订阅号不可用，服务号认证后可用
+         *  @see me.hao0.wechat.model.message.send.SendMessageScope
+         * @param accessToken accessToken
+         * @param msg 消息
+         * @param cb 回调
+         */
+        public void send(final String accessToken, final SendMessage msg, Callback<Long> cb){
+           doAsync(new AsyncFunction<Long>(cb) {
+               @Override
+               public Long execute() {
+                   return send(accessToken, msg);
+               }
+           });
         }
 
         /**
@@ -1579,6 +2213,30 @@ public final class Wechat {
 
         /**
          * 发送预览消息
+         * @param msg 预览消息
+         * @param cb 回调
+         */
+        public void previewSend(final SendPreviewMessage msg, Callback<Boolean> cb){
+            previewSend(loadAccessToken(), msg, cb);
+        }
+
+        /**
+         * 发送预览消息
+         * @param accessToken accessToken
+         * @param msg 预览消息
+         * @param cb 回调
+         */
+        public void previewSend(final String accessToken, final SendPreviewMessage msg, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return previewSend(accessToken, msg);
+                }
+            });
+        }
+
+        /**
+         * 发送预览消息
          * @param accessToken accessToken
          * @param msg 预览消息
          * @return 发送成功返回true，或抛WechatException
@@ -1629,6 +2287,38 @@ public final class Wechat {
 
         /**
          * 删除群发消息: 订阅号与服务号认证后均可用:
+         1、只有已经发送成功的消息才能删除
+         2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
+         3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
+         4、如果多次群发发送的是一个图文消息，那么删除其中一次群发，就会删除掉这个图文消息也，导致所有群发都失效
+         * @param id 群发消息ID
+         * @param cb 回调
+         */
+        public void deleteSend(final Long id, Callback<Boolean> cb){
+            deleteSend(loadAccessToken(), id, cb);
+        }
+
+        /**
+         * 删除群发消息: 订阅号与服务号认证后均可用:
+         1、只有已经发送成功的消息才能删除
+         2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
+         3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
+         4、如果多次群发发送的是一个图文消息，那么删除其中一次群发，就会删除掉这个图文消息也，导致所有群发都失效
+         * @param accessToken acessToken
+         * @param id 群发消息ID
+         * @param cb 回调
+         */
+        public void deleteSend(final String accessToken, final Long id, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return deleteSend(accessToken, id);
+                }
+            });
+        }
+
+        /**
+         * 删除群发消息: 订阅号与服务号认证后均可用:
              1、只有已经发送成功的消息才能删除
              2、删除消息是将消息的图文详情页失效，已经收到的用户，还是能在其本地看到消息卡片。
              3、删除群发消息只能删除图文消息和视频消息，其他类型的消息一经发送，无法删除。
@@ -1654,6 +2344,30 @@ public final class Wechat {
          */
         public String getSend(Long id){
             return getSend(loadAccessToken(), id);
+        }
+
+        /**
+         * 检查群发消息状态: 订阅号与服务号认证后均可用
+         * @param id 群发消息ID
+         * @param cb 回调
+         */
+        public void getSend(final Long id, Callback<String> cb){
+            getSend(loadAccessToken(), id, cb);
+        }
+
+        /**
+         * 检查群发消息状态: 订阅号与服务号认证后均可用
+         * @param accessToken acessToken
+         * @param id 群发消息ID
+         * @param cb 回调
+         */
+        public void getSend(final String accessToken, final Long id, Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return getSend(accessToken, id);
+                }
+            });
         }
 
         /**
@@ -1707,6 +2421,32 @@ public final class Wechat {
 
         /**
          * 获取临时二维码
+         * @param sceneId 业务场景ID，32位非0整型
+         * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
+         * @param cb 回调
+         */
+        public void getTempQrcode(final String sceneId, final Integer expire, Callback<String> cb){
+            getTempQrcode(loadAccessToken(), sceneId, expire, cb);
+        }
+
+        /**
+         * 获取临时二维码
+         * @param accessToken accessToken
+         * @param sceneId 业务场景ID，32位非0整型
+         * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
+         * @param cb 回调
+         */
+        public void getTempQrcode(final String accessToken, final String sceneId, final Integer expire, Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return getTempQrcode(accessToken, sceneId, expire);
+                }
+            });
+        }
+
+        /**
+         * 获取临时二维码
          * @param accessToken accessToken
          * @param sceneId 业务场景ID，32位非0整型
          * @param expire 该二维码有效时间，以秒为单位。 最大不超过604800（即7天）
@@ -1730,6 +2470,30 @@ public final class Wechat {
          */
         public String getPermQrcode(String sceneId){
             return getPermQrcode(loadAccessToken(), sceneId);
+        }
+
+        /**
+         * 获取永久二维码
+         * @param sceneId 业务场景ID，最大值为100000（目前参数只支持1--100000）
+         * @param cb 回调
+         */
+        public void getPermQrcode(final String sceneId, Callback<String> cb){
+            getPermQrcode(loadAccessToken(), sceneId, cb);
+        }
+
+        /**
+         * 获取永久二维码
+         * @param accessToken accessToken
+         * @param sceneId 业务场景ID，最大值为100000（目前参数只支持1--100000）
+         * @param cb 回调
+         */
+        public void getPermQrcode(final String accessToken, final String sceneId, Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return getPermQrcode(accessToken, sceneId);
+                }
+            });
         }
 
         /**
@@ -1783,6 +2547,30 @@ public final class Wechat {
          */
         public String shortUrl(String longUrl){
             return shortUrl(loadAccessToken(), longUrl);
+        }
+
+        /**
+         * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率
+         * @param longUrl 长链接
+         * @param cb 回调
+         */
+        public void shortUrl(final String longUrl, Callback<String> cb){
+            shortUrl(longUrl, longUrl, cb);
+        }
+
+        /**
+         * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率
+         * @param accessToken accessToken
+         * @param longUrl 长链接
+         * @param cb 回调
+         */
+        public void shortUrl(final String accessToken, final String longUrl, Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return shortUrl(accessToken, longUrl);
+                }
+            });
         }
 
         /**
@@ -1865,6 +2653,28 @@ public final class Wechat {
 
         /**
          * 获取素材总数统计
+         * @param cb 回调
+         */
+        public void count(Callback<MaterialCount> cb){
+            count(loadAccessToken(), cb);
+        }
+
+        /**
+         * 获取素材总数统计
+         * @param accessToken accessToken
+         * @param cb 回调
+         */
+        public void count(final String accessToken, Callback<MaterialCount> cb){
+            doAsync(new AsyncFunction<MaterialCount>(cb) {
+                @Override
+                public MaterialCount execute() {
+                    return count(accessToken);
+                }
+            });
+        }
+
+        /**
+         * 获取素材总数统计
          * @param accessToken accessToken
          * @return 素材总数统计，或抛WechatException
          */
@@ -1886,6 +2696,36 @@ public final class Wechat {
          */
         public <T> Page<T> gets(MaterialType type, Integer offset, Integer count){
             return gets(loadAccessToken(), type, offset, count);
+        }
+
+        /**
+         * 获取素材列表
+         * @param type 素材类型
+         * @param offset 从全部素材的该偏移位置开始返回，0表示从第一个素材返回
+         * @param count 返回素材的数量，取值在1到20之间
+         * @param <T> Material范型
+         * @param cb 回调
+         */
+        public <T> void gets(final MaterialType type, final Integer offset, final Integer count, Callback<Page<T>> cb){
+            gets(loadAccessToken(), type, offset, count, cb);
+        }
+
+        /**
+         * 获取素材列表
+         * @param accessToken accessToken
+         * @param type 素材类型
+         * @param offset 从全部素材的该偏移位置开始返回，0表示从第一个素材返回
+         * @param count 返回素材的数量，取值在1到20之间
+         * @param <T> Material范型
+         * @param cb 回调
+         */
+        public <T> void gets(final String accessToken, final MaterialType type, final Integer offset, final Integer count, Callback<Page<T>> cb){
+            doAsync(new AsyncFunction<Page<T>>(cb) {
+                @Override
+                public Page<T> execute() {
+                    return gets(accessToken, type, offset, count);
+                }
+            });
         }
 
         /**
@@ -1932,6 +2772,30 @@ public final class Wechat {
          */
         public Boolean delete(String mediaId){
             return delete(loadAccessToken(), mediaId);
+        }
+
+        /**
+         * 删除永久素材
+         * @param mediaId 永久素材mediaId
+         * @param cb 回调
+         */
+        public void delete(final String mediaId, Callback<Boolean> cb){
+            delete(loadAccessToken(), mediaId, cb);
+        }
+
+        /**
+         * 删除永久素材
+         * @param accessToken accessToken
+         * @param mediaId 永久素材mediaId
+         * @param cb 回调
+         */
+        public void delete(final String accessToken, final String mediaId, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return delete(accessToken, mediaId);
+                }
+            });
         }
 
         /**
@@ -2026,11 +2890,86 @@ public final class Wechat {
              缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
              媒体文件在后台保存时间为3天，即3天后media_id失效。
          * @param type 文件类型
+         * @param media 媒体文件输入流
+         * @param cb 回调
+         */
+        public void uploadTemp( MaterialUploadType type, File media, Callback<TempMaterial> cb) {
+            try {
+                uploadTemp(loadAccessToken(), type, media.getName(), new FileInputStream(media), cb);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param media 媒体文件输入流
+         * @param cb 回调
+         */
+        public void uploadTemp(String accessToken, MaterialUploadType type, File media, Callback<TempMaterial> cb) {
+            try {
+                uploadTemp(accessToken, type, media.getName(), new FileInputStream(media), cb);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param type 文件类型
          * @param input 输入流
          * @return TempMaterial对象，或抛WechatException
          */
         public TempMaterial uploadTemp(MaterialUploadType type, String fileName, InputStream input) {
             return uploadTemp(loadAccessToken(), type, fileName, input);
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param type 文件类型
+         * @param input 输入流
+         * @param cb 回调
+         */
+        public void uploadTemp(final MaterialUploadType type, final String fileName, final InputStream input, Callback<TempMaterial> cb) {
+            uploadTemp(loadAccessToken(), type, fileName, input, cb);
+        }
+
+        /**
+         * 上传临时素材:
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             视频（video）：10MB，支持MP4格式
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+             媒体文件在后台保存时间为3天，即3天后media_id失效。
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param input 输入流
+         * @param cb 回调
+         */
+        public void uploadTemp(final String accessToken, final MaterialUploadType type, final String fileName, final InputStream input, Callback<TempMaterial> cb) {
+            doAsync(new AsyncFunction<TempMaterial>(cb) {
+                @Override
+                public TempMaterial execute() {
+                    return uploadTemp(accessToken, type, fileName, input);
+                }
+            });
         }
 
         /**
@@ -2066,6 +3005,30 @@ public final class Wechat {
 
         /**
          * 下载临时素材
+         * @param mediaId mediaId
+         * @param cb 回调
+         */
+        public void downloadTemp(final String mediaId, Callback<byte[]> cb){
+            downloadTemp(loadAccessToken(), mediaId, cb);
+        }
+
+        /**
+         * 下载临时素材
+         * @param accessToken accessToken
+         * @param mediaId mediaId
+         * @param cb 回调
+         */
+        public void downloadTemp(final String accessToken, final String mediaId, Callback<byte[]> cb){
+            doAsync(new AsyncFunction<byte[]>(cb) {
+                @Override
+                public byte[] execute() {
+                    return downloadTemp(accessToken, mediaId);
+                }
+            });
+        }
+
+        /**
+         * 下载临时素材
          * @param accessToken accessToken
          * @param mediaId mediaId
          * @return 文件二进制数据
@@ -2090,6 +3053,30 @@ public final class Wechat {
 
         /**
          * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param items 图文素材列表
+         * @param cb 回调
+         */
+        public void uploadPermNews(final List<NewsContentItem> items, Callback<String> cb){
+            uploadPermNews(loadAccessToken(), items, cb);
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param items 图文素材列表
+         * @param cb 回调
+         */
+        public void uploadPermNews(final String accessToken, final List<NewsContentItem> items, Callback<String> cb){
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() {
+                    return uploadPermNews(accessToken, items);
+                }
+            });
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
          * @param accessToken accessToken
          * @param items 图文素材列表
          * @return mediaId
@@ -2100,6 +3087,34 @@ public final class Wechat {
             params.put("articles", items);
             Map<String, Object> resp = doPost(url, params);
             return (String)resp.get("media_id");
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param mediaId 图文mediaId
+         * @param itemIndex 对应图文素材中的第几个图文项，从0开始
+         * @param newItem 新的图文项
+         * @param cb 回调
+         */
+        public void updatePermNews(final String mediaId, final Integer itemIndex, final NewsContentItem newItem, Callback<Boolean> cb){
+            updatePermNews(loadAccessToken(), mediaId, itemIndex, newItem, cb);
+        }
+
+        /**
+         * 添加永久图文素材(其中内容中的外部图片链接会被过滤，所以需先用uploadPermNewsImage转换为微信内部图片)
+         * @param accessToken accessToken
+         * @param mediaId 图文mediaId
+         * @param itemIndex 对应图文素材中的第几个图文项，从0开始
+         * @param newItem 新的图文项
+         * @param cb 回调
+         */
+        public void updatePermNews(final String accessToken, final String mediaId, final Integer itemIndex, final NewsContentItem newItem, Callback<Boolean> cb){
+            doAsync(new AsyncFunction<Boolean>(cb) {
+                @Override
+                public Boolean execute() {
+                    return updatePermNews(accessToken, mediaId, itemIndex, newItem);
+                }
+            });
         }
 
         /**
@@ -2128,11 +3143,35 @@ public final class Wechat {
          * @param image 图片对象
          * @return 微信内部图片链接
          */
-        public String uploadPermNewsImage(String accessToken, File image) throws FileNotFoundException {
-            String url = UPLOAD_NEWS_IMAGE + accessToken;
-            Map<String, Object> resp = doUpload(url, "media", image.getName(),
-                    new FileInputStream(image), Collections.<String, String>emptyMap());
-            return (String)resp.get("url");
+        public String uploadPermNewsImage(String accessToken, File image) {
+            try {
+                return uploadPermNewsImage(accessToken, image.getName(), new FileInputStream(image));
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param image 图片对象
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(File image, Callback<String> cb) {
+            uploadPermNewsImage(loadAccessToken(), image, cb);
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param image 图片对象
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(String accessToken, File image, Callback<String> cb) {
+            try {
+                uploadPermNewsImage(accessToken, image.getName(), new FileInputStream(image), cb);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
         }
 
         /**
@@ -2142,8 +3181,55 @@ public final class Wechat {
          * @param data 文件二机制数据
          * @return 微信内部图片链接
          */
-        public String uploadPermNewsImage(String accessToken, String fileName, byte[] data) throws FileNotFoundException {
+        public String uploadPermNewsImage(String accessToken, String fileName, byte[] data) {
             return uploadPermNewsImage(accessToken, fileName, new ByteArrayInputStream(data));
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param fileName 文件名
+         * @param data 文件二机制数据
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(String fileName, byte[] data, Callback<String> cb) {
+            uploadPermNewsImage(loadAccessToken(), fileName, new ByteArrayInputStream(data), cb);
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param data 文件二机制数据
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(String accessToken, String fileName, byte[] data, Callback<String> cb) {
+            uploadPermNewsImage(accessToken, fileName, new ByteArrayInputStream(data), cb);
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param fileName 文件名
+         * @param in 文件输入流
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(final String fileName, final InputStream in, Callback<String> cb){
+            uploadPermNewsImage(loadAccessToken(), fileName, in, cb);
+        }
+
+        /**
+         * 上传永久图文素材内容中引用的图片
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param in 文件输入流
+         * @param cb 回调
+         */
+        public void uploadPermNewsImage(final String accessToken, final String fileName, final InputStream in, Callback<String> cb) {
+            doAsync(new AsyncFunction<String>(cb) {
+                @Override
+                public String execute() throws FileNotFoundException {
+                    return uploadPermNewsImage(accessToken, fileName, in);
+                }
+            });
         }
 
         /**
@@ -2153,7 +3239,7 @@ public final class Wechat {
          * @param in 文件输入流
          * @return 微信内部图片链接
          */
-        public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) throws FileNotFoundException {
+        public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) {
             String url = UPLOAD_NEWS_IMAGE + accessToken;
             Map<String, Object> resp = doUpload(url, "media", fileName, in, Collections.<String, String>emptyMap());
             return (String)resp.get("url");
@@ -2176,6 +3262,135 @@ public final class Wechat {
             } catch (FileNotFoundException e) {
                 throw new WechatException(e);
             }
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param data 文件二进制数据
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPerm(String accessToken, MaterialUploadType type, String fileName, byte[] data) {
+            return uploadPerm(accessToken, type, fileName, new ByteArrayInputStream(data));
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param data 文件二进制数据
+         * @param cb 回调
+         */
+        public void uploadPerm(String accessToken, MaterialUploadType type, String fileName, byte[] data, Callback<PermMaterial> cb) {
+             uploadPerm(accessToken, type, fileName, new ByteArrayInputStream(data), cb);
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+         永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+         图片（image）: 1M，bmp/png/jpeg/jpg/gif
+         语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+         缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param data 文件二进制数据
+         * @param cb 回调
+         */
+        public void uploadPerm(MaterialUploadType type, String fileName, byte[] data, Callback<PermMaterial> cb) {
+            uploadPerm(loadAccessToken(), type, fileName, new ByteArrayInputStream(data), cb);
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+         永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+         图片（image）: 1M，bmp/png/jpeg/jpg/gif
+         语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+         缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param type 文件类型
+         * @param fileName 文件名
+         * @param data 文件二进制数据
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPerm( MaterialUploadType type, String fileName, byte[] data) {
+            return uploadPerm(loadAccessToken(), type, fileName, new ByteArrayInputStream(data));
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param type 文件类型
+         * @param file 输入流
+         * @param cb 回调
+         */
+        public void uploadPerm(final MaterialUploadType type, final File file, Callback<PermMaterial> cb) {
+            uploadPerm(loadAccessToken(), type, file, cb);
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param file 输入流
+         * @param cb 回调
+         */
+        public void uploadPerm(String accessToken, final MaterialUploadType type, final File file, Callback<PermMaterial> cb) {
+            try {
+                uploadPerm(accessToken, type, file.getName(), new FileInputStream(file), cb);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param type 文件类型
+         * @param input 输入流
+         * @param cb 回调
+         */
+        public void uploadPerm(final MaterialUploadType type, final String fileName, final InputStream input, Callback<PermMaterial> cb) {
+            uploadPerm(loadAccessToken(), type, fileName, input, cb);
+        }
+
+        /**
+         * 上传永久(图片，语音，缩略图)素材
+             永久素材的数量是有上限的，请谨慎新增。图文消息素材和图片素材的上限为5000，其他类型为1000
+             图片（image）: 1M，bmp/png/jpeg/jpg/gif
+             语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
+             缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
+         * @param accessToken accessToken
+         * @param type 文件类型
+         * @param input 输入流
+         * @param cb 回调
+         */
+        public void uploadPerm(final String accessToken, final MaterialUploadType type, final String fileName, final InputStream input, Callback<PermMaterial> cb) {
+            doAsync(new AsyncFunction<PermMaterial>(cb) {
+                @Override
+                public PermMaterial execute() throws Exception {
+                    return uploadPerm(accessToken, type, fileName, input);
+                }
+            });
         }
 
         /**
@@ -2212,6 +3427,124 @@ public final class Wechat {
          */
         public PermMaterial uploadPermVideo(String accessToken, File video, String title, String desc) throws FileNotFoundException {
             return uploadPermVideo(accessToken, video.getName(), new FileInputStream(video), title, desc);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param video 视频文件
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPermVideo(File video, String title, String desc) throws FileNotFoundException {
+            return uploadPermVideo(loadAccessToken(), video.getName(), new FileInputStream(video), title, desc);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param data 二进制数据
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPermVideo(String accessToken, String fileName, byte[] data, String title, String desc) throws FileNotFoundException {
+            return uploadPermVideo(accessToken, fileName, new ByteArrayInputStream(data), title, desc);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param fileName 文件名
+         * @param data 二进制数据
+         * @param title 标题
+         * @param desc 描述
+         * @return PermMaterial对象，或抛WechatException
+         */
+        public PermMaterial uploadPermVideo(String fileName, byte[] data, String title, String desc) throws FileNotFoundException {
+            return uploadPermVideo(loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param data 二进制数据
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(String accessToken, String fileName, byte[] data, final String title, final String desc, Callback<PermMaterial> cb) {
+            uploadPermVideo(accessToken, fileName, new ByteArrayInputStream(data), title, desc, cb);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param fileName 文件名
+         * @param data 二进制数据
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(String fileName, byte[] data, final String title, final String desc, Callback<PermMaterial> cb) {
+            uploadPermVideo(loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc, cb);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param video 文件
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(final File video, final String title, final String desc, Callback<PermMaterial> cb) {
+            uploadPermVideo(loadAccessToken(), video, title, desc, cb);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param video 文件
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(final String accessToken, final File video, final String title, final String desc, Callback<PermMaterial> cb) {
+            try {
+                uploadPermVideo(accessToken, video.getName(), new FileInputStream(video), title, desc, cb);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param fileName 文件名
+         * @param input 输入流
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(final String fileName, final InputStream input, final String title, final String desc, Callback<PermMaterial> cb) {
+            uploadPermVideo(loadAccessToken(), fileName, input, title, desc, cb);
+        }
+
+        /**
+         * 上传永久视频素材(10M大小)
+         * @param accessToken accessToken
+         * @param fileName 文件名
+         * @param input 输入流
+         * @param title 标题
+         * @param desc 描述
+         * @param cb 回调
+         */
+        public void uploadPermVideo(final String accessToken, final String fileName, final InputStream input, final String title, final String desc, Callback<PermMaterial> cb) {
+            doAsync(new AsyncFunction<PermMaterial>(cb) {
+                @Override
+                public PermMaterial execute() throws Exception {
+                    return uploadPermVideo(accessToken, fileName, input, title, desc);
+                }
+            });
         }
 
         /**
@@ -2265,10 +3598,36 @@ public final class Wechat {
          * 获取临时凭证
          * @param type 凭证类型
          *             @see me.hao0.wechat.model.js.TicketType
+         * @param cb 回调
+         */
+        public void getTicket(final TicketType type, final Callback<Ticket> cb){
+            getTicket(loadAccessToken(), type, cb);
+        }
+
+        /**
+         * 获取临时凭证
+         * @param type 凭证类型
+         *             @see me.hao0.wechat.model.js.TicketType
          * @return Ticket对象，或抛WechatException
          */
         public Ticket getTicket(TicketType type){
             return getTicket(loadAccessToken(), type);
+        }
+
+        /**
+         * 获取临时凭证
+         * @param accessToken accessToken
+         * @param type 凭证类型
+         *             @see me.hao0.wechat.model.js.TicketType
+         * @param cb 回调
+         */
+        public void getTicket(final String accessToken, final TicketType type, final Callback<Ticket> cb){
+            doAsync(new AsyncFunction<Ticket>(cb) {
+                @Override
+                public Ticket execute() {
+                    return getTicket(accessToken, type);
+                }
+            });
         }
 
         /**
@@ -2341,6 +3700,15 @@ public final class Wechat {
         }
     }
 
+    /**
+     * 关闭异步执行器(不再支持异步执行)
+     */
+    public void stop(){
+        if (executor.isShutdown()){
+            executor.shutdown();
+        }
+    }
+
     private String loadAccessToken(){
         String accessToken = tokenLoader.get();
         if (Strings.isNullOrEmpty(accessToken)){
@@ -2364,7 +3732,7 @@ public final class Wechat {
     private Map<String, Object> doPost(String url, Map<String, Object> params) {
         Http http = Http.post(url);
         if (params != null && params.size() > 0){
-            http.body(Jsons.EXCLUDE_EMPTY.toJson(params));
+            http.body(Jsons.DEFAULT.toJson(params));
         }
         Map<String, Object> resp = http.request(Types.MAP_STRING_OBJ_TYPE);
         Integer errcode = (Integer)resp.get(ERROR_CODE);
@@ -2399,6 +3767,55 @@ public final class Wechat {
             throw new WechatException(resp);
         }
         return resp;
+    }
+
+    private <T> void doAsync(final AsyncFunction<T> f){
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    T res = f.execute();
+                    f.cb.onSuccess(res);
+                } catch (Exception e){
+                    f.cb.onFailure(e);
+                }
+            }
+        });
+    }
+
+    private void doAsync(final VoidAsyncFunction f){
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    f.execute();
+                } catch (Exception e){
+                    f.cb.onFailure(e);
+                }
+            }
+        });
+    }
+
+    private static abstract class AsyncFunction<T> {
+
+        private Callback<T> cb;
+
+        AsyncFunction(Callback<T> cb){
+            this.cb = cb;
+        }
+
+        public abstract T execute() throws Exception;
+    }
+
+    private static abstract class VoidAsyncFunction {
+
+        private VoidCallback cb;
+
+        VoidAsyncFunction(VoidCallback cb){
+            this.cb = cb;
+        }
+
+        public abstract void execute();
     }
 
     public static final class Types {

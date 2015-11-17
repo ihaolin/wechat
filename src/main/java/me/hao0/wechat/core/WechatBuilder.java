@@ -1,5 +1,7 @@
 package me.hao0.wechat.core;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * Author: haolin
  * Email: haolin.h0@gmail.com
@@ -58,6 +60,16 @@ public final class WechatBuilder {
      */
     public WechatBuilder ticketLoader(TicketLoader ticketLoader){
         wechat.ticketLoader = ticketLoader;
+        return this;
+    }
+
+    /**
+     * 设置ExecutorService，用于异步调用
+     * @param executor 异步执行器
+     * @return this
+     */
+    public WechatBuilder executor(ExecutorService executor){
+        wechat.executor = executor;
         return this;
     }
 

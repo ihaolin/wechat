@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.0</version>
     </dependency>
 	```
 	
@@ -26,6 +26,7 @@
         <artifactId>jackson-databind</artifactId>
         <version>2.4.2</version>
     </dependency>
+    <!-- 1.3.0之后引入 -->
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -33,7 +34,11 @@
     </dependency>
 	```
 
-+ 基本用法:
++ 业务系统与微信公众号交互图阐述:
+
+	![](flow.png)
+
++ API基本用法:
 
 	```java
 	Wechat wechat = 
@@ -41,10 +46,14 @@
 						.conf1()  // 其他可选配置
 						...
 						.build();
-	wechat.{component}.{api};
+	// 同步调用
+	wechat.COMPONENT.api(args);
+	
+	// 异步调用
+	wechat.COMPONENT.api(args, Callback<T>);
 	```	
 
-+ ``Wechat``中包含几个组件:
++ Wechat中包含以下组件:
 
 	+ <a href="#base-api">基础</a>: ```BASE```
 	+ <a href="#user-api">用户</a>: ```USER```
@@ -54,7 +63,7 @@
 	+ <a href="#qr-api">二维码</a>: ```QRCODE```
 	+ <a href="#material-api">素材</a>: ```MATERIAL```
 	+ <a href="#jssdk-api">JS调用相关</a>: ```JSSDK```
-	+ <a href="#data-api">数据统计</a>(待码): ```DATA```
+	+ <a href="#data-api">数据统计</a>(TODO): ```DATA```
 
 + API介绍:
 	
@@ -665,7 +674,7 @@
 	+ 1.3.0:
 		
 		+ 引入[guava](https://github.com/google/guava)。
-		+ API异步化。
+		+ API支持异步调用。
 		
 + 微信相关文档
 
