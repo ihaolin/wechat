@@ -234,9 +234,8 @@ public final class Wechat {
          * 构建授权跳转URL(静默授权，仅获取用户openId，不包括个人信息)
          * @param redirectUrl 授权后的跳转URL(我方服务器URL)
          * @return 微信授权跳转URL
-         * @throws java.io.UnsupportedEncodingException
          */
-        public String authUrl(String redirectUrl) throws UnsupportedEncodingException {
+        public String authUrl(String redirectUrl) {
             return authUrl(redirectUrl, Boolean.TRUE);
         }
 
@@ -245,23 +244,25 @@ public final class Wechat {
          * @param redirectUrl 授权后的跳转URL(我方服务器URL)
          * @param quiet 是否静默: true: 仅获取openId，false: 获取openId和个人信息(需用户手动确认)
          * @return 微信授权跳转URL
-         * @throws UnsupportedEncodingException
          */
-        public String authUrl(String redirectUrl, Boolean quiet) throws UnsupportedEncodingException {
-            redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
-            return AUTH_URL +
-                    "appid=" + appId +
-                    "&redirect_uri=" + redirectUrl +
-                    "&response_type=code&scope=" +
-                    (quiet ? AuthType.BASE.scope() : AuthType.USER_INFO.scope())
-                    + "&state=1#wechat_redirect";
+        public String authUrl(String redirectUrl, Boolean quiet) {
+            try {
+                redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
+                return AUTH_URL +
+                        "appid=" + appId +
+                        "&redirect_uri=" + redirectUrl +
+                        "&response_type=code&scope=" +
+                        (quiet ? AuthType.BASE.scope() : AuthType.USER_INFO.scope())
+                        + "&state=1#wechat_redirect";
+            } catch (UnsupportedEncodingException e) {
+                throw new WechatException(e);
+            }
         }
 
         /**
          * 获取用户openId
          * @param code 用户授权的code
          * @param cb 回调
-         * @return 用户的openId，或抛WechatException
          */
         public void openId(final String code, final Callback<String> cb){
             doAsync(new AsyncFunction<String>(cb) {
@@ -629,6 +630,7 @@ public final class Wechat {
          * @param pageSize 分页大小
          * @param startTime 起始时间
          * @param endTime 结束时间
+         * @param cb 回调
          */
         public void getMsgRecords(final Integer pageNo, final Integer pageSize, final Date startTime, final Date endTime, Callback<List<MsgRecord>> cb){
             getMsgRecords(loadAccessToken(), pageNo, pageSize, startTime, endTime, cb);
@@ -641,6 +643,7 @@ public final class Wechat {
          * @param pageSize 分页大小
          * @param startTime 起始时间
          * @param endTime 结束时间
+         * @param cb 回调
          */
         public void getMsgRecords(final String accessToken, final Integer pageNo, final Integer pageSize, final Date startTime, final Date endTime, Callback<List<MsgRecord>> cb){
             doAsync(new AsyncFunction<List<MsgRecord>>(cb) {
@@ -694,6 +697,7 @@ public final class Wechat {
 
         /**
          * 创建会话(该客服必需在线)
+         * @param openId openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
          * @return 创建成功返回true，或抛WechatException
@@ -704,6 +708,7 @@ public final class Wechat {
 
         /**
          * 创建会话(该客服必需在线)
+         * @param openId openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
          * @param cb 回调
@@ -715,6 +720,7 @@ public final class Wechat {
         /**
          * 创建会话(该客服必需在线)
          * @param accessToken accessToken
+         * @param openId openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
          * @param cb 回调
@@ -742,6 +748,7 @@ public final class Wechat {
 
         /**
          * 关闭会话
+         * @param openId openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
          * @return 关闭成功返回true，或抛WechatException
@@ -780,6 +787,7 @@ public final class Wechat {
 
         /**
          * 关闭会话
+         * @param accessToken accessToken
          * @param openId 用户openId
          * @param kfAccount 客服帐号(包含域名)
          * @param text 附加文本
@@ -1154,6 +1162,7 @@ public final class Wechat {
         /**
          * 创建一个一级菜单
          * @param m 菜单对象
+         * @return this
          */
         public MenuBuilder menu(Menu m){
             menus.add(m);
@@ -1164,6 +1173,7 @@ public final class Wechat {
          * 创建一个CLICK一级菜单
          * @param name 名称
          * @param key 键
+         * @return this
          */
         public MenuBuilder click(String name, String key){
             Menu m = newClickMenu(name, key);
@@ -1176,6 +1186,7 @@ public final class Wechat {
          * @param parent 父级菜单
          * @param name 名称
          * @param key 键
+         * @return this
          */
         public MenuBuilder click(Menu parent, String name, String key){
             Menu m = newClickMenu(name, key);
@@ -1187,6 +1198,7 @@ public final class Wechat {
          * 创建一个VIEW一级菜单
          * @param name 名称
          * @param url 链接
+         * @return this
          */
         public MenuBuilder view(String name, String url){
             Menu m = newViewMenu(name, url);
@@ -1199,6 +1211,7 @@ public final class Wechat {
          * @param parent 父级菜单
          * @param name 名称
          * @param url 链接
+         * @return this
          */
         public MenuBuilder view(Menu parent, String name, String url){
             Menu m = newViewMenu(name, url);
@@ -1210,6 +1223,7 @@ public final class Wechat {
          * 创建一个VIEW菜单
          * @param name 名称
          * @param url 链接
+         * @return Menu对象
          */
         public Menu newViewMenu(String name, String url) {
             Menu m = new Menu();
@@ -1223,6 +1237,7 @@ public final class Wechat {
          * 创建一个CLICK菜单
          * @param name 名称
          * @param key 键
+         * @return Menu对象
          */
         public Menu newClickMenu(String name, String key) {
             Menu m = new Menu();
@@ -1235,6 +1250,7 @@ public final class Wechat {
         /**
          * 创建一个一级菜单
          * @param name 名称
+         * @return Menu对象
          */
         public Menu newParentMenu(String name) {
             Menu m = new Menu();
@@ -1244,6 +1260,7 @@ public final class Wechat {
 
         /**
          * 返回菜单的json数据
+         * @return 菜单json数据
          */
         public String build(){
             return Jsons.EXCLUDE_EMPTY.toJson(this);
@@ -1399,7 +1416,7 @@ public final class Wechat {
          * @param cb 回调
          */
         public void deleteGroup(final Integer id, Callback<Boolean> cb){
-            deleteGroup(id, cb);
+            deleteGroup(loadAccessToken(), id, cb);
         }
 
         /**
@@ -2929,6 +2946,7 @@ public final class Wechat {
              缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
              媒体文件在后台保存时间为3天，即3天后media_id失效。
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @return TempMaterial对象，或抛WechatException
          */
@@ -2944,6 +2962,7 @@ public final class Wechat {
              缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
              媒体文件在后台保存时间为3天，即3天后media_id失效。
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @param cb 回调
          */
@@ -2960,6 +2979,7 @@ public final class Wechat {
              媒体文件在后台保存时间为3天，即3天后media_id失效。
          * @param accessToken accessToken
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @param cb 回调
          */
@@ -2981,6 +3001,7 @@ public final class Wechat {
              媒体文件在后台保存时间为3天，即3天后media_id失效。
          * @param accessToken accessToken
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @return TempMaterial对象，或抛WechatException
          */
@@ -3366,6 +3387,7 @@ public final class Wechat {
              语音（voice）：2M，播放长度不超过60s，mp3/wma/wav/amr
              缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @param cb 回调
          */
@@ -3381,6 +3403,7 @@ public final class Wechat {
              缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
          * @param accessToken accessToken
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @param cb 回调
          */
@@ -3401,6 +3424,7 @@ public final class Wechat {
                  缩略图（thumb）：64KB，bmp/png/jpeg/jpg/gif
          * @param accessToken accessToken
          * @param type 文件类型
+         * @param fileName 文件名
          * @param input 输入流
          * @return PermMaterial对象，或抛WechatException
          */
@@ -3425,8 +3449,12 @@ public final class Wechat {
          * @param desc 描述
          * @return PermMaterial对象，或抛WechatException
          */
-        public PermMaterial uploadPermVideo(String accessToken, File video, String title, String desc) throws FileNotFoundException {
-            return uploadPermVideo(accessToken, video.getName(), new FileInputStream(video), title, desc);
+        public PermMaterial uploadPermVideo(String accessToken, File video, String title, String desc) {
+            try {
+                return uploadPermVideo(accessToken, video.getName(), new FileInputStream(video), title, desc);
+            } catch (FileNotFoundException e) {
+                throw new WechatException(e);
+            }
         }
 
         /**
@@ -3436,8 +3464,8 @@ public final class Wechat {
          * @param desc 描述
          * @return PermMaterial对象，或抛WechatException
          */
-        public PermMaterial uploadPermVideo(File video, String title, String desc) throws FileNotFoundException {
-            return uploadPermVideo(loadAccessToken(), video.getName(), new FileInputStream(video), title, desc);
+        public PermMaterial uploadPermVideo(File video, String title, String desc) {
+            return uploadPermVideo(loadAccessToken(), video, title, desc);
         }
 
         /**
@@ -3449,7 +3477,7 @@ public final class Wechat {
          * @param desc 描述
          * @return PermMaterial对象，或抛WechatException
          */
-        public PermMaterial uploadPermVideo(String accessToken, String fileName, byte[] data, String title, String desc) throws FileNotFoundException {
+        public PermMaterial uploadPermVideo(String accessToken, String fileName, byte[] data, String title, String desc) {
             return uploadPermVideo(accessToken, fileName, new ByteArrayInputStream(data), title, desc);
         }
 
@@ -3461,7 +3489,7 @@ public final class Wechat {
          * @param desc 描述
          * @return PermMaterial对象，或抛WechatException
          */
-        public PermMaterial uploadPermVideo(String fileName, byte[] data, String title, String desc) throws FileNotFoundException {
+        public PermMaterial uploadPermVideo(String fileName, byte[] data, String title, String desc) {
             return uploadPermVideo(loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc);
         }
 

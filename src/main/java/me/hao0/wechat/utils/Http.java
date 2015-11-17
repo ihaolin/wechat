@@ -217,6 +217,8 @@ public class Http {
      * upload file
      * @param url url
      * @param fieldName field name
+     * @param fileName file name
+     * @param data file byte data
      * @param params other params
      * @return string response
      */
@@ -228,6 +230,7 @@ public class Http {
      * upload file
      * @param url url
      * @param fieldName field name
+     * @param fileName file name
      * @param in InputStream
      * @param params other params
      * @return string response
