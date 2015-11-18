@@ -1,5 +1,8 @@
 package me.hao0.wechat.core;
 
+import me.hao0.wechat.loader.AccessTokenLoader;
+import me.hao0.wechat.loader.TicketLoader;
+
 import java.util.concurrent.ExecutorService;
 
 /**

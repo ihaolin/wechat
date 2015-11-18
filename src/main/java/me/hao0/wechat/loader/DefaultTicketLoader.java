@@ -1,4 +1,4 @@
-package me.hao0.wechat.core;
+package me.hao0.wechat.loader;
 
 import com.google.common.base.Strings;
 import me.hao0.wechat.model.js.Ticket;

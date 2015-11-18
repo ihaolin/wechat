@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
     </dependency>
 	```
 	
@@ -47,27 +47,27 @@
 						...
 						.build();
 	// 同步调用
-	wechat.COMPONENT.api(args);
+	wechat.base().accessToken();
 	
 	// 异步调用
-	wechat.COMPONENT.api(args, Callback<T>);
+	wechat.base(). accessToken(Callback<T>);
 	```	
 
 + Wechat中包含以下组件:
 
-	+ <a href="#base-api">基础</a>: ```BASE```
-	+ <a href="#user-api">用户</a>: ```USER```
-	+ <a href="#menu-api">菜单</a>: ```MENU```
-	+ <a href="#cs-api">多客服</a>: ```CS```
-	+ <a href="#message-api">消息</a>: ```MESSAGE```
-	+ <a href="#qr-api">二维码</a>: ```QRCODE```
-	+ <a href="#material-api">素材</a>: ```MATERIAL```
-	+ <a href="#jssdk-api">JS调用相关</a>: ```JSSDK```
-	+ <a href="#data-api">数据统计</a>(TODO): ```DATA```
+	+ <a href="#base-api">基础</a>: ```base()```
+	+ <a href="#user-api">用户</a>: ```user()```
+	+ <a href="#menu-api">菜单</a>: ```menu()```
+	+ <a href="#cs-api">多客服</a>: ```cs()```
+	+ <a href="#message-api">消息</a>: ```msg()```
+	+ <a href="#qr-api">二维码</a>: ```qr()```
+	+ <a href="#material-api">素材</a>: ```material()```
+	+ <a href="#jssdk-api">JS调用相关</a>: ```js()```
+	+ <a href="#data-api">数据统计</a>(TODO): ```data()```
 
 + API介绍:
 	
-	+ <a id="base-api">**```BASE```**</a>: 
+	+ <a id="base-api">**```base()```**</a>: 
 		
 		```java
 		/**
@@ -100,7 +100,7 @@
 		List<String> ip(String accessToken);
 		```
 	
-	+ <a id="user-api">**```USER```**</a>: 
+	+ <a id="user-api">**```user()```**</a>: 
 		
 		```java
 		/**
@@ -170,7 +170,7 @@
         Boolean remarkUser(String accessToken, String openId, String remark)
 		```
 	
-	+ <a id="menu-api">**```MENU```**</a>: 
+	+ <a id="menu-api">**```menu()```**</a>: 
 		
 		```java
 		/**
@@ -196,7 +196,7 @@
         Boolean delete(String accessToken)
 		```
 	
-	+ <a id="cs-api">**```CS```**</a>: 
+	+ <a id="cs-api">**```cs()```**</a>: 
 		
 		```java
 		/**
@@ -288,7 +288,7 @@
         List<WaitingSession> getWaitingSessions(String accessToken)
 		```
 	
-	+ <a id="message-api">**```MESSAGE```**</a>: 
+	+ <a id="message-api">**```msg()```**</a>: 
 	
 		```java
 		/**
@@ -403,7 +403,7 @@
             
 		```
 	
-	+ <a id="qr-api">**```QRCODE```**</a>: 
+	+ <a id="qr-api">**```qr()```**</a>: 
 		
 		```java
 		
@@ -433,7 +433,7 @@
         String shortUrl(String accessToken, String longUrl)
 		```
 	
-	+ <a id="material-api">**```MATERIAL```**</a>:
+	+ <a id="material-api">**```material()```**</a>:
 
 		```java
 		/**
@@ -535,7 +535,7 @@
          */
         PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc)
 		``` 
-	+ <a id="jssdk-api">**```JSSDK```**</a>:
+	+ <a id="jssdk-api">**```js()```**</a>:
 
 		```java
 		/**
@@ -558,6 +558,16 @@
         Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url)
 		```
 
++ 组件扩展: 如果想自己扩展组件，可以继承``Component``，调用``register``:
+	
+	```java
+	public class MyComponent extends Component {
+	    // ...
+	}
+	MyComponent myComp = new MyComponent();
+   wechat.register(myComp);
+	```
+	
 + **AccessToken管理**:
 	
 	> 由于微信服务器限制**AccessToken**请求次数，并且频繁请求**AccessToken**并不是一个明智之举，需要将获取的**AccessToken**保存下来，待过期时，再去请求新的**AccessToken**，所以以上API均提供了无accessToken版本，如:
@@ -675,6 +685,11 @@
 		
 		+ 引入[guava](https://github.com/google/guava)。
 		+ API支持异步调用。
+		
+	+ 1.4.0:
+		
+		+ 组件懒加载。
+		+ 改变组件访问方式，由~~变量~~到**方法**。
 		
 + 微信相关文档
 
