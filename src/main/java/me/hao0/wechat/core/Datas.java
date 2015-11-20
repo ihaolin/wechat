@@ -141,7 +141,7 @@ public class Datas extends Component {
     Datas(){}
 
     /**
-     * 查询用户增量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户增量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @return 用户增量统计
@@ -151,7 +151,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户增量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户增量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -161,7 +161,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户增量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户增量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -177,7 +177,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户增量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户增量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -188,7 +188,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户总量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户总量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @return 用户增量统计
@@ -198,7 +198,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户总量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户总量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -208,7 +208,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户总量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户总量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -224,7 +224,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 查询用户总量数据(最多跨度7天，endDate - startDate < 7)
+     * 查询用户总量数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -325,7 +325,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文统计数据(最多跨度3天，endDate - startDate < 3)
+     * 获取图文统计数据(最多跨度3天，endDate - startDate 小于 3)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -335,7 +335,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文统计数据(最多跨度3天，endDate - startDate < 3)
+     * 获取图文统计数据(最多跨度3天，endDate - startDate 小于 3)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -351,7 +351,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文统计数据(最多跨度3天，endDate - startDate < 3)
+     * 获取图文统计数据(最多跨度3天，endDate - startDate 小于 3)
      * @param startDate 起始日期
      * @param endDate 结束日期
      * @return 图文统计数据
@@ -361,7 +361,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文统计数据(最多跨度3天，endDate - startDate < 3)
+     * 获取图文统计数据(最多跨度3天，endDate - startDate 小于 3)
      * @param accessToken accessToken
      * @param startDate 起始日期
      * @param endDate 结束日期
@@ -415,7 +415,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文分享转发数据(最多跨度7天，endDate - startDate < 7)
+     * 获取图文分享转发数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -425,7 +425,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文分享转发数据(最多跨度7天，endDate - startDate < 7)
+     * 获取图文分享转发数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -441,7 +441,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文分享转发数据(最多跨度7天，endDate - startDate < 7)
+     * 获取图文分享转发数据(最多跨度7天，endDate - startDate 小于 7)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 图文分享转发数据
@@ -451,7 +451,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取图文分享转发数据(最多跨度7天，endDate - startDate < 7)
+     * 获取图文分享转发数据(最多跨度7天，endDate - startDate 小于 7)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -505,7 +505,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取接口分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取接口分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -515,7 +515,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取接口分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取接口分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -531,7 +531,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取接口分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取接口分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 接口分析数据
@@ -541,7 +541,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取接口分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取接口分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -595,7 +595,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -605,7 +605,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -621,7 +621,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 消息分析数据
@@ -631,7 +631,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -685,7 +685,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -695,7 +695,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -711,7 +711,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 消息分析数据
@@ -721,7 +721,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -732,7 +732,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -742,7 +742,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -758,7 +758,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 消息分析数据
@@ -768,7 +768,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息分析月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息分析月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -779,7 +779,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布数据(最多跨度15天，endDate - startDate < 15)
+     * 获取消息发送分布数据(最多跨度15天，endDate - startDate 小于 15)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -795,7 +795,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布数据(最多跨度15天，endDate - startDate < 15)
+     * 获取消息发送分布数据(最多跨度15天，endDate - startDate 小于 15)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -805,7 +805,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布数据(最多跨度15天，endDate - startDate < 15)
+     * 获取消息发送分布数据(最多跨度15天，endDate - startDate 小于 15)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 发送消息分布周数据
@@ -815,7 +815,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布数据(最多跨度15天，endDate - startDate < 15)
+     * 获取消息发送分布数据(最多跨度15天，endDate - startDate 小于 15)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -826,7 +826,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 发送消息分布周数据
@@ -836,7 +836,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -846,7 +846,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -862,7 +862,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布周数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -873,7 +873,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @return 发送消息分布月数据
@@ -883,7 +883,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param startDate 开始日期
      * @param endDate 结束日期
      * @param cb 回调
@@ -893,7 +893,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期
@@ -909,7 +909,7 @@ public class Datas extends Component {
     }
 
     /**
-     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate < 30)
+     * 获取消息发送分布月数据(最多跨度30天，endDate - startDate 小于 30)
      * @param accessToken accessToken
      * @param startDate 开始日期
      * @param endDate 结束日期

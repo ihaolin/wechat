@@ -167,6 +167,15 @@
         Boolean updateAccount(String accessToken, String account, String nickName, String password)
         
         /**
+	     * 上传客服头像(jpg/png等格式)
+	       注意: 当kfAccount不存在时，微信服务器返回的json数据格式是错误的。
+	     * @param kfAccount 客服帐号(账号前缀@公众号微信号)
+	     * @param image 文件
+	     * @return 上传成功返回true，或抛WechatException
+	     */
+	    public Boolean uploadHead(String kfAccount, File image)
+    
+        /**
          * 删除客服账户
          * @param accessToken accessToken
          * @param kfAccount 客服登录帐号(包含域名)

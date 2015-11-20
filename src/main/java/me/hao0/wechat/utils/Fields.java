@@ -54,6 +54,7 @@ public abstract class Fields {
      * get field of target object
      * @param target target object
      * @param name field name
+     * @param <T> 范型
      * @return the field value
      */
     @SuppressWarnings("unchecked")
