@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Email: haolin.h0@gmail.com
  * Date: 20/11/15
  */
-public class articleSummaryDaily extends CommonSummary {
+public class ArticleDailySummary extends CommonSummary {
 
     private static final long serialVersionUID = -7195185645683267419L;
 

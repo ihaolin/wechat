@@ -7,7 +7,7 @@ import me.hao0.wechat.core.WechatBuilder;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.base.AccessToken;
-import me.hao0.wechat.model.data.article.articleSummaryDaily;
+import me.hao0.wechat.model.data.article.ArticleDailySummary;
 import me.hao0.wechat.model.data.article.ArticleShare;
 import me.hao0.wechat.model.data.article.ArticleShareHour;
 import me.hao0.wechat.model.data.article.ArticleSummary;
@@ -614,7 +614,7 @@ public class WechatTests {
 
     @Test
     public void testarticleSummaryDaily(){
-        List<articleSummaryDaily> summaries = wechat.data().articleSummaryDaily(accessToken, "2015-11-11");
+        List<ArticleDailySummary> summaries = wechat.data().articleDailySummary(accessToken, "2015-11-11");
         assertNotNull(summaries);
         System.out.println(summaries);
     }

@@ -2,7 +2,7 @@ package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
-import me.hao0.wechat.model.data.article.articleSummaryDaily;
+import me.hao0.wechat.model.data.article.ArticleDailySummary;
 import me.hao0.wechat.model.data.article.ArticleShare;
 import me.hao0.wechat.model.data.article.ArticleShareHour;
 import me.hao0.wechat.model.data.article.ArticleSummary;
@@ -116,7 +116,7 @@ public class Datas extends Component {
 
     private static final JavaType USER_CUMULATE_LIST_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, UserCumulate.class);
 
-    private static final JavaType ARTICLE_DAILY_SUMMARY_LIST_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, articleSummaryDaily.class);
+    private static final JavaType ARTICLE_DAILY_SUMMARY_LIST_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, ArticleDailySummary.class);
 
     private static final JavaType ARTICLE_TOTAL_LIST_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, ArticleTotal.class);
 
@@ -240,8 +240,8 @@ public class Datas extends Component {
      * @param date 日期
      * @return 图文群发每日数据
      */
-    public List<articleSummaryDaily> articleSummaryDaily(String date){
-        return articleSummaryDaily(loadAccessToken(), date);
+    public List<ArticleDailySummary> articleDailySummary(String date){
+        return articleDailySummary(loadAccessToken(), date);
     }
 
     /**
@@ -251,11 +251,11 @@ public class Datas extends Component {
      * @param date 日期
      * @param cb 回调
      */
-    public void articleSummaryDaily(final String accessToken, final String date, Callback<List<articleSummaryDaily>> cb){
-        doAsync(new AsyncFunction<List<articleSummaryDaily>>(cb) {
+    public void articleDailySummary(final String accessToken, final String date, Callback<List<ArticleDailySummary>> cb){
+        doAsync(new AsyncFunction<List<ArticleDailySummary>>(cb) {
             @Override
-            public List<articleSummaryDaily> execute() throws Exception {
-                return articleSummaryDaily(accessToken, date);
+            public List<ArticleDailySummary> execute() throws Exception {
+                return articleDailySummary(accessToken, date);
             }
         });
     }
@@ -266,8 +266,8 @@ public class Datas extends Component {
      * @param date 日期
      * @param cb 回调
      */
-    public void articleSummaryDaily(final String date, Callback<List<articleSummaryDaily>> cb){
-        articleSummaryDaily(loadAccessToken(), date, cb);
+    public void articleDailySummary(final String date, Callback<List<ArticleDailySummary>> cb){
+        articleDailySummary(loadAccessToken(), date, cb);
     }
 
     /**
@@ -277,7 +277,7 @@ public class Datas extends Component {
      * @param date 日期
      * @return 图文群发每日数据
      */
-    public List<articleSummaryDaily> articleSummaryDaily(String accessToken, String date){
+    public List<ArticleDailySummary> articleDailySummary(String accessToken, String date){
         return doSummary(ARTICLE_DAILY_SUMMARY + accessToken, date, date, ARTICLE_DAILY_SUMMARY_LIST_TYPE);
     }
 
