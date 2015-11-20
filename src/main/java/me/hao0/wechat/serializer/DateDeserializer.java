@@ -1,4 +1,4 @@
-package me.hao0.wechat.utils;
+package me.hao0.wechat.serializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

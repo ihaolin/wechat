@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
 import me.hao0.wechat.utils.Jsons;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ public class Users extends Component {
      * @return 分组ID，或抛WechatException
      */
     public Integer createGroup(String name){
-        return createGroup(wechat.loadAccessToken(), name);
+        return createGroup(loadAccessToken(), name);
     }
 
     /**
@@ -76,7 +75,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void createGroup(final String name, Callback<Integer> cb){
-        createGroup(wechat.loadAccessToken(), name, cb);
+        createGroup(loadAccessToken(), name, cb);
     }
 
     /**
@@ -86,7 +85,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void createGroup(final String accessToken, final String name, Callback<Integer> cb){
-        wechat.doAsync(new AsyncFunction<Integer>(cb) {
+        doAsync(new AsyncFunction<Integer>(cb) {
             @Override
             public Integer execute() {
                 return createGroup(accessToken, name);
@@ -108,7 +107,7 @@ public class Users extends Component {
         g.setName(name);
         params.put("group", g);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (Integer)((Map)resp.get("group")).get("id");
     }
 
@@ -117,7 +116,7 @@ public class Users extends Component {
      * @return 分组列表，或抛WechatException
      */
     public List<Group> getGroup(){
-        return getGroup(wechat.loadAccessToken());
+        return getGroup(loadAccessToken());
     }
 
     /**
@@ -126,7 +125,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void getGroup(final String accessToken, Callback<List<Group>> cb){
-        wechat.doAsync(new AsyncFunction<List<Group>>(cb) {
+        doAsync(new AsyncFunction<List<Group>>(cb) {
             @Override
             public List<Group> execute() {
                 return getGroup(accessToken);
@@ -142,7 +141,7 @@ public class Users extends Component {
     public List<Group> getGroup(String accessToken){
         String url = GET_GROUP + accessToken;
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         return Jsons.EXCLUDE_DEFAULT
                 .fromJson(Jsons.DEFAULT.toJson(resp.get("groups")), ARRAY_LIST_GROUP_TYPE);
@@ -154,7 +153,7 @@ public class Users extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean deleteGroup(Integer id){
-        return deleteGroup(wechat.loadAccessToken(), id);
+        return deleteGroup(loadAccessToken(), id);
     }
 
     /**
@@ -163,7 +162,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void deleteGroup(final Integer id, Callback<Boolean> cb){
-        deleteGroup(wechat.loadAccessToken(), id, cb);
+        deleteGroup(loadAccessToken(), id, cb);
     }
 
     /**
@@ -173,7 +172,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void deleteGroup(final String accessToken, final Integer id, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return deleteGroup(accessToken, id);
@@ -195,7 +194,7 @@ public class Users extends Component {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("group", g);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -206,7 +205,7 @@ public class Users extends Component {
      * @return 更新成功返回true，或抛WechatException
      */
     public Boolean updateGroup(Integer id, String newName){
-        return updateGroup(wechat.loadAccessToken(), id, newName);
+        return updateGroup(loadAccessToken(), id, newName);
     }
 
     /**
@@ -216,7 +215,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void updateGroup(final Integer id, final String newName, Callback<Boolean> cb){
-        updateGroup(wechat.loadAccessToken(), id, newName, cb);
+        updateGroup(loadAccessToken(), id, newName, cb);
     }
 
     /**
@@ -227,7 +226,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void updateGroup(final String accessToken, final Integer id, final String newName, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return updateGroup(accessToken, id, newName);
@@ -251,7 +250,7 @@ public class Users extends Component {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("group", g);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -261,7 +260,7 @@ public class Users extends Component {
      * @return 组ID，或抛WechatException
      */
     public Integer getUserGroup(String openId){
-        return getUserGroup(wechat.loadAccessToken(), openId);
+        return getUserGroup(loadAccessToken(), openId);
     }
 
     /**
@@ -270,7 +269,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void getUserGroup(final String openId, Callback<Integer> cb){
-        getUserGroup(wechat.loadAccessToken(), openId, cb);
+        getUserGroup(loadAccessToken(), openId, cb);
     }
 
     /**
@@ -280,7 +279,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void getUserGroup(final String accessToken, final String openId, Callback<Integer> cb){
-        wechat.doAsync(new AsyncFunction<Integer>(cb) {
+        doAsync(new AsyncFunction<Integer>(cb) {
             @Override
             public Integer execute() {
                 return getUserGroup(accessToken, openId);
@@ -300,7 +299,7 @@ public class Users extends Component {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("openid", openId);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (Integer)resp.get("groupid");
     }
 
@@ -311,7 +310,7 @@ public class Users extends Component {
      * @return 移动成功返回true，或抛WechatException
      */
     public Boolean mvUserGroup(String openId, Integer groupId){
-        return mvUserGroup(wechat.loadAccessToken(), openId, groupId);
+        return mvUserGroup(loadAccessToken(), openId, groupId);
     }
 
     /**
@@ -321,7 +320,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void mvUserGroup(final String openId, final Integer groupId, Callback<Boolean> cb){
-        mvUserGroup(wechat.loadAccessToken(), openId, groupId, cb);
+        mvUserGroup(loadAccessToken(), openId, groupId, cb);
     }
 
     /**
@@ -332,7 +331,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void mvUserGroup(final String accessToken, final String openId, final Integer groupId, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return mvUserGroup(accessToken, openId, groupId);
@@ -354,7 +353,7 @@ public class Users extends Component {
         params.put("openid", openId);
         params.put("to_groupid", groupId);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -364,7 +363,7 @@ public class Users extends Component {
      * @return 用户信息，或抛WechatException
      */
     public User getUser(String openId){
-        return getUser(wechat.loadAccessToken(), openId);
+        return getUser(loadAccessToken(), openId);
     }
 
     /**
@@ -373,7 +372,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void getUser(final String openId, Callback<User> cb){
-        getUser(wechat.loadAccessToken(), openId, cb);
+        getUser(loadAccessToken(), openId, cb);
     }
 
     /**
@@ -383,7 +382,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void getUser(final String accessToken, final String openId, Callback<User> cb){
-        wechat.doAsync(new AsyncFunction<User>(cb) {
+        doAsync(new AsyncFunction<User>(cb) {
             @Override
             public User execute() {
                 return getUser(accessToken, openId);
@@ -400,7 +399,7 @@ public class Users extends Component {
     public User getUser(String accessToken, String openId){
         String url = GET_USER_INFO + accessToken + "&openid=" + openId;
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
     }
@@ -412,7 +411,7 @@ public class Users extends Component {
      * @return 备注成功返回true，或抛WechatException
      */
     public Boolean remarkUser(String openId, String remark){
-        return remarkUser(wechat.loadAccessToken(), openId, remark);
+        return remarkUser(loadAccessToken(), openId, remark);
     }
 
     /**
@@ -422,7 +421,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void remarkUser(final String openId, final String remark, Callback<Boolean> cb){
-        remarkUser(wechat.loadAccessToken(), openId, remark, cb);
+        remarkUser(loadAccessToken(), openId, remark, cb);
     }
 
     /**
@@ -433,7 +432,7 @@ public class Users extends Component {
      * @param cb 回调
      */
     public void remarkUser(final String accessToken, final String openId, final String remark, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return remarkUser(accessToken, openId, remark);
@@ -455,7 +454,7 @@ public class Users extends Component {
         params.put("openid", openId);
         params.put("remark", remark);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 }

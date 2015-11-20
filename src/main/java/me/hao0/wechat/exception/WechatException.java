@@ -9,8 +9,14 @@ import java.util.Map;
  */
 public class WechatException extends RuntimeException {
 
+    /**
+     * 微信返回的errcode
+     */
+    private Integer code;
+
     public WechatException(Map<String, ?> errMap) {
         super("[" + errMap.get("errcode") + "]" + errMap.get("errmsg"));
+        code = (Integer)errMap.get("errcode");
     }
 
     public WechatException() {
@@ -31,5 +37,9 @@ public class WechatException extends RuntimeException {
 
     protected WechatException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public Integer getCode() {
+        return code;
     }
 }

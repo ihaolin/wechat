@@ -28,7 +28,7 @@ public class JsSdks extends Component {
      * @param cb 回调
      */
     public void getTicket(final TicketType type, final Callback<Ticket> cb){
-        getTicket(wechat.loadAccessToken(), type, cb);
+        getTicket(loadAccessToken(), type, cb);
     }
 
     /**
@@ -38,7 +38,7 @@ public class JsSdks extends Component {
      * @return Ticket对象，或抛WechatException
      */
     public Ticket getTicket(TicketType type){
-        return getTicket(wechat.loadAccessToken(), type);
+        return getTicket(loadAccessToken(), type);
     }
 
     /**
@@ -49,7 +49,7 @@ public class JsSdks extends Component {
      * @param cb 回调
      */
     public void getTicket(final String accessToken, final TicketType type, final Callback<Ticket> cb){
-        wechat.doAsync(new AsyncFunction<Ticket>(cb) {
+        doAsync(new AsyncFunction<Ticket>(cb) {
             @Override
             public Ticket execute() {
                 return getTicket(accessToken, type);
@@ -67,7 +67,7 @@ public class JsSdks extends Component {
     public Ticket getTicket(String accessToken, TicketType type){
         String url = TICKET_GET + accessToken + "&type=" + type.type();
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         Ticket t = new Ticket();
         t.setTicket((String)resp.get("ticket"));

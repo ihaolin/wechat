@@ -1,11 +1,8 @@
 package me.hao0.wechat.model.material;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import me.hao0.wechat.utils.DateDeserializer;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 上传永久素材后的返回对象

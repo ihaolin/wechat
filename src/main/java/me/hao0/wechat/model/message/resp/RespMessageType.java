@@ -13,7 +13,8 @@ public enum RespMessageType {
     VOICE("voice", "语音消息"),
     VIDEO("video", "视频消息"),
     MUSIC("music", "音乐消息"),
-    NEWS("news", "图文消息");
+    NEWS("news", "图文消息"),
+    CS("transfer_customer_service", "转发客服消息");
 
     private String value;
 

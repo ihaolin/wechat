@@ -72,7 +72,7 @@ public class Bases extends Component {
      * @param cb 回调
      */
     public void openId(final String code, final Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return openId(code);
@@ -92,7 +92,7 @@ public class Bases extends Component {
                 "&code=" + code +
                 "&grant_type=authorization_code";
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         return (String)resp.get("openid");
     }
@@ -102,7 +102,7 @@ public class Bases extends Component {
      * @param cb 回调
      */
     public void accessToken(final Callback<AccessToken> cb){
-        wechat.doAsync(new AsyncFunction<AccessToken>(cb) {
+        doAsync(new AsyncFunction<AccessToken>(cb) {
             @Override
             public AccessToken execute() {
                 return accessToken();
@@ -117,7 +117,7 @@ public class Bases extends Component {
     public AccessToken accessToken(){
         String url = ACCESS_TOKEN_URL + "&appid=" + wechat.getAppId() + "&secret=" + wechat.getAppSecret();
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         AccessToken token = new AccessToken();
         token.setAccessToken((String)resp.get("access_token"));
@@ -132,7 +132,7 @@ public class Bases extends Component {
      * @return 微信服务器IP列表，或抛WechatException
      */
     public List<String> ip(){
-        return ip(wechat.loadAccessToken());
+        return ip(loadAccessToken());
     }
 
     /**
@@ -140,7 +140,7 @@ public class Bases extends Component {
      * @param cb 回调
      */
     public void ip(Callback<List<String>> cb){
-        ip(wechat.loadAccessToken(), cb);
+        ip(loadAccessToken(), cb);
     }
 
     /**
@@ -149,7 +149,7 @@ public class Bases extends Component {
      * @param cb 回调
      */
     public void ip(final String accessToken, Callback<List<String>> cb){
-        wechat.doAsync(new AsyncFunction<List<String>>(cb) {
+        doAsync(new AsyncFunction<List<String>>(cb) {
             @Override
             public List<String> execute() {
                 return ip(accessToken);
@@ -166,7 +166,7 @@ public class Bases extends Component {
     public List<String> ip(String accessToken){
         String url = WX_IP_URL + accessToken;
 
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
 
         return (List<String>)resp.get("ip_list");
     }

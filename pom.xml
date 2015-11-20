@@ -6,10 +6,10 @@
 
     <groupId>me.hao0</groupId>
     <artifactId>wechat</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 
     <name>wechat</name>
-    <description>一个简单基础的微信公众号接口组件</description>
+    <description>A Lightweight Wechat Component</description>
     <url>https://github.com/ihaolin/wechat</url>
 
     <licenses>

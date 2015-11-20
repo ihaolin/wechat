@@ -180,6 +180,36 @@ public class Messages extends Component {
     }
 
     /**
+     * 构建转发客服的XML消息(该消息自动转发给一个在线的客服)
+     * @param openId 用户openId
+     * @return 转发客服的XML消息
+     */
+    public String forward(String openId){
+        return forward(openId, null);
+    }
+
+    /**
+     * 构建转发客服的XML消息(指定一个在线的客服，若该客服不在线，消息将不再转发给其他在线客服)
+     * @param openId 用户openId
+     * @param kfAccount 客服帐号(包含域名)
+     * @return 转发客服的XML消息
+     */
+    public String forward(String openId, String kfAccount){
+        XmlWriters xmlWriters = XmlWriters.create();
+
+        xmlWriters.element("ToUserName", openId)
+                .element("FromUserName", wechat.getAppId())
+                .element("CreateTime", System.currentTimeMillis() / 1000);
+
+        if (!Strings.isNullOrEmpty(kfAccount)){
+            xmlWriters.element("TransInfo", "KfAccount", kfAccount);
+        }
+        xmlWriters.element("MsgType", RespMessageType.CS.value());
+
+        return xmlWriters.build();
+    }
+
+    /**
      * 接收微信服务器发来的XML消息
      * @param xml xml字符串
      * @return 消息类，或抛WechatException
@@ -332,7 +362,7 @@ public class Messages extends Component {
      * @return 消息ID，或抛WechatException
      */
     public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields){
-        return sendTemplate(wechat.loadAccessToken(), openId, templateId, null, fields);
+        return sendTemplate(loadAccessToken(), openId, templateId, null, fields);
     }
 
     /**
@@ -356,7 +386,7 @@ public class Messages extends Component {
      * @return 消息ID，或抛WechatException
      */
     public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields, String link){
-        return sendTemplate(wechat.loadAccessToken(), openId, templateId, link, fields);
+        return sendTemplate(loadAccessToken(), openId, templateId, link, fields);
     }
 
     /**
@@ -367,7 +397,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void sendTemplate(final String openId, final String templateId, final List<TemplateField> fields, Callback<Integer> cb){
-        sendTemplate(wechat.loadAccessToken(), openId, templateId, null, fields, cb);
+        sendTemplate(loadAccessToken(), openId, templateId, null, fields, cb);
     }
 
     /**
@@ -380,7 +410,7 @@ public class Messages extends Component {
      */
     public void sendTemplate(final String openId, final String templateId,
                              final String link, final List<TemplateField> fields, Callback<Integer> cb){
-        sendTemplate(wechat.loadAccessToken(), openId, templateId, link, fields, cb);
+        sendTemplate(loadAccessToken(), openId, templateId, link, fields, cb);
     }
 
     /**
@@ -394,7 +424,7 @@ public class Messages extends Component {
      */
     public void sendTemplate(final String accessToken, final String openId, final String templateId,
                              final String link, final List<TemplateField> fields, Callback<Integer> cb){
-        wechat.doAsync(new AsyncFunction<Integer>(cb) {
+        doAsync(new AsyncFunction<Integer>(cb) {
             @Override
             public Integer execute() {
                 return sendTemplate(accessToken, openId, templateId, link, fields);
@@ -416,7 +446,7 @@ public class Messages extends Component {
 
         Map<String, Object> params = buildTemplateParams(openId, templateId, link, fields);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (Integer)resp.get("msgid");
     }
 
@@ -450,7 +480,7 @@ public class Messages extends Component {
      * @return 消息ID，或抛WechatException
      */
     public Long send(SendMessage msg){
-        return send(wechat.loadAccessToken(), msg);
+        return send(loadAccessToken(), msg);
     }
 
     /**
@@ -462,7 +492,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void send(final SendMessage msg, Callback<Long> cb){
-        send(wechat.loadAccessToken(), msg, cb);
+        send(loadAccessToken(), msg, cb);
     }
 
     /**
@@ -475,7 +505,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void send(final String accessToken, final SendMessage msg, Callback<Long> cb){
-        wechat.doAsync(new AsyncFunction<Long>(cb) {
+        doAsync(new AsyncFunction<Long>(cb) {
             @Override
             public Long execute() {
                 return send(accessToken, msg);
@@ -496,7 +526,7 @@ public class Messages extends Component {
         String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
         Map<String, Object> params = buildSendParams(msg);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (Long)resp.get("msg_id");
     }
 
@@ -546,7 +576,7 @@ public class Messages extends Component {
      * @return 发送成功返回true，或抛WechatException
      */
     public Boolean previewSend(SendPreviewMessage msg){
-        return previewSend(wechat.loadAccessToken(), msg);
+        return previewSend(loadAccessToken(), msg);
     }
 
     /**
@@ -555,7 +585,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void previewSend(final SendPreviewMessage msg, Callback<Boolean> cb){
-        previewSend(wechat.loadAccessToken(), msg, cb);
+        previewSend(loadAccessToken(), msg, cb);
     }
 
     /**
@@ -565,7 +595,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void previewSend(final String accessToken, final SendPreviewMessage msg, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return previewSend(accessToken, msg);
@@ -583,7 +613,7 @@ public class Messages extends Component {
         String url = PREVIEW_SEND + accessToken;
         Map<String, Object> params = buildPreviewParams(msg);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -620,7 +650,7 @@ public class Messages extends Component {
      * @return 删除成功，或抛WechatException
      */
     public Boolean deleteSend(Long id){
-        return deleteSend(wechat.loadAccessToken(), id);
+        return deleteSend(loadAccessToken(), id);
     }
 
     /**
@@ -633,7 +663,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void deleteSend(final Long id, Callback<Boolean> cb){
-        deleteSend(wechat.loadAccessToken(), id, cb);
+        deleteSend(loadAccessToken(), id, cb);
     }
 
     /**
@@ -647,7 +677,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void deleteSend(final String accessToken, final Long id, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return deleteSend(accessToken, id);
@@ -671,7 +701,7 @@ public class Messages extends Component {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("msg_id", id);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -681,7 +711,7 @@ public class Messages extends Component {
      * @return 群发消息状态，或抛WechatException
      */
     public String getSend(Long id){
-        return getSend(wechat.loadAccessToken(), id);
+        return getSend(loadAccessToken(), id);
     }
 
     /**
@@ -690,7 +720,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void getSend(final Long id, Callback<String> cb){
-        getSend(wechat.loadAccessToken(), id, cb);
+        getSend(loadAccessToken(), id, cb);
     }
 
     /**
@@ -700,7 +730,7 @@ public class Messages extends Component {
      * @param cb 回调
      */
     public void getSend(final String accessToken, final Long id, Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return getSend(accessToken, id);
@@ -720,7 +750,7 @@ public class Messages extends Component {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("msg_id", id);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (String)resp.get("msg_status");
     }
 }

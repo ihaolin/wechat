@@ -2,7 +2,7 @@ package me.hao0.wechat.model.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import me.hao0.wechat.utils.DateDeserializer;
+import me.hao0.wechat.serializer.DateDeserializer;
 
 import java.io.Serializable;
 import java.util.Date;

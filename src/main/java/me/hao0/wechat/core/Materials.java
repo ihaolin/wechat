@@ -88,7 +88,7 @@ public class Materials extends Component {
      * @return 素材总数统计
      */
     public MaterialCount count(){
-        return count(wechat.loadAccessToken());
+        return count(loadAccessToken());
     }
 
     /**
@@ -96,7 +96,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void count(Callback<MaterialCount> cb){
-        count(wechat.loadAccessToken(), cb);
+        count(loadAccessToken(), cb);
     }
 
     /**
@@ -105,7 +105,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void count(final String accessToken, Callback<MaterialCount> cb){
-        wechat.doAsync(new AsyncFunction<MaterialCount>(cb) {
+        doAsync(new AsyncFunction<MaterialCount>(cb) {
             @Override
             public MaterialCount execute() {
                 return count(accessToken);
@@ -120,7 +120,7 @@ public class Materials extends Component {
      */
     public MaterialCount count(String accessToken){
         String url = COUNT + accessToken;
-        Map<String, Object> resp = wechat.doGet(url);
+        Map<String, Object> resp = doGet(url);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), MaterialCount.class);
     }
 
@@ -133,7 +133,7 @@ public class Materials extends Component {
      * @return 素材分页对象，或抛WechatException
      */
     public <T> Page<T> gets(MaterialType type, Integer offset, Integer count){
-        return gets(wechat.loadAccessToken(), type, offset, count);
+        return gets(loadAccessToken(), type, offset, count);
     }
 
     /**
@@ -145,7 +145,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public <T> void gets(final MaterialType type, final Integer offset, final Integer count, Callback<Page<T>> cb){
-        gets(wechat.loadAccessToken(), type, offset, count, cb);
+        gets(loadAccessToken(), type, offset, count, cb);
     }
 
     /**
@@ -158,7 +158,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public <T> void gets(final String accessToken, final MaterialType type, final Integer offset, final Integer count, Callback<Page<T>> cb){
-        wechat.doAsync(new AsyncFunction<Page<T>>(cb) {
+        doAsync(new AsyncFunction<Page<T>>(cb) {
             @Override
             public Page<T> execute() {
                 return gets(accessToken, type, offset, count);
@@ -183,7 +183,7 @@ public class Materials extends Component {
         params.put("offset", offset);
         params.put("count", count);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return renderMaterialPage(type, resp);
     }
 
@@ -209,7 +209,7 @@ public class Materials extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean delete(String mediaId){
-        return delete(wechat.loadAccessToken(), mediaId);
+        return delete(loadAccessToken(), mediaId);
     }
 
     /**
@@ -218,7 +218,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void delete(final String mediaId, Callback<Boolean> cb){
-        delete(wechat.loadAccessToken(), mediaId, cb);
+        delete(loadAccessToken(), mediaId, cb);
     }
 
     /**
@@ -228,7 +228,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void delete(final String accessToken, final String mediaId, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return delete(accessToken, mediaId);
@@ -247,7 +247,7 @@ public class Materials extends Component {
 
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("media_id", mediaId);
-        wechat.doPost(url, params);
+        doPost(url, params);
 
         return Boolean.TRUE;
     }
@@ -265,7 +265,7 @@ public class Materials extends Component {
      * @return TempMaterial对象，或抛WechatException
      */
     public TempMaterial uploadTemp(MaterialUploadType type, String fileName, byte[] fileData) {
-        return uploadTemp(wechat.loadAccessToken(), type, fileName, new ByteArrayInputStream(fileData));
+        return uploadTemp(loadAccessToken(), type, fileName, new ByteArrayInputStream(fileData));
     }
 
     /**
@@ -297,7 +297,7 @@ public class Materials extends Component {
      * @return TempMaterial对象，或抛WechatException
      */
     public TempMaterial uploadTemp(MaterialUploadType type, File media) {
-        return uploadTemp(wechat.loadAccessToken(), type, media);
+        return uploadTemp(loadAccessToken(), type, media);
     }
 
     /**
@@ -333,7 +333,7 @@ public class Materials extends Component {
      */
     public void uploadTemp( MaterialUploadType type, File media, Callback<TempMaterial> cb) {
         try {
-            uploadTemp(wechat.loadAccessToken(), type, media.getName(), new FileInputStream(media), cb);
+            uploadTemp(loadAccessToken(), type, media.getName(), new FileInputStream(media), cb);
         } catch (FileNotFoundException e) {
             throw new WechatException(e);
         }
@@ -372,7 +372,7 @@ public class Materials extends Component {
      * @return TempMaterial对象，或抛WechatException
      */
     public TempMaterial uploadTemp(MaterialUploadType type, String fileName, InputStream input) {
-        return uploadTemp(wechat.loadAccessToken(), type, fileName, input);
+        return uploadTemp(loadAccessToken(), type, fileName, input);
     }
 
     /**
@@ -388,7 +388,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadTemp(final MaterialUploadType type, final String fileName, final InputStream input, Callback<TempMaterial> cb) {
-        uploadTemp(wechat.loadAccessToken(), type, fileName, input, cb);
+        uploadTemp(loadAccessToken(), type, fileName, input, cb);
     }
 
     /**
@@ -405,7 +405,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadTemp(final String accessToken, final MaterialUploadType type, final String fileName, final InputStream input, Callback<TempMaterial> cb) {
-        wechat.doAsync(new AsyncFunction<TempMaterial>(cb) {
+        doAsync(new AsyncFunction<TempMaterial>(cb) {
             @Override
             public TempMaterial execute() {
                 return uploadTemp(accessToken, type, fileName, input);
@@ -432,7 +432,7 @@ public class Materials extends Component {
         Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
         params.put("type", type.value());
 
-        Map<String, Object> resp = wechat.doUpload(url, "media", fileName, input, params);
+        Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), TempMaterial.class);
     }
 
@@ -442,7 +442,7 @@ public class Materials extends Component {
      * @return 文件二进制数据
      */
     public byte[] downloadTemp(String mediaId){
-        return downloadTemp(wechat.loadAccessToken(), mediaId);
+        return downloadTemp(loadAccessToken(), mediaId);
     }
 
     /**
@@ -451,7 +451,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void downloadTemp(final String mediaId, Callback<byte[]> cb){
-        downloadTemp(wechat.loadAccessToken(), mediaId, cb);
+        downloadTemp(loadAccessToken(), mediaId, cb);
     }
 
     /**
@@ -461,7 +461,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void downloadTemp(final String accessToken, final String mediaId, Callback<byte[]> cb){
-        wechat.doAsync(new AsyncFunction<byte[]>(cb) {
+        doAsync(new AsyncFunction<byte[]>(cb) {
             @Override
             public byte[] execute() {
                 return downloadTemp(accessToken, mediaId);
@@ -490,7 +490,7 @@ public class Materials extends Component {
      * @return mediaId
      */
     public String uploadPermNews(List<NewsContentItem> items){
-        return uploadPermNews(wechat.loadAccessToken(), items);
+        return uploadPermNews(loadAccessToken(), items);
     }
 
     /**
@@ -499,7 +499,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNews(final List<NewsContentItem> items, Callback<String> cb){
-        uploadPermNews(wechat.loadAccessToken(), items, cb);
+        uploadPermNews(loadAccessToken(), items, cb);
     }
 
     /**
@@ -509,7 +509,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNews(final String accessToken, final List<NewsContentItem> items, Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return uploadPermNews(accessToken, items);
@@ -527,7 +527,7 @@ public class Materials extends Component {
         String url = ADD_NEWS + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("articles", items);
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (String)resp.get("media_id");
     }
 
@@ -539,7 +539,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void updatePermNews(final String mediaId, final Integer itemIndex, final NewsContentItem newItem, Callback<Boolean> cb){
-        updatePermNews(wechat.loadAccessToken(), mediaId, itemIndex, newItem, cb);
+        updatePermNews(loadAccessToken(), mediaId, itemIndex, newItem, cb);
     }
 
     /**
@@ -551,7 +551,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void updatePermNews(final String accessToken, final String mediaId, final Integer itemIndex, final NewsContentItem newItem, Callback<Boolean> cb){
-        wechat.doAsync(new AsyncFunction<Boolean>(cb) {
+        doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
                 return updatePermNews(accessToken, mediaId, itemIndex, newItem);
@@ -575,7 +575,7 @@ public class Materials extends Component {
         params.put("index", itemIndex);
         params.put("articles", newItem);
 
-        wechat.doPost(url, params);
+        doPost(url, params);
         return Boolean.TRUE;
     }
 
@@ -599,7 +599,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNewsImage(File image, Callback<String> cb) {
-        uploadPermNewsImage(wechat.loadAccessToken(), image, cb);
+        uploadPermNewsImage(loadAccessToken(), image, cb);
     }
 
     /**
@@ -634,7 +634,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNewsImage(String fileName, byte[] data, Callback<String> cb) {
-        uploadPermNewsImage(wechat.loadAccessToken(), fileName, new ByteArrayInputStream(data), cb);
+        uploadPermNewsImage(loadAccessToken(), fileName, new ByteArrayInputStream(data), cb);
     }
 
     /**
@@ -655,7 +655,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNewsImage(final String fileName, final InputStream in, Callback<String> cb){
-        uploadPermNewsImage(wechat.loadAccessToken(), fileName, in, cb);
+        uploadPermNewsImage(loadAccessToken(), fileName, in, cb);
     }
 
     /**
@@ -666,7 +666,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermNewsImage(final String accessToken, final String fileName, final InputStream in, Callback<String> cb) {
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() throws FileNotFoundException {
                 return uploadPermNewsImage(accessToken, fileName, in);
@@ -683,7 +683,7 @@ public class Materials extends Component {
      */
     public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) {
         String url = UPLOAD_NEWS_IMAGE + accessToken;
-        Map<String, Object> resp = wechat.doUpload(url, "media", fileName, in, Collections.<String, String>emptyMap());
+        Map<String, Object> resp = doUpload(url, "media", fileName, in, Collections.<String, String>emptyMap());
         return (String)resp.get("url");
     }
 
@@ -750,7 +750,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPerm(MaterialUploadType type, String fileName, byte[] data, Callback<PermMaterial> cb) {
-        uploadPerm(wechat.loadAccessToken(), type, fileName, new ByteArrayInputStream(data), cb);
+        uploadPerm(loadAccessToken(), type, fileName, new ByteArrayInputStream(data), cb);
     }
 
     /**
@@ -765,7 +765,7 @@ public class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPerm( MaterialUploadType type, String fileName, byte[] data) {
-        return uploadPerm(wechat.loadAccessToken(), type, fileName, new ByteArrayInputStream(data));
+        return uploadPerm(loadAccessToken(), type, fileName, new ByteArrayInputStream(data));
     }
 
     /**
@@ -779,7 +779,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPerm(final MaterialUploadType type, final File file, Callback<PermMaterial> cb) {
-        uploadPerm(wechat.loadAccessToken(), type, file, cb);
+        uploadPerm(loadAccessToken(), type, file, cb);
     }
 
     /**
@@ -813,7 +813,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPerm(final MaterialUploadType type, final String fileName, final InputStream input, Callback<PermMaterial> cb) {
-        uploadPerm(wechat.loadAccessToken(), type, fileName, input, cb);
+        uploadPerm(loadAccessToken(), type, fileName, input, cb);
     }
 
     /**
@@ -829,7 +829,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPerm(final String accessToken, final MaterialUploadType type, final String fileName, final InputStream input, Callback<PermMaterial> cb) {
-        wechat.doAsync(new AsyncFunction<PermMaterial>(cb) {
+        doAsync(new AsyncFunction<PermMaterial>(cb) {
             @Override
             public PermMaterial execute() throws Exception {
                 return uploadPerm(accessToken, type, fileName, input);
@@ -858,7 +858,7 @@ public class Materials extends Component {
         Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
         params.put("type", type.value());
 
-        Map<String, Object> resp = wechat.doUpload(url, "media", fileName, input, params);
+        Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), PermMaterial.class);
     }
 
@@ -886,7 +886,7 @@ public class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPermVideo(File video, String title, String desc) {
-        return uploadPermVideo(wechat.loadAccessToken(), video, title, desc);
+        return uploadPermVideo(loadAccessToken(), video, title, desc);
     }
 
     /**
@@ -911,7 +911,7 @@ public class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPermVideo(String fileName, byte[] data, String title, String desc) {
-        return uploadPermVideo(wechat.loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc);
+        return uploadPermVideo(loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc);
     }
 
     /**
@@ -936,7 +936,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermVideo(String fileName, byte[] data, final String title, final String desc, Callback<PermMaterial> cb) {
-        uploadPermVideo(wechat.loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc, cb);
+        uploadPermVideo(loadAccessToken(), fileName, new ByteArrayInputStream(data), title, desc, cb);
     }
 
     /**
@@ -947,7 +947,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermVideo(final File video, final String title, final String desc, Callback<PermMaterial> cb) {
-        uploadPermVideo(wechat.loadAccessToken(), video, title, desc, cb);
+        uploadPermVideo(loadAccessToken(), video, title, desc, cb);
     }
 
     /**
@@ -975,7 +975,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermVideo(final String fileName, final InputStream input, final String title, final String desc, Callback<PermMaterial> cb) {
-        uploadPermVideo(wechat.loadAccessToken(), fileName, input, title, desc, cb);
+        uploadPermVideo(loadAccessToken(), fileName, input, title, desc, cb);
     }
 
     /**
@@ -988,7 +988,7 @@ public class Materials extends Component {
      * @param cb 回调
      */
     public void uploadPermVideo(final String accessToken, final String fileName, final InputStream input, final String title, final String desc, Callback<PermMaterial> cb) {
-        wechat.doAsync(new AsyncFunction<PermMaterial>(cb) {
+        doAsync(new AsyncFunction<PermMaterial>(cb) {
             @Override
             public PermMaterial execute() throws Exception {
                 return uploadPermVideo(accessToken, fileName, input, title, desc);
@@ -1017,7 +1017,7 @@ public class Materials extends Component {
         description.put("introduction", desc);
         params.put("description", Jsons.DEFAULT.toJson(description));
 
-        Map<String, Object> resp = wechat.doUpload(url, "media", fileName, input, params);
+        Map<String, Object> resp = doUpload(url, "media", fileName, input, params);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), PermMaterial.class);
     }
 }

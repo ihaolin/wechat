@@ -40,7 +40,7 @@ public class QrCodes extends Component {
      * @return 临时二维码链接，或抛WechatException
      */
     public String getTempQrcode(String sceneId, Integer expire){
-        return getTempQrcode(wechat.loadAccessToken(), sceneId, expire);
+        return getTempQrcode(loadAccessToken(), sceneId, expire);
     }
 
     /**
@@ -50,7 +50,7 @@ public class QrCodes extends Component {
      * @param cb 回调
      */
     public void getTempQrcode(final String sceneId, final Integer expire, Callback<String> cb){
-        getTempQrcode(wechat.loadAccessToken(), sceneId, expire, cb);
+        getTempQrcode(loadAccessToken(), sceneId, expire, cb);
     }
 
     /**
@@ -61,7 +61,7 @@ public class QrCodes extends Component {
      * @param cb 回调
      */
     public void getTempQrcode(final String accessToken, final String sceneId, final Integer expire, Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return getTempQrcode(accessToken, sceneId, expire);
@@ -82,7 +82,7 @@ public class QrCodes extends Component {
         Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_SCENE);
         params.put("expire_seconds", expire);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
         return showQrcode(qr.getTicket());
     }
@@ -93,7 +93,7 @@ public class QrCodes extends Component {
      * @return 永久二维码链接，或抛WechatException
      */
     public String getPermQrcode(String sceneId){
-        return getPermQrcode(wechat.loadAccessToken(), sceneId);
+        return getPermQrcode(loadAccessToken(), sceneId);
     }
 
     /**
@@ -102,7 +102,7 @@ public class QrCodes extends Component {
      * @param cb 回调
      */
     public void getPermQrcode(final String sceneId, Callback<String> cb){
-        getPermQrcode(wechat.loadAccessToken(), sceneId, cb);
+        getPermQrcode(loadAccessToken(), sceneId, cb);
     }
 
     /**
@@ -112,7 +112,7 @@ public class QrCodes extends Component {
      * @param cb 回调
      */
     public void getPermQrcode(final String accessToken, final String sceneId, Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return getPermQrcode(accessToken, sceneId);
@@ -131,7 +131,7 @@ public class QrCodes extends Component {
 
         Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
 
         return showQrcode(qr.getTicket());
@@ -170,7 +170,7 @@ public class QrCodes extends Component {
      * @return 短链接，或抛WechatException
      */
     public String shortUrl(String longUrl){
-        return shortUrl(wechat.loadAccessToken(), longUrl);
+        return shortUrl(loadAccessToken(), longUrl);
     }
 
     /**
@@ -189,7 +189,7 @@ public class QrCodes extends Component {
      * @param cb 回调
      */
     public void shortUrl(final String accessToken, final String longUrl, Callback<String> cb){
-        wechat.doAsync(new AsyncFunction<String>(cb) {
+        doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
                 return shortUrl(accessToken, longUrl);
@@ -210,7 +210,7 @@ public class QrCodes extends Component {
         params.put("action", "long2short");
         params.put("long_url", longUrl);
 
-        Map<String, Object> resp = wechat.doPost(url, params);
+        Map<String, Object> resp = doPost(url, params);
         return (String)resp.get("short_url");
     }
 }
