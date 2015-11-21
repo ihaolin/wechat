@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 	```
 	
@@ -17,14 +17,9 @@
 
 	```xml
 	<dependency>
-        <groupId>com.github.kevinsawicki</groupId>
-        <artifactId>http-request</artifactId>
-        <version>6.0</version>
-    </dependency>
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.4.2</version>
+        <groupId>me.hao0</groupId>
+        <artifactId>common</artifactId>
+        <version>1.0.0</version>
     </dependency>
     <!-- 1.3.0之后引入 -->
     <dependency>
@@ -203,6 +198,10 @@
 		+ 上传客服头像。
 		+ 消息转发客服接口移至消息模块。
 		+ 实现<a href="#data-api">DATA</a>组件。
+	
+	+ 1.6.0:
+		
+		+ 将通用工具类移入[common](https://github.com/ihaolin/common)组件。	
 		
 + 微信相关文档
 

@@ -15,7 +15,7 @@ import me.hao0.wechat.model.data.msg.MsgSendSummary;
 import me.hao0.wechat.model.data.msg.MsgSendSummaryHour;
 import me.hao0.wechat.model.data.user.UserCumulate;
 import me.hao0.wechat.model.data.user.UserSummary;
-import me.hao0.wechat.utils.Jsons;
+import me.hao0.common.json.Jsons;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

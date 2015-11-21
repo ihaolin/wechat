@@ -6,7 +6,7 @@
 
     <groupId>me.hao0</groupId>
     <artifactId>wechat</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
 
     <name>wechat</name>
     <description>A Lightweight Wechat Component</description>
@@ -35,15 +35,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.github.kevinsawicki</groupId>
-            <artifactId>http-request</artifactId>
-            <version>6.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.4.2</version>
+            <groupId>me.hao0</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>

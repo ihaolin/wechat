@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.qrcode.Qrcode;
 import me.hao0.wechat.model.qrcode.QrcodeType;
-import me.hao0.wechat.utils.Jsons;
+import me.hao0.common.json.Jsons;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;

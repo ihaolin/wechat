@@ -3,7 +3,7 @@ package me.hao0.wechat.core;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.wechat.model.menu.MenuType;
-import me.hao0.wechat.utils.Jsons;
+import me.hao0.common.json.Jsons;
 import java.util.ArrayList;
 import java.util.List;
 

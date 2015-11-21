@@ -2,8 +2,10 @@ package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
+import me.hao0.common.http.Http;
+import me.hao0.common.json.Jsons;
+import me.hao0.common.model.Page;
 import me.hao0.wechat.exception.WechatException;
-import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.material.CommonMaterial;
 import me.hao0.wechat.model.material.MaterialCount;
 import me.hao0.wechat.model.material.MaterialType;
@@ -12,8 +14,6 @@ import me.hao0.wechat.model.material.NewsContentItem;
 import me.hao0.wechat.model.material.NewsMaterial;
 import me.hao0.wechat.model.material.PermMaterial;
 import me.hao0.wechat.model.material.TempMaterial;
-import me.hao0.wechat.utils.Http;
-import me.hao0.wechat.utils.Jsons;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -200,7 +200,7 @@ public class Materials extends Component {
         List<T> materials = Jsons.DEFAULT.fromJson(
                 Jsons.DEFAULT.toJson(resp.get("item")), materialType);
 
-        return new Page<>(itemTotal, materials);
+        return new Page<>(Long.valueOf(itemTotal), materials);
     }
 
     /**

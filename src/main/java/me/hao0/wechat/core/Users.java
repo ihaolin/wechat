@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
-import me.hao0.wechat.utils.Jsons;
+import me.hao0.common.json.Jsons;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

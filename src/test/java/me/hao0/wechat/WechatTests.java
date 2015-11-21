@@ -1,11 +1,11 @@
 package me.hao0.wechat;
 
+import me.hao0.common.model.Page;
 import me.hao0.wechat.core.Callback;
 import me.hao0.wechat.core.MenuBuilder;
 import me.hao0.wechat.core.Wechat;
 import me.hao0.wechat.core.WechatBuilder;
 import me.hao0.wechat.exception.WechatException;
-import me.hao0.wechat.model.Page;
 import me.hao0.wechat.model.base.AccessToken;
 import me.hao0.wechat.model.data.article.ArticleDailySummary;
 import me.hao0.wechat.model.data.article.ArticleShare;
@@ -51,15 +51,19 @@ import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import me.hao0.wechat.model.user.Group;
+import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+
 import static org.junit.Assert.*;
 
 /**
@@ -69,13 +73,23 @@ import static org.junit.Assert.*;
  */
 public class WechatTests {
 
-    private Wechat wechat = WechatBuilder.newBuilder("wxf66ea2204a7a1c58", "5c9d2dc5a3c9209edfa76cb4893956f0").build();
+    private Wechat wechat;
 
-    private String accessToken = "Vhwk8ipy22qRk3DxT6KsYKpordq5SNTjkf2Y_oHBGKNhPuAgS0k9Xghk8uoho57xz_LWisxz7fs-wkAQB05XoNQQZHydNBISw-5Z-gEXRhwWBPaAIAFKY";
+    private String accessToken = "DrKCsEv_YEFl3Ni3MW89YU7kVJO0mykt_EOIjRqvEcD8uNjAoUD6xPOHNtD5bLM9XATptWl-Qkn6Xn9qetchTjs6MB0mqMuN_STpseeu3ZACDLeAIANOW";
 
     private String testDomain = "xxx";
 
     private String openId = "onN_8trIW7PSoXLMzMSWySb5jfdY";
+
+    @Before
+    public void init() throws IOException {
+        Properties props = new Properties();
+        InputStream in = Object.class.getResourceAsStream("/dev.properties");
+        props.load(in);
+
+        wechat = WechatBuilder.newBuilder(props.getProperty("appId"), props.getProperty("appSecret"))
+                .build();
+    }
 
     @Test
     public void testAccessToken(){
@@ -456,16 +470,20 @@ public class WechatTests {
     public void testMaterialGets(){
 
         Page<CommonMaterial> images = wechat.material().gets(accessToken, MaterialType.IMAGE, 0, 10);
-        assertTrue(images.getTotal() == 2);
+        assertNotNull(images);
+        System.out.println(images);
 
         Page<CommonMaterial> videos = wechat.material().gets(accessToken, MaterialType.VIDEO, 0, 10);
-        assertTrue(videos.getTotal() == 0);
+        assertNotNull(videos);
+        System.out.println(videos);
 
         Page<CommonMaterial> voices = wechat.material().gets(accessToken, MaterialType.VOICE, 0, 10);
-        assertTrue(voices.getTotal() == 0);
+        assertNotNull(voices);
+        System.out.println(voices);
 
         Page<NewsMaterial> news = wechat.material().gets(accessToken, MaterialType.NEWS, 0, 10);
-        assertTrue(news.getTotal() == 1);
+        assertNotNull(news);
+        System.out.println(news);
     }
 
     @Test

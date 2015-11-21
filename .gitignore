@@ -79,7 +79,7 @@ service-demo/service-demo/*
 service-sms/service-sms/*
 service-user/service-user/*
 
-dev.properties
+src/test/resources/dev.properties
 
 Demo*.java
 
