@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
     </dependency>
 	```
 	
@@ -207,6 +207,10 @@
 
 		+ 文档完善，类访问权限控制；
 		+ 更新最新[common](https://github.com/ihaolin/common)包。
+
+	+ 1.6.2:
+
+		+ 参数严格校验。
 		
 + 微信相关文档
 
