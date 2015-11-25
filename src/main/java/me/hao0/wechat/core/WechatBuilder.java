@@ -6,9 +6,11 @@ import me.hao0.wechat.loader.TicketLoader;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * 微信组件库配置构建器
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 14/11/15
+ * @since 1.4.0
  */
 public final class WechatBuilder {
 

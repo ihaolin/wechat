@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * 一个简陋的微信XML构建器
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 6/11/15

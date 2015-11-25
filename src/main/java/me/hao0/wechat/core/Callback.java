@@ -4,6 +4,7 @@ package me.hao0.wechat.core;
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 17/11/15
+ * @since 1.4.0
  */
 public interface Callback<T> {
 

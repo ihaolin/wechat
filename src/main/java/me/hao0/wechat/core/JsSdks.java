@@ -8,11 +8,13 @@ import me.hao0.wechat.model.js.TicketType;
 import java.util.Map;
 
 /**
+ * JS-SDK组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class JsSdks extends Component {
+public final class JsSdks extends Component {
 
     /**
      * 获取Ticket

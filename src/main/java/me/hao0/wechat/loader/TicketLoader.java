@@ -8,6 +8,7 @@ import me.hao0.wechat.model.js.TicketType;
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 15/11/15
+ * @since 1.3.0
  */
 public interface TicketLoader {
 

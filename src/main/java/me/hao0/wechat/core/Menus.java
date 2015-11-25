@@ -3,17 +3,18 @@ package me.hao0.wechat.core;
 import com.fasterxml.jackson.databind.JavaType;
 import me.hao0.wechat.model.menu.Menu;
 import me.hao0.common.json.Jsons;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * 菜单组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class Menus extends Component {
+public final class Menus extends Component {
 
     /**
      * 查询菜单

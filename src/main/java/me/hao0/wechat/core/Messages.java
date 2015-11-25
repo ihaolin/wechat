@@ -2,6 +2,7 @@ package me.hao0.wechat.core;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import me.hao0.common.xml.XmlReaders;
 import me.hao0.wechat.model.message.receive.RecvMessage;
 import me.hao0.wechat.model.message.receive.RecvMessageType;
 import me.hao0.wechat.model.message.receive.event.RecvEvent;
@@ -26,7 +27,6 @@ import me.hao0.wechat.model.message.send.SendMessageScope;
 import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
-import me.hao0.wechat.utils.XmlReaders;
 import me.hao0.wechat.utils.XmlWriters;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,11 +34,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 消息组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class Messages extends Component {
+public final class Messages extends Component {
 
     /**
      * 发送模板消息

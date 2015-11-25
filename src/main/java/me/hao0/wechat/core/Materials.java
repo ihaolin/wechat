@@ -26,11 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 素材组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class Materials extends Component {
+public final class Materials extends Component {
 
     /**
      * 素材总数

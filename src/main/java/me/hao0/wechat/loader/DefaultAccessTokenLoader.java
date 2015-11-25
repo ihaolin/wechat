@@ -4,10 +4,11 @@ import com.google.common.base.Strings;
 import me.hao0.wechat.model.base.AccessToken;
 
 /**
- * 一个内存式AccessToken加载器
+ * 一个内存式AccessToken加载器(生产环境不推荐使用)
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 10/11/15
+ * @since 1.3.0
  */
 public class DefaultAccessTokenLoader implements AccessTokenLoader {
 

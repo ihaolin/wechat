@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 用户组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class Users extends Component {
+public final class Users extends Component {
 
     /**
      * 创建用户分组

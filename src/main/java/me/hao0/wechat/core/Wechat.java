@@ -24,9 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
+ * 微信核心组件库
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 5/11/15
+ * @since 1.0.0
  */
 public final class Wechat {
 

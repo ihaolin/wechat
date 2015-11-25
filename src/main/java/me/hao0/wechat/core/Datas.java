@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 数据统计组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class Datas extends Component {
+public final class Datas extends Component {
 
     /**
      * 获取用户增减数据

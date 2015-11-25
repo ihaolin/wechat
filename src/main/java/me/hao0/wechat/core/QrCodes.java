@@ -10,11 +10,13 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 /**
+ * 二维码组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ * @since 1.4.0
  */
-public class QrCodes extends Component {
+public final class QrCodes extends Component {
 
     /**
      * 获取Ticket

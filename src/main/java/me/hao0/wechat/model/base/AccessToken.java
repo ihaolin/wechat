@@ -3,9 +3,11 @@ package me.hao0.wechat.model.base;
 import java.io.Serializable;
 
 /**
+ * 访问Token
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 10/11/15
+ * @since 1.0.0
  */
 public class AccessToken implements Serializable {
 

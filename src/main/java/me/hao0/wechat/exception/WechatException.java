@@ -3,9 +3,11 @@ package me.hao0.wechat.exception;
 import java.util.Map;
 
 /**
+ * 微信异常，微信服务器返回错误时抛出的异常
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 5/11/15
+ * @since 1.0.0
  */
 public class WechatException extends RuntimeException {
 
