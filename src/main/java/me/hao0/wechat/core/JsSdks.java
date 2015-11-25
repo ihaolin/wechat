@@ -6,6 +6,7 @@ import me.hao0.wechat.model.js.Config;
 import me.hao0.wechat.model.js.Ticket;
 import me.hao0.wechat.model.js.TicketType;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * JS-SDK组件
@@ -67,10 +68,11 @@ public final class JsSdks extends Component {
      * @return Ticket对象，或抛WechatException
      */
     public Ticket getTicket(String accessToken, TicketType type){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(type, "ticket type can't be null");
+
         String url = TICKET_GET + accessToken + "&type=" + type.type();
-
         Map<String, Object> resp = doGet(url);
-
         Ticket t = new Ticket();
         t.setTicket((String)resp.get("ticket"));
         Integer expire = (Integer)resp.get("expires_in");
@@ -122,6 +124,10 @@ public final class JsSdks extends Component {
      * @return Config对象
      */
     public Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url){
+        checkNotNullAndEmpty(jsApiTicket, "jsApiTicket can't be null or empty");
+        checkNotNullAndEmpty(nonStr, "nonStr can't be null or empty");
+        checkNotNull(timestamp, "timestamp can't be null");
+
         String signStr = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s";
         signStr = String.format(signStr, jsApiTicket, nonStr, timestamp, url);
         String sign = Hashing.sha1().hashString(signStr, Charsets.UTF_8).toString().toLowerCase();

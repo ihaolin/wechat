@@ -6,6 +6,7 @@ import me.hao0.common.json.Jsons;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 菜单组件
@@ -71,6 +72,8 @@ public final class Menus extends Component {
      * @return 菜单列表
      */
     public List<Menu> get(String accessToken){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+
         String url = GET + accessToken;
         Map<String, Object> resp =  doGet(url);
         String jsonMenu = Jsons.DEFAULT.toJson(((Map) resp.get("menu")).get("button"));
@@ -117,6 +120,9 @@ public final class Menus extends Component {
      * @return 创建成功返回true，或抛WechatException
      */
     public Boolean create(String accessToken, String jsonMenu){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(jsonMenu, "jsonMenu can't be null or empty");
+
         String url = CREATE + accessToken;
         doPost(url, jsonMenu);
         return Boolean.TRUE;
@@ -158,6 +164,8 @@ public final class Menus extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean delete(String accessToken){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+
         String url = DELETE + accessToken;
         doGet(url);
         return Boolean.TRUE;

@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 消息组件
@@ -81,6 +82,8 @@ public final class Messages extends Component {
      * @return XML文本消息
      */
     public String respText(String openId, String content){
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(content, "content can't be null or empty");
         XmlWriters msg = respCommonElements(openId, RespMessageType.TEXT);
         msg.element("Content", content);
         return msg.build();
@@ -93,6 +96,9 @@ public final class Messages extends Component {
      * @return XML图片消息
      */
     public String respImage(String openId, String mediaId){
+        checkNotNullAndEmpty(openId, "opendId can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+
         XmlWriters msg = respCommonElements(openId, RespMessageType.IMAGE);
         msg.element("Image", "MediaId", mediaId);
         return msg.build();
@@ -105,6 +111,9 @@ public final class Messages extends Component {
      * @return XML语音消息
      */
     public String respVoice(String openId, String mediaId){
+        checkNotNullAndEmpty(openId, "opendId can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+
         XmlWriters msg = respCommonElements(openId, RespMessageType.VOICE);
         msg.element("Voice", "MediaId", mediaId);
         return msg.build();
@@ -119,6 +128,9 @@ public final class Messages extends Component {
      * @return XML视频消息
      */
     public String respVideo(String openId, String mediaId, String title, String desc){
+        checkNotNullAndEmpty(openId, "opendId can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+
         XmlWriters msg = respCommonElements(openId, RespMessageType.VIDEO);
         msg.element("Video", "MediaId", mediaId, "Title", title, "Description", desc);
         return msg.build();
@@ -136,6 +148,9 @@ public final class Messages extends Component {
      */
     public String respMusic(String openId, String mediaId,
                             String title, String desc, String url, String hqUrl){
+        checkNotNullAndEmpty(openId, "opendId can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+
         XmlWriters msg = respCommonElements(openId, RespMessageType.MUSIC);
         msg.element("Music",
                 "Title", title,
@@ -153,9 +168,10 @@ public final class Messages extends Component {
      * @return XML图文消息
      */
     public String respNews(String openId, List<Article> articles){
-        if (articles.size() > 10){
-            articles = articles.subList(0, 10);
-        }
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(articles, "articles can't be null or empty");
+        checkArgument(articles.size() > 10, "articles length must < 10");
+
         XmlWriters xmlWriters = respCommonElements(openId, RespMessageType.NEWS);
         xmlWriters.element("ArticleCount", articles.size());
         List<XmlWriters.E> items = new ArrayList<>();
@@ -197,8 +213,10 @@ public final class Messages extends Component {
      * @return 转发客服的XML消息
      */
     public String forward(String openId, String kfAccount){
-        XmlWriters xmlWriters = XmlWriters.create();
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(kfAccount, "kfAccount can't be null or empty");
 
+        XmlWriters xmlWriters = XmlWriters.create();
         xmlWriters.element("ToUserName", openId)
                 .element("FromUserName", wechat.getAppId())
                 .element("CreateTime", System.currentTimeMillis() / 1000);
@@ -444,8 +462,11 @@ public final class Messages extends Component {
      * @return 消息ID，或抛WechatException
      */
     public Integer sendTemplate(String accessToken, String openId, String templateId, String link, List<TemplateField> fields){
-        String url = TEMPLATE_SEND + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(templateId, "templateId can't be null or empty");
 
+        String url = TEMPLATE_SEND + accessToken;
         Map<String, Object> params = buildTemplateParams(openId, templateId, link, fields);
 
         Map<String, Object> resp = doPost(url, params);
@@ -525,6 +546,9 @@ public final class Messages extends Component {
      * @return 消息ID，或抛WechatException
      */
     public Long send(String accessToken, SendMessage msg){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(msg, "msg can't be null");
+
         String url = (SendMessageScope.GROUP == msg.getScope() ? SEND_ALL : SEND) + accessToken;
         Map<String, Object> params = buildSendParams(msg);
 
@@ -612,6 +636,9 @@ public final class Messages extends Component {
      * @return 发送成功返回true，或抛WechatException
      */
     public Boolean previewSend(String accessToken, SendPreviewMessage msg){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(msg, "msg can't be null");
+
         String url = PREVIEW_SEND + accessToken;
         Map<String, Object> params = buildPreviewParams(msg);
 
@@ -698,6 +725,9 @@ public final class Messages extends Component {
      * @return 删除成功，或抛WechatException
      */
     public Boolean deleteSend(String accessToken, Long id){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkArgument(id != null && id > 0, "id must be > 0");
+
         String url = DELETE_SEND + accessToken;
 
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -747,8 +777,10 @@ public final class Messages extends Component {
      * @return 群发消息状态，或抛WechatException
      */
     public String getSend(String accessToken, Long id){
-        String url = GET_SEND + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkArgument(id != null && id > 0, "id must be > 0");
 
+        String url = GET_SEND + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("msg_id", id);
 

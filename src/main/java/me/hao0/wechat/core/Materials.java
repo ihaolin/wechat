@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 素材组件
@@ -121,6 +122,7 @@ public final class Materials extends Component {
      * @return 素材总数统计，或抛WechatException
      */
     public MaterialCount count(String accessToken){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
         String url = COUNT + accessToken;
         Map<String, Object> resp = doGet(url);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), MaterialCount.class);
@@ -178,12 +180,14 @@ public final class Materials extends Component {
      * @return 素材分页对象，或抛WechatException
      */
     public <T> Page<T> gets(String accessToken, MaterialType type, Integer offset, Integer count){
-        String url = GETS + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(type, "material type can't be null");
 
+        String url = GETS + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
         params.put("type", type.value());
-        params.put("offset", offset);
-        params.put("count", count);
+        params.put("offset", offset == null ? 0 : offset);
+        params.put("count", count == null ? 10 : count);
 
         Map<String, Object> resp = doPost(url, params);
         return renderMaterialPage(type, resp);
@@ -245,8 +249,10 @@ public final class Materials extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean delete(String accessToken, String mediaId){
-        String url = DELETE + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
 
+        String url = DELETE + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("media_id", mediaId);
         doPost(url, params);
@@ -429,8 +435,12 @@ public final class Materials extends Component {
      * @return TempMaterial对象，或抛WechatException
      */
     public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
-        String url = UPLOAD_TEMP + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(type, "material upload type can't be null");
+        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNull(input, "input can't be null");
 
+        String url = UPLOAD_TEMP + accessToken;
         Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
         params.put("type", type.value());
 
@@ -478,8 +488,10 @@ public final class Materials extends Component {
      * @return 文件二进制数据
      */
     public byte[] downloadTemp(String accessToken, String mediaId){
-        String url = DOWNLOAD_TEMP + accessToken + "&media_id=" + mediaId;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
 
+        String url = DOWNLOAD_TEMP + accessToken + "&media_id=" + mediaId;
         ByteArrayOutputStream output = new ByteArrayOutputStream(1024);
         Http.download(url, output);
 
@@ -526,6 +538,9 @@ public final class Materials extends Component {
      * @return mediaId
      */
     public String uploadPermNews(String accessToken, List<NewsContentItem> items){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(items, "items can't be null or empty");
+
         String url = ADD_NEWS + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("articles", items);
@@ -570,8 +585,12 @@ public final class Materials extends Component {
      * @return 更新成功返回true，反之false
      */
     public Boolean updatePermNews(String accessToken, String mediaId, Integer itemIndex, NewsContentItem newItem){
-        String url = UPDATE_NEWS + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+        checkArgument(itemIndex != null && itemIndex > 0, "itemIndex can't be null and must > 0");
+        checkNotNull(newItem, "newItem can't be null");
 
+        String url = UPDATE_NEWS + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
         params.put("media_id", mediaId);
         params.put("index", itemIndex);
@@ -684,6 +703,10 @@ public final class Materials extends Component {
      * @return 微信内部图片链接
      */
     public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) {
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNull(in, "input can't be null");
+
         String url = UPLOAD_NEWS_IMAGE + accessToken;
         Map<String, Object> resp = doUpload(url, "media", fileName, in, Collections.<String, String>emptyMap());
         return (String)resp.get("url");
@@ -852,11 +875,15 @@ public final class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPerm(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNull(type, "material upload type can't be null");
+        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNull(input, "input can't be null");
         if (MaterialUploadType.VIDEO == type){
             throw new IllegalArgumentException("type must be image, voice, or thumb, you should use uploadPermVideo method.");
         }
-        String url = UPLOAD_PERM + accessToken;
 
+        String url = UPLOAD_PERM + accessToken;
         Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
         params.put("type", type.value());
 
@@ -1008,6 +1035,12 @@ public final class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc) {
+
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNull(input, "input can't be null");
+        checkNotNullAndEmpty(title, "title can't be null or empty");
+        checkNotNullAndEmpty(desc, "desc can't be null or empty");
 
         String url = UPLOAD_PERM + accessToken;
 

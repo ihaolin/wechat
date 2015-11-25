@@ -8,6 +8,7 @@ import me.hao0.common.json.Jsons;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 用户组件
@@ -102,8 +103,10 @@ public final class Users extends Component {
      * @return 分组ID，或抛WechatException
      */
     public Integer createGroup(String accessToken, String name){
-        String url = CREATE_GROUP + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(name, "name can't be null or empty");
 
+        String url = CREATE_GROUP + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         Group g = new Group();
         g.setName(name);
@@ -141,10 +144,10 @@ public final class Users extends Component {
      * @return 分组列表，或抛WechatException
      */
     public List<Group> getGroup(String accessToken){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+
         String url = GET_GROUP + accessToken;
-
         Map<String, Object> resp = doGet(url);
-
         return Jsons.EXCLUDE_DEFAULT
                 .fromJson(Jsons.DEFAULT.toJson(resp.get("groups")), ARRAY_LIST_GROUP_TYPE);
     }
@@ -189,8 +192,10 @@ public final class Users extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean deleteGroup(String accessToken, Integer id){
-        String url = DELETE_GROUP + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkArgument(id != null && id > 0, "id must > 0");
 
+        String url = DELETE_GROUP + accessToken;
         Group g = new Group();
         g.setId(id);
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -244,8 +249,11 @@ public final class Users extends Component {
      * @return 更新成功返回true，或抛WechatException
      */
     public Boolean updateGroup(String accessToken, Integer id, String newName){
-        String url = UPDATE_GROUP + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkArgument(id != null && id > 0, "id must > 0");
+        checkNotNullAndEmpty(newName, "group name can't be null or empty");
 
+        String url = UPDATE_GROUP + accessToken;
         Group g = new Group();
         g.setId(id);
         g.setName(newName);
@@ -296,8 +304,10 @@ public final class Users extends Component {
      * @return 组ID，或抛WechatException
      */
     public Integer getUserGroup(String accessToken, String openId){
-        String url = GROUP_OF_USER + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
 
+        String url = GROUP_OF_USER + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("openid", openId);
 
@@ -349,8 +359,11 @@ public final class Users extends Component {
      * @return 移动成功返回true，或抛WechatException
      */
     public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
-        String url = MOVE_USER_GROUP + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkArgument(groupId != null && groupId > 0, "groupId must > 0");
 
+        String url = MOVE_USER_GROUP + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
         params.put("openid", openId);
         params.put("to_groupid", groupId);
@@ -399,8 +412,10 @@ public final class Users extends Component {
      * @return 用户信息，或抛WechatException
      */
     public User getUser(String accessToken, String openId){
-        String url = GET_USER_INFO + accessToken + "&openid=" + openId;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
 
+        String url = GET_USER_INFO + accessToken + "&openid=" + openId;
         Map<String, Object> resp = doGet(url);
 
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
@@ -450,6 +465,10 @@ public final class Users extends Component {
      * @return 备注成功返回true，或抛WechatException
      */
     public Boolean remarkUser(String accessToken, String openId, String remark){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(remark, "remakr can't be null or empty");
+
         String url = REMARK_USER + accessToken;
 
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);

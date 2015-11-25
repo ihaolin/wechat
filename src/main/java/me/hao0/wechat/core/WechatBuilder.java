@@ -2,8 +2,8 @@ package me.hao0.wechat.core;
 
 import me.hao0.wechat.loader.AccessTokenLoader;
 import me.hao0.wechat.loader.TicketLoader;
-
 import java.util.concurrent.ExecutorService;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 微信组件库配置构建器
@@ -23,6 +23,9 @@ public final class WechatBuilder {
      * @return a builder
      */
     public static WechatBuilder newBuilder(String appId, String appSecret){
+        checkNotNullAndEmpty(appId, "appId can't be null or empty");
+        checkNotNullAndEmpty(appSecret, "appSecret can't be null or empty");
+
         WechatBuilder builder = new WechatBuilder();
         builder.wechat = new Wechat(appId, appSecret);
         return builder;
@@ -34,6 +37,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder token(String token){
+        checkNotNullAndEmpty(token, "token can't be null or empty");
         wechat.appToken = token;
         return this;
     }
@@ -44,6 +48,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder msgKey(String msgKey){
+        checkNotNullAndEmpty(msgKey, "msg key can't be null or empty");
         wechat.msgKey = msgKey;
         return this;
     }
@@ -54,6 +59,7 @@ public final class WechatBuilder {
      * @return return this
      */
     public WechatBuilder accessTokenLoader(AccessTokenLoader accessTokenLoader){
+        checkNotNull(accessTokenLoader, "accessTokenLoader can't be null");
         wechat.tokenLoader = accessTokenLoader;
         return this;
     }
@@ -64,6 +70,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder ticketLoader(TicketLoader ticketLoader){
+        checkNotNull(ticketLoader, "ticketLoader can't be null");
         wechat.ticketLoader = ticketLoader;
         return this;
     }
@@ -74,6 +81,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder executor(ExecutorService executor){
+        checkNotNull(executor, "executor can't be null");
         wechat.executor = executor;
         return this;
     }

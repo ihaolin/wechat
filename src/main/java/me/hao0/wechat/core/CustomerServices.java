@@ -8,7 +8,6 @@ import me.hao0.wechat.model.customer.CsSession;
 import me.hao0.wechat.model.customer.MsgRecord;
 import me.hao0.wechat.model.customer.UserSession;
 import me.hao0.wechat.model.customer.WaitingSession;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +18,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 多客服组件
@@ -186,6 +186,9 @@ public final class CustomerServices extends Component {
     }
 
     private Boolean createOrUpdateAccount(String account, String nickName, String password, String url) {
+        checkNotNullAndEmpty(account, "account can't be null or empty");
+        checkNotNullAndEmpty(nickName, "nickName can't be null or empty");
+        checkNotNullAndEmpty(password, "password can't be null or empty");
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
 
         params.put("kf_account", account);
@@ -319,6 +322,10 @@ public final class CustomerServices extends Component {
      * @return 上传成功返回true，或抛WechatException
      */
     public Boolean uploadHead(String accessToken, String kfAccount, String fileName, InputStream input){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(kfAccount, "kfAccount can't be null or empty");
+        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNull(input, "input can't be null");
         String url = UPLOAD_HEAD + accessToken + "&kf_account=" + kfAccount;
         doUpload(url, "media", fileName, input);
         return Boolean.TRUE;
@@ -364,10 +371,10 @@ public final class CustomerServices extends Component {
      * @return 添加成功返回true，或抛WechatException
      */
     public Boolean deleteAccount(String accessToken, String kfAccount){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(kfAccount, "kfAccount can't be null or empty");
         String url = DELETE_ACCOUNT + accessToken + "&kf_account=" + kfAccount;
-
         doGet(url);
-
         return Boolean.TRUE;
     }
 
@@ -424,13 +431,14 @@ public final class CustomerServices extends Component {
      */
     @SuppressWarnings("unchecked")
     public List<MsgRecord> getMsgRecords(String accessToken, Integer pageNo, Integer pageSize, Date startTime, Date endTime){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
         String url = RECORD + accessToken;
 
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(4);
-        params.put("pageindex", pageNo);
-        params.put("pagesize", pageSize);
-        params.put("starttime", startTime.getTime());
-        params.put("endtime", endTime.getTime());
+        params.put("pageindex", pageNo == null ? 1 : pageNo);
+        params.put("pagesize", pageSize == null ? 10 : pageSize);
+        params.put("starttime", startTime == null ? System.currentTimeMillis() : startTime.getTime());
+        params.put("endtime", endTime == null ? System.currentTimeMillis() : endTime.getTime());
 
         Map<String, Object> resp = doPost(url, params);
         List<Map<String, Object>> records = (List<Map<String, Object>>)resp.get("recordlist");
@@ -557,7 +565,8 @@ public final class CustomerServices extends Component {
     }
 
     private Boolean createOrCloseSession(String openId, String kfAccount, String text, String url){
-
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(kfAccount, "kfAccount can't be null or empty");
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
         params.put("openid", openId);
         params.put("kf_account", kfAccount);
@@ -607,8 +616,10 @@ public final class CustomerServices extends Component {
      * @return 客户的会话状态，或抛WechatException
      */
     public UserSession getUserSession(String accessToken, String openId){
-        String url = USER_SESSION_STATUS + accessToken + "&openid=" + openId;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(openId, "openId can't be null or empty");
 
+        String url = USER_SESSION_STATUS + accessToken + "&openid=" + openId;
         Map<String, Object> resp = doGet(url);
         UserSession status = new UserSession();
         status.setKfAccount(String.valueOf(resp.get("kf_account")));
@@ -659,8 +670,10 @@ public final class CustomerServices extends Component {
      */
     @SuppressWarnings("unchecked")
     public List<CsSession> getCsSessions(String accessToken, String kfAccount){
-        String url = CS_SESSION_STATUS + accessToken + "&kf_account=" + kfAccount;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(kfAccount, "kfAccount can't be null or empty");
 
+        String url = CS_SESSION_STATUS + accessToken + "&kf_account=" + kfAccount;
         Map<String, Object> resp = doGet(url);
         List<Map<String, Object>> sessions = (List<Map<String, Object>>)resp.get("sessionlist");
         if (sessions.isEmpty()){
@@ -718,8 +731,9 @@ public final class CustomerServices extends Component {
      */
     @SuppressWarnings("unchecked")
     public List<WaitingSession> getWaitingSessions(String accessToken){
-        String url = WAITING_SESSION + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
 
+        String url = WAITING_SESSION + accessToken;
         Map<String, Object> resp = doGet(url);
         List<Map<String, Object>> sessions = (List<Map<String, Object>>)resp.get("waitcaselist");
         if (sessions.isEmpty()){

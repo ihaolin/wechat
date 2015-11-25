@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 基础组件
@@ -56,6 +57,7 @@ public final class Bases extends Component {
      */
     public String authUrl(String redirectUrl, Boolean quiet) {
         try {
+            checkNotNullAndEmpty(redirectUrl, "redirectUrl can't be null or empty.");
             redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
             return AUTH_URL +
                     "appid=" + wechat.getAppId() +
@@ -88,6 +90,7 @@ public final class Bases extends Component {
      * @return 用户的openId，或抛WechatException
      */
     public String openId(String code){
+        checkNotNullAndEmpty(code, "code can't be null or empty");
         String url = OPEN_ID_URL +
                 "appid=" + wechat.getAppId() +
                 "&secret=" + wechat.getAppSecret() +
@@ -120,12 +123,12 @@ public final class Bases extends Component {
         String url = ACCESS_TOKEN_URL + "&appid=" + wechat.getAppId() + "&secret=" + wechat.getAppSecret();
 
         Map<String, Object> resp = doGet(url);
-
         AccessToken token = new AccessToken();
         token.setAccessToken((String)resp.get("access_token"));
         Integer expire = (Integer)resp.get("expires_in");
         token.setExpire(expire);
         token.setExpiredAt(System.currentTimeMillis() + expire * 1000);
+
         return token;
     }
 
@@ -166,10 +169,9 @@ public final class Bases extends Component {
      */
     @SuppressWarnings("unchecked")
     public List<String> ip(String accessToken){
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty.");
         String url = WX_IP_URL + accessToken;
-
         Map<String, Object> resp = doGet(url);
-
         return (List<String>)resp.get("ip_list");
     }
 }

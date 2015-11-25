@@ -8,6 +8,7 @@ import me.hao0.common.json.Jsons;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import static me.hao0.common.util.Preconditions.*;
 
 /**
  * 二维码组件
@@ -79,8 +80,11 @@ public final class QrCodes extends Component {
      * @return 临时二维码链接，或抛WechatException
      */
     public String getTempQrcode(String accessToken, String sceneId, Integer expire){
-        String url = TICKET_GET + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(sceneId, "sceneId can't be null or empty");
+        checkArgument(expire != null && expire > 0, "expire must > 0");
 
+        String url = TICKET_GET + accessToken;
         Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_SCENE);
         params.put("expire_seconds", expire);
 
@@ -129,8 +133,10 @@ public final class QrCodes extends Component {
      * @return 永久二维码链接，或抛WechatException
      */
     public String getPermQrcode(String accessToken, String sceneId){
-        String url = TICKET_GET + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(sceneId, "sceneId can't be null or empty");
 
+        String url = TICKET_GET + accessToken;
         Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
 
         Map<String, Object> resp = doPost(url, params);
@@ -206,8 +212,10 @@ public final class QrCodes extends Component {
      * @return 短链接，或抛WechatException
      */
     public String shortUrl(String accessToken, String longUrl){
-        String url = LONG_TO_SHORT + accessToken;
+        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(longUrl, "longUrl can't be null or empty");
 
+        String url = LONG_TO_SHORT + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
         params.put("action", "long2short");
         params.put("long_url", longUrl);
