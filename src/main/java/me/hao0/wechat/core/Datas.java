@@ -923,8 +923,8 @@ public final class Datas extends Component {
     }
 
     private <T> List<T> doSummary(String url, String startDate, String endDate, JavaType type){
-        checkNotNullAndEmpty(startDate, "startDate can't be null or empty");
-        checkNotNullAndEmpty(endDate, "endDate can't be null or empty");
+        checkNotNullAndEmpty(startDate, "startDate");
+        checkNotNullAndEmpty(endDate, "endDate");
         Map<String, Object> params = buildDateRange(startDate, endDate);
         Map<String, Object> resp = doPost(url, params);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp.get("list")), type);

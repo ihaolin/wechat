@@ -68,7 +68,7 @@ public final class JsSdks extends Component {
      * @return Ticket对象，或抛WechatException
      */
     public Ticket getTicket(String accessToken, TicketType type){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNull(type, "ticket type can't be null");
 
         String url = TICKET_GET + accessToken + "&type=" + type.type();
@@ -124,8 +124,8 @@ public final class JsSdks extends Component {
      * @return Config对象
      */
     public Config getConfig(String jsApiTicket, String nonStr, Long timestamp, String url){
-        checkNotNullAndEmpty(jsApiTicket, "jsApiTicket can't be null or empty");
-        checkNotNullAndEmpty(nonStr, "nonStr can't be null or empty");
+        checkNotNullAndEmpty(jsApiTicket, "jsApiTicket");
+        checkNotNullAndEmpty(nonStr, "nonStr");
         checkNotNull(timestamp, "timestamp can't be null");
 
         String signStr = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s";

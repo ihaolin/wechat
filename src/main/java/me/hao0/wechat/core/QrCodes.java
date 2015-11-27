@@ -80,8 +80,8 @@ public final class QrCodes extends Component {
      * @return 临时二维码链接，或抛WechatException
      */
     public String getTempQrcode(String accessToken, String sceneId, Integer expire){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(sceneId, "sceneId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(sceneId, "sceneId");
         checkArgument(expire != null && expire > 0, "expire must > 0");
 
         String url = TICKET_GET + accessToken;
@@ -133,8 +133,8 @@ public final class QrCodes extends Component {
      * @return 永久二维码链接，或抛WechatException
      */
     public String getPermQrcode(String accessToken, String sceneId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(sceneId, "sceneId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(sceneId, "sceneId");
 
         String url = TICKET_GET + accessToken;
         Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
@@ -212,8 +212,8 @@ public final class QrCodes extends Component {
      * @return 短链接，或抛WechatException
      */
     public String shortUrl(String accessToken, String longUrl){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(longUrl, "longUrl can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(longUrl, "longUrl");
 
         String url = LONG_TO_SHORT + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);

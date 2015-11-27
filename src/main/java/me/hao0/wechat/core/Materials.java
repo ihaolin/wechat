@@ -122,7 +122,7 @@ public final class Materials extends Component {
      * @return 素材总数统计，或抛WechatException
      */
     public MaterialCount count(String accessToken){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         String url = COUNT + accessToken;
         Map<String, Object> resp = doGet(url);
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), MaterialCount.class);
@@ -180,7 +180,7 @@ public final class Materials extends Component {
      * @return 素材分页对象，或抛WechatException
      */
     public <T> Page<T> gets(String accessToken, MaterialType type, Integer offset, Integer count){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNull(type, "material type can't be null");
 
         String url = GETS + accessToken;
@@ -249,8 +249,8 @@ public final class Materials extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean delete(String accessToken, String mediaId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(mediaId, "mediaId");
 
         String url = DELETE + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -435,9 +435,9 @@ public final class Materials extends Component {
      * @return TempMaterial对象，或抛WechatException
      */
     public TempMaterial uploadTemp(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNull(type, "material upload type can't be null");
-        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNullAndEmpty(fileName, "fileName");
         checkNotNull(input, "input can't be null");
 
         String url = UPLOAD_TEMP + accessToken;
@@ -488,8 +488,8 @@ public final class Materials extends Component {
      * @return 文件二进制数据
      */
     public byte[] downloadTemp(String accessToken, String mediaId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(mediaId, "mediaId");
 
         String url = DOWNLOAD_TEMP + accessToken + "&media_id=" + mediaId;
         ByteArrayOutputStream output = new ByteArrayOutputStream(1024);
@@ -538,8 +538,8 @@ public final class Materials extends Component {
      * @return mediaId
      */
     public String uploadPermNews(String accessToken, List<NewsContentItem> items){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(items, "items can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(items, "items");
 
         String url = ADD_NEWS + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -585,8 +585,8 @@ public final class Materials extends Component {
      * @return 更新成功返回true，反之false
      */
     public Boolean updatePermNews(String accessToken, String mediaId, Integer itemIndex, NewsContentItem newItem){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(mediaId, "mediaId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(mediaId, "mediaId");
         checkArgument(itemIndex != null && itemIndex > 0, "itemIndex can't be null and must > 0");
         checkNotNull(newItem, "newItem can't be null");
 
@@ -703,8 +703,8 @@ public final class Materials extends Component {
      * @return 微信内部图片链接
      */
     public String uploadPermNewsImage(String accessToken, String fileName, InputStream in) {
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(fileName, "fileName");
         checkNotNull(in, "input can't be null");
 
         String url = UPLOAD_NEWS_IMAGE + accessToken;
@@ -875,9 +875,9 @@ public final class Materials extends Component {
      * @return PermMaterial对象，或抛WechatException
      */
     public PermMaterial uploadPerm(String accessToken, MaterialUploadType type, String fileName, InputStream input) {
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNull(type, "material upload type can't be null");
-        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNullAndEmpty(fileName, "fileName");
         checkNotNull(input, "input can't be null");
         if (MaterialUploadType.VIDEO == type){
             throw new IllegalArgumentException("type must be image, voice, or thumb, you should use uploadPermVideo method.");
@@ -1036,11 +1036,11 @@ public final class Materials extends Component {
      */
     public PermMaterial uploadPermVideo(String accessToken, String fileName, InputStream input, String title, String desc) {
 
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(fileName, "fileName can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(fileName, "fileName");
         checkNotNull(input, "input can't be null");
-        checkNotNullAndEmpty(title, "title can't be null or empty");
-        checkNotNullAndEmpty(desc, "desc can't be null or empty");
+        checkNotNullAndEmpty(title, "title");
+        checkNotNullAndEmpty(desc, "desc");
 
         String url = UPLOAD_PERM + accessToken;
 

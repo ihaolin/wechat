@@ -57,7 +57,7 @@ public final class Bases extends Component {
      */
     public String authUrl(String redirectUrl, Boolean quiet) {
         try {
-            checkNotNullAndEmpty(redirectUrl, "redirectUrl can't be null or empty.");
+            checkNotNullAndEmpty(redirectUrl, "redirectUrl");
             redirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
             return AUTH_URL +
                     "appid=" + wechat.getAppId() +
@@ -90,7 +90,7 @@ public final class Bases extends Component {
      * @return 用户的openId，或抛WechatException
      */
     public String openId(String code){
-        checkNotNullAndEmpty(code, "code can't be null or empty");
+        checkNotNullAndEmpty(code, "code");
         String url = OPEN_ID_URL +
                 "appid=" + wechat.getAppId() +
                 "&secret=" + wechat.getAppSecret() +
@@ -169,7 +169,7 @@ public final class Bases extends Component {
      */
     @SuppressWarnings("unchecked")
     public List<String> ip(String accessToken){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty.");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         String url = WX_IP_URL + accessToken;
         Map<String, Object> resp = doGet(url);
         return (List<String>)resp.get("ip_list");

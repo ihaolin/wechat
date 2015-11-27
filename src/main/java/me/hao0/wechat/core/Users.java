@@ -103,8 +103,8 @@ public final class Users extends Component {
      * @return 分组ID，或抛WechatException
      */
     public Integer createGroup(String accessToken, String name){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(name, "name can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(name, "name");
 
         String url = CREATE_GROUP + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -144,7 +144,7 @@ public final class Users extends Component {
      * @return 分组列表，或抛WechatException
      */
     public List<Group> getGroup(String accessToken){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
 
         String url = GET_GROUP + accessToken;
         Map<String, Object> resp = doGet(url);
@@ -192,7 +192,7 @@ public final class Users extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean deleteGroup(String accessToken, Integer id){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkArgument(id != null && id > 0, "id must > 0");
 
         String url = DELETE_GROUP + accessToken;
@@ -249,9 +249,9 @@ public final class Users extends Component {
      * @return 更新成功返回true，或抛WechatException
      */
     public Boolean updateGroup(String accessToken, Integer id, String newName){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
         checkArgument(id != null && id > 0, "id must > 0");
-        checkNotNullAndEmpty(newName, "group name can't be null or empty");
+        checkNotNullAndEmpty(newName, "group name");
 
         String url = UPDATE_GROUP + accessToken;
         Group g = new Group();
@@ -304,8 +304,8 @@ public final class Users extends Component {
      * @return 组ID，或抛WechatException
      */
     public Integer getUserGroup(String accessToken, String openId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(openId, "openId");
 
         String url = GROUP_OF_USER + accessToken;
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
@@ -359,8 +359,8 @@ public final class Users extends Component {
      * @return 移动成功返回true，或抛WechatException
      */
     public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(openId, "openId");
         checkArgument(groupId != null && groupId > 0, "groupId must > 0");
 
         String url = MOVE_USER_GROUP + accessToken;
@@ -412,8 +412,8 @@ public final class Users extends Component {
      * @return 用户信息，或抛WechatException
      */
     public User getUser(String accessToken, String openId){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(openId, "openId can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(openId, "openId");
 
         String url = GET_USER_INFO + accessToken + "&openid=" + openId;
         Map<String, Object> resp = doGet(url);
@@ -465,9 +465,9 @@ public final class Users extends Component {
      * @return 备注成功返回true，或抛WechatException
      */
     public Boolean remarkUser(String accessToken, String openId, String remark){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(openId, "openId can't be null or empty");
-        checkNotNullAndEmpty(remark, "remakr can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(openId, "openId");
+        checkNotNullAndEmpty(remark, "remark");
 
         String url = REMARK_USER + accessToken;
 

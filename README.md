@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
     </dependency>
 	```
 	
@@ -19,7 +19,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.7</version>
     </dependency>
     <!-- 1.3.0之后引入 -->
     <dependency>

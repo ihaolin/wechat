@@ -72,7 +72,7 @@ public final class Menus extends Component {
      * @return 菜单列表
      */
     public List<Menu> get(String accessToken){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
 
         String url = GET + accessToken;
         Map<String, Object> resp =  doGet(url);
@@ -120,8 +120,8 @@ public final class Menus extends Component {
      * @return 创建成功返回true，或抛WechatException
      */
     public Boolean create(String accessToken, String jsonMenu){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
-        checkNotNullAndEmpty(jsonMenu, "jsonMenu can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(jsonMenu, "jsonMenu");
 
         String url = CREATE + accessToken;
         doPost(url, jsonMenu);
@@ -164,7 +164,7 @@ public final class Menus extends Component {
      * @return 删除成功返回true，或抛WechatException
      */
     public Boolean delete(String accessToken){
-        checkNotNullAndEmpty(accessToken, "accessToken can't be null or empty");
+        checkNotNullAndEmpty(accessToken, "accessToken");
 
         String url = DELETE + accessToken;
         doGet(url);
