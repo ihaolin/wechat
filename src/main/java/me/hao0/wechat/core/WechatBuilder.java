@@ -23,8 +23,8 @@ public final class WechatBuilder {
      * @return a builder
      */
     public static WechatBuilder newBuilder(String appId, String appSecret){
-        checkNotNullAndEmpty(appId, "appId can't be null or empty");
-        checkNotNullAndEmpty(appSecret, "appSecret can't be null or empty");
+        checkNotNullAndEmpty(appId, "appId");
+        checkNotNullAndEmpty(appSecret, "appSecret");
 
         WechatBuilder builder = new WechatBuilder();
         builder.wechat = new Wechat(appId, appSecret);
@@ -37,7 +37,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder token(String token){
-        checkNotNullAndEmpty(token, "token can't be null or empty");
+        checkNotNullAndEmpty(token, "token");
         wechat.appToken = token;
         return this;
     }
@@ -48,7 +48,7 @@ public final class WechatBuilder {
      * @return this
      */
     public WechatBuilder msgKey(String msgKey){
-        checkNotNullAndEmpty(msgKey, "msg key can't be null or empty");
+        checkNotNullAndEmpty(msgKey, "msgKey");
         wechat.msgKey = msgKey;
         return this;
     }

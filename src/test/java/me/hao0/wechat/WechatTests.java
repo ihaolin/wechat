@@ -744,4 +744,9 @@ public class WechatTests {
             System.out.println(dist);
         }
     }
+
+    @Test
+    public void testBuildWechat(){
+        Wechat w = WechatBuilder.newBuilder(null, "").build();
+    }
 }

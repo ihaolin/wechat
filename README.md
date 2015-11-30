@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.3</version>
+        <version>1.6.4</version>
     </dependency>
 	```
 	
@@ -19,7 +19,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.9</version>
     </dependency>
     <!-- 1.3.0之后引入 -->
     <dependency>
@@ -215,7 +215,11 @@
     + 1.6.3:
 
         + 简化校验。
-		
+
+    + 1.6.4:
+
+	    + 更新最新[common](https://github.com/ihaolin/common)包。
+
 + 微信相关文档
 
 	+ [公众号接口权限说明](http://mp.weixin.qq.com/wiki/8/71e1908fa08e67c6251ebdd78fd6b6b4.html)
