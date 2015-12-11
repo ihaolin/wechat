@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.4</version>
+        <version>1.6.5</version>
     </dependency>
 	```
 	
@@ -19,7 +19,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.9</version>
+        <version>1.1.0</version>
     </dependency>
     <!-- 1.3.0之后引入 -->
     <dependency>
@@ -219,6 +219,11 @@
     + 1.6.4:
 
 	    + 更新最新[common](https://github.com/ihaolin/common)包。
+
+	+ 1.6.5
+
+	    + 升级[common](https://github.com/ihaolin/common)，去掉kfAccount校验。
+
 
 + 微信相关文档
 

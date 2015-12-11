@@ -214,7 +214,6 @@ public final class Messages extends Component {
      */
     public String forward(String openId, String kfAccount){
         checkNotNullAndEmpty(openId, "openId");
-        checkNotNullAndEmpty(kfAccount, "kfAccount");
 
         XmlWriters xmlWriters = XmlWriters.create();
         xmlWriters.element("ToUserName", openId)
