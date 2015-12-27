@@ -170,7 +170,7 @@ public final class Messages extends Component {
     public String respNews(String openId, List<Article> articles){
         checkNotNullAndEmpty(openId, "openId");
         checkNotNullAndEmpty(articles, "articles");
-        checkArgument(articles.size() > 10, "articles length must < 10");
+        checkArgument(articles.size() < 10, "articles length must < 10");
 
         XmlWriters xmlWriters = respCommonElements(openId, RespMessageType.NEWS);
         xmlWriters.element("ArticleCount", articles.size());

@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.5</version>
+        <version>1.6.6</version>
     </dependency>
 	```
 	
@@ -224,6 +224,9 @@
 
 	    + 升级[common](https://github.com/ihaolin/common)，去掉kfAccount校验。
 
+	+ 1.6.6
+
+        + 修复respNews参数校验。
 
 + 微信相关文档
 
