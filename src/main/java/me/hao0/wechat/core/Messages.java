@@ -380,7 +380,7 @@ public final class Messages extends Component {
      * @param fields 字段列表
      * @return 消息ID，或抛WechatException
      */
-    public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields){
+    public Long sendTemplate(String openId, String templateId, List<TemplateField> fields){
         return sendTemplate(loadAccessToken(), openId, templateId, null, fields);
     }
 
@@ -392,7 +392,7 @@ public final class Messages extends Component {
      * @param fields 字段列表
      * @return 消息ID，或抛WechatException
      */
-    public Integer sendTemplate(String accessToken, String openId, String templateId, List<TemplateField> fields){
+    public Long sendTemplate(String accessToken, String openId, String templateId, List<TemplateField> fields){
         return sendTemplate(accessToken, openId, templateId, null, fields);
     }
 
@@ -404,7 +404,7 @@ public final class Messages extends Component {
      * @param link 点击链接
      * @return 消息ID，或抛WechatException
      */
-    public Integer sendTemplate(String openId, String templateId, List<TemplateField> fields, String link){
+    public Long sendTemplate(String openId, String templateId, List<TemplateField> fields, String link){
         return sendTemplate(loadAccessToken(), openId, templateId, link, fields);
     }
 
@@ -415,7 +415,7 @@ public final class Messages extends Component {
      * @param fields 字段列表
      * @param cb 回调
      */
-    public void sendTemplate(final String openId, final String templateId, final List<TemplateField> fields, Callback<Integer> cb){
+    public void sendTemplate(final String openId, final String templateId, final List<TemplateField> fields, Callback<Long> cb){
         sendTemplate(loadAccessToken(), openId, templateId, null, fields, cb);
     }
 
@@ -428,7 +428,7 @@ public final class Messages extends Component {
      * @param cb 回调
      */
     public void sendTemplate(final String openId, final String templateId,
-                             final String link, final List<TemplateField> fields, Callback<Integer> cb){
+                             final String link, final List<TemplateField> fields, Callback<Long> cb){
         sendTemplate(loadAccessToken(), openId, templateId, link, fields, cb);
     }
 
@@ -442,10 +442,10 @@ public final class Messages extends Component {
      * @param cb 回调
      */
     public void sendTemplate(final String accessToken, final String openId, final String templateId,
-                             final String link, final List<TemplateField> fields, Callback<Integer> cb){
-        doAsync(new AsyncFunction<Integer>(cb) {
+                             final String link, final List<TemplateField> fields, Callback<Long> cb){
+        doAsync(new AsyncFunction<Long>(cb) {
             @Override
-            public Integer execute() {
+            public Long execute() {
                 return sendTemplate(accessToken, openId, templateId, link, fields);
             }
         });
@@ -460,7 +460,7 @@ public final class Messages extends Component {
      * @param fields 字段列表
      * @return 消息ID，或抛WechatException
      */
-    public Integer sendTemplate(String accessToken, String openId, String templateId, String link, List<TemplateField> fields){
+    public Long sendTemplate(String accessToken, String openId, String templateId, String link, List<TemplateField> fields){
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(openId, "openId");
         checkNotNullAndEmpty(templateId, "templateId");
@@ -469,7 +469,8 @@ public final class Messages extends Component {
         Map<String, Object> params = buildTemplateParams(openId, templateId, link, fields);
 
         Map<String, Object> resp = doPost(url, params);
-        return (Integer)resp.get("msgid");
+        Object msgId = resp.get("msgid");
+        return msgId instanceof Long ? (Long)msgId : ((Integer)msgId).longValue();
     }
 
     private Map<String, Object> buildTemplateParams(String openId, String templateId, String link, List<TemplateField> fields) {
@@ -552,7 +553,8 @@ public final class Messages extends Component {
         Map<String, Object> params = buildSendParams(msg);
 
         Map<String, Object> resp = doPost(url, params);
-        return (Long)resp.get("msg_id");
+        Object msgId = resp.get("msg_id");
+        return msgId instanceof Long ? (Long)msgId : ((Integer)msgId).longValue();
     }
 
     private Map<String, Object> buildSendParams(SendMessage msg) {

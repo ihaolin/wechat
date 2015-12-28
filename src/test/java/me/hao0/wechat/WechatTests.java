@@ -63,7 +63,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 import static org.junit.Assert.*;
 
 /**
@@ -75,7 +74,7 @@ public class WechatTests {
 
     private Wechat wechat;
 
-    private String accessToken = "DrKCsEv_YEFl3Ni3MW89YU7kVJO0mykt_EOIjRqvEcD8uNjAoUD6xPOHNtD5bLM9XATptWl-Qkn6Xn9qetchTjs6MB0mqMuN_STpseeu3ZACDLeAIANOW";
+    private String accessToken = "a9l23BUNe5v3qvZeJs3N5nzRid9GbmXSjwW5XNMI0iUrZVkWPZFO-KLQvFRSa1GYY6CDAVNW0jXn5uGA6v1MGRsJgLSgVpeKR0HuJWB2LKdkFSDfACAUHS";
 
     private String testDomain = "xxx";
 
@@ -185,7 +184,9 @@ public class WechatTests {
 
     @Test
     public void testGroupGet(){
-        assertNotNull(wechat.user().getGroup(accessToken));
+        List<Group> groups = wechat.user().getGroup(accessToken);
+        assertNotNull(groups);
+        System.out.println(groups);
     }
 
     @Test
@@ -237,17 +238,16 @@ public class WechatTests {
 
     @Test
     public void testSendTemplate(){
-        assertTrue(
-                wechat.msg().sendTemplate(accessToken,
-                        openId, "vxjR2DrT-I5-Edzc3vgWV-CgMoG0cAWISAxQIMLmYk4", "http://www.hao0.me",
-                        Arrays.asList(
-                                new TemplateField("first", "下单成功"),
-                                new TemplateField("remark", "感谢您的使用。"),
-                                new TemplateField("keyword1", "TD113123123"),
-                                new TemplateField("keyword2", "2015-11-11 11:11:11"),
-                                new TemplateField("keyword3", "123456")
-                        )) > 0
-        );
+        Long msgId = wechat.msg().sendTemplate(accessToken,
+                openId, "vxjR2DrT-I5-Edzc3vgWV-CgMoG0cAWISAxQIMLmYk4", "http://www.hao0.me",
+                Arrays.asList(
+                    new TemplateField("first", "下单成功"),
+                    new TemplateField("remark", "感谢您的使用。"),
+                    new TemplateField("keyword1", "TD113123123"),
+                    new TemplateField("keyword2", "2015-11-11 11:11:11"),
+                    new TemplateField("keyword3", "123456")
+                ));
+        assertTrue(msgId > 0L);
     }
 
     @Test
@@ -423,7 +423,9 @@ public class WechatTests {
         msg.setType(SendMessageType.TEXT);
         msg.setContent("这是测试，openId列表群发");
         msg.setOpenIds(Arrays.asList(openId, openId));
-        assertTrue(wechat.msg().send(accessToken, msg) > 0L);
+        Long msgId = wechat.msg().send(accessToken, msg);
+        assertTrue(msgId > 0L);
+        System.out.println(msgId);
     }
 
     @Test
@@ -433,7 +435,9 @@ public class WechatTests {
         msg.setGroupId(100);
         msg.setType(SendMessageType.TEXT);
         msg.setContent("这是测试，groupId群发");
-        assertTrue(wechat.msg().send(accessToken, msg) > 0L);
+        Long msgId = wechat.msg().send(accessToken, msg);
+        assertTrue(msgId > 0L);
+        System.out.println(msgId);
     }
 
     @Test
