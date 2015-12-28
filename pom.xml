@@ -6,7 +6,7 @@
 
     <groupId>me.hao0</groupId>
     <artifactId>wechat</artifactId>
-    <version>1.6.6</version>
+    <version>1.6.7</version>
 
     <name>wechat</name>
     <description>A Lightweight Wechat Component</description>
