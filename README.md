@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.7</version>
+        <version>1.6.8</version>
     </dependency>
 	```
 	
@@ -231,6 +231,10 @@
     + 1.6.7
 
         + 消息群发兼容msgId为Int时。
+
+    + 1.6.8
+
+        + 修复消息被动回复问题。
 
 + 微信相关文档
 

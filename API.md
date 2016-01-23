@@ -240,64 +240,67 @@
 	
 		```java
 		/**
-         * 被动回复微信服务器文本消息
-         * @return XML文本消息
-         */
-        String respText(String openId, String content)
+	     * 被动回复微信服务器文本消息
+	     * @param recv 微信发来的XML消息
+	     * @param content 文本内容
+	     * @return XML文本消息
+	     */
+	    String respText(RecvMessage recv, String content)
         
-         /**
-         * 被动回复微信服务器图片消息
-         * @param openId 用户openId
-         * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
-         * @return XML图片消息
-         */
-        String respImage(String openId, String mediaId)
+       /**
+	     * 被动回复微信服务器图片消息
+	     * @param recv 微信发来的XML消息
+	     * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
+	     * @return XML图片消息
+	     */
+	    String respImage(RecvMessage recv, String mediaId)
         
-        /**
-         * 被动回复微信服务器语音消息
-         * @param openId 用户openId
-         * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
-         * @return XML语音消息
-         */
-        String respVoice(String openId, String mediaId)
+       /**
+	     * 被动回复微信服务器语音消息
+	     * @param recv 微信发来的XML消息
+	     * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
+	     * @return XML语音消息
+	     */
+	    String respVoice(RecvMessage recv, String mediaId)
         
-        /**
-         * 被动回复微信服务器视频消息
-         * @param openId 用户openId
-         * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
-         * @param title 标题
-         * @param desc 描述
-         * @return XML视频消息
-         */
-        String respVideo(String openId, String mediaId, String title, String desc)
+       /**
+	     * 被动回复微信服务器视频消息
+	     * @param recv 微信发来的XML消息
+	     * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
+	     * @param title 标题
+	     * @param desc 描述
+	     * @return XML视频消息
+	     */
+	    String respVideo(RecvMessage recv, String mediaId, String title, String desc)
         
-        /**
-         * 被动回复微信服务器音乐消息
-         * @param openId 用户openId
-         * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
-         * @param title 标题
-         * @param desc 描述
-         * @param url 音乐链接
-         * @param hqUrl 高质量音乐链接，WIFI环境优先使用该链接播放音乐
-         * @return XML音乐消息
-         */
-        String respMusic(String openId, String mediaId, String title, String desc, String url, String hqUrl)
+       /**
+	     * 被动回复微信服务器音乐消息
+	     * @param recv 微信发来的XML消息
+	     * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
+	     * @param title 标题
+	     * @param desc 描述
+	     * @param url 音乐链接
+	     * @param hqUrl 高质量音乐链接，WIFI环境优先使用该链接播放音乐
+	     * @return XML音乐消息
+	     */
+    String respMusic(RecvMessage recv, String mediaId,
+                            String title, String desc, String url, String hqUrl){
         
-        /**
-         * 被动回复微信服务器图文消息
-         * @param openId 用户openId
-         * @param articles 图片消息对象列表，长度 <= 10
-         * @return XML图文消息
-         */
-        String respNews(String openId, List<Article> articles)
+       /**
+	     * 被动回复微信服务器图文消息
+	     * @param recv 微信发来的XML消息
+	     * @param articles 图片消息对象列表，长度小于10
+	     * @return XML图文消息
+	     */
+	    String respNews(RecvMessage recv, List<Article> articles)
         
-        /**
-         * 构建转发客服的XML消息(指定一个在线的客服，若该客服不在线，消息将不再转发给其他在线客服)
-         * @param openId 用户openId
-         * @param kfAccount 客服帐号(包含域名)
-         * @return 转发客服的XML消息
-         */
-        String forward(String openId, String kfAccount)
+       /**
+	     * 构建转发客服的XML消息(指定一个在线的客服，若该客服不在线，消息将不再转发给其他在线客服)
+	     * @param recv 微信发来的XML消息
+	     * @param kfAccount 客服帐号(包含域名)
+	     * @return 转发客服的XML消息
+	     */
+	    String forward(RecvMessage recv, String kfAccount)
 
         /**
          * 接收微信服务器发来的XML消息，将解析xml为RecvMessage的子类，

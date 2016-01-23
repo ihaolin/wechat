@@ -77,68 +77,65 @@ public final class Messages extends Component {
 
     /**
      * 被动回复微信服务器文本消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param content 文本内容
      * @return XML文本消息
      */
-    public String respText(String openId, String content){
-        checkNotNullAndEmpty(openId, "openId");
+    public String respText(RecvMessage recv, String content){
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(content, "content");
-        XmlWriters msg = respCommonElements(openId, RespMessageType.TEXT);
+        XmlWriters msg = respCommonElements(recv, RespMessageType.TEXT);
         msg.element("Content", content);
         return msg.build();
     }
 
     /**
      * 被动回复微信服务器图片消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
      * @return XML图片消息
      */
-    public String respImage(String openId, String mediaId){
-        checkNotNullAndEmpty(openId, "opendId");
+    public String respImage(RecvMessage recv, String mediaId){
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(mediaId, "mediaId");
-
-        XmlWriters msg = respCommonElements(openId, RespMessageType.IMAGE);
+        XmlWriters msg = respCommonElements(recv, RespMessageType.IMAGE);
         msg.element("Image", "MediaId", mediaId);
         return msg.build();
     }
 
     /**
      * 被动回复微信服务器语音消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
      * @return XML语音消息
      */
-    public String respVoice(String openId, String mediaId){
-        checkNotNullAndEmpty(openId, "opendId");
+    public String respVoice(RecvMessage recv, String mediaId) {
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(mediaId, "mediaId");
-
-        XmlWriters msg = respCommonElements(openId, RespMessageType.VOICE);
+        XmlWriters msg = respCommonElements(recv, RespMessageType.VOICE);
         msg.element("Voice", "MediaId", mediaId);
         return msg.build();
     }
 
     /**
      * 被动回复微信服务器视频消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
      * @param title 标题
      * @param desc 描述
      * @return XML视频消息
      */
-    public String respVideo(String openId, String mediaId, String title, String desc){
-        checkNotNullAndEmpty(openId, "opendId");
+    public String respVideo(RecvMessage recv, String mediaId, String title, String desc){
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(mediaId, "mediaId");
-
-        XmlWriters msg = respCommonElements(openId, RespMessageType.VIDEO);
+        XmlWriters msg = respCommonElements(recv, RespMessageType.VIDEO);
         msg.element("Video", "MediaId", mediaId, "Title", title, "Description", desc);
         return msg.build();
     }
 
     /**
      * 被动回复微信服务器音乐消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param mediaId 通过素材管理接口上传多媒体文件，得到的id
      * @param title 标题
      * @param desc 描述
@@ -146,12 +143,12 @@ public final class Messages extends Component {
      * @param hqUrl 高质量音乐链接，WIFI环境优先使用该链接播放音乐
      * @return XML音乐消息
      */
-    public String respMusic(String openId, String mediaId,
+    public String respMusic(RecvMessage recv, String mediaId,
                             String title, String desc, String url, String hqUrl){
-        checkNotNullAndEmpty(openId, "opendId");
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(mediaId, "mediaId");
 
-        XmlWriters msg = respCommonElements(openId, RespMessageType.MUSIC);
+        XmlWriters msg = respCommonElements(recv, RespMessageType.MUSIC);
         msg.element("Music",
                 "Title", title,
                 "Description", desc,
@@ -163,16 +160,16 @@ public final class Messages extends Component {
 
     /**
      * 被动回复微信服务器图文消息
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param articles 图片消息对象列表，长度小于10
      * @return XML图文消息
      */
-    public String respNews(String openId, List<Article> articles){
-        checkNotNullAndEmpty(openId, "openId");
+    public String respNews(RecvMessage recv, List<Article> articles){
+        checkNotNull(recv, "recv can't be null");
         checkNotNullAndEmpty(articles, "articles");
         checkArgument(articles.size() < 10, "articles length must < 10");
 
-        XmlWriters xmlWriters = respCommonElements(openId, RespMessageType.NEWS);
+        XmlWriters xmlWriters = respCommonElements(recv, RespMessageType.NEWS);
         xmlWriters.element("ArticleCount", articles.size());
         List<XmlWriters.E> items = new ArrayList<>();
         XmlWriters.E item;
@@ -188,10 +185,10 @@ public final class Messages extends Component {
         return xmlWriters.build();
     }
 
-    private XmlWriters respCommonElements(String openId, RespMessageType type) {
+    private XmlWriters respCommonElements(RecvMessage recv, RespMessageType type) {
         XmlWriters xmlWriters = XmlWriters.create();
-        xmlWriters.element("ToUserName", openId)
-                .element("FromUserName", wechat.getAppId())
+        xmlWriters.element("ToUserName", recv.getFromUserName())
+                .element("FromUserName", recv.getToUserName())
                 .element("CreateTime", System.currentTimeMillis() / 1000)
                 .element("MsgType", type.value());
         return xmlWriters;
@@ -199,25 +196,25 @@ public final class Messages extends Component {
 
     /**
      * 构建转发客服的XML消息(该消息自动转发给一个在线的客服)
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @return 转发客服的XML消息
      */
-    public String forward(String openId){
-        return forward(openId, null);
+    public String forward(RecvMessage recv){
+        return forward(recv, null);
     }
 
     /**
      * 构建转发客服的XML消息(指定一个在线的客服，若该客服不在线，消息将不再转发给其他在线客服)
-     * @param openId 用户openId
+     * @param recv 微信发来的XML消息
      * @param kfAccount 客服帐号(包含域名)
      * @return 转发客服的XML消息
      */
-    public String forward(String openId, String kfAccount){
-        checkNotNullAndEmpty(openId, "openId");
+    public String forward(RecvMessage recv, String kfAccount){
+        checkNotNull(recv, "recv can't be null");
 
         XmlWriters xmlWriters = XmlWriters.create();
-        xmlWriters.element("ToUserName", openId)
-                .element("FromUserName", wechat.getAppId())
+        xmlWriters.element("ToUserName", recv.getFromUserName())
+                .element("FromUserName", recv.getToUserName())
                 .element("CreateTime", System.currentTimeMillis() / 1000);
 
         if (!Strings.isNullOrEmpty(kfAccount)){
