@@ -6,31 +6,11 @@
 
     <groupId>me.hao0</groupId>
     <artifactId>wechat</artifactId>
-    <version>1.6.8</version>
+    <version>1.6.9</version>
 
     <name>wechat</name>
     <description>A Lightweight Wechat Component</description>
     <url>https://github.com/ihaolin/wechat</url>
-
-    <licenses>
-        <license>
-            <name>The MIT License (MIT)</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>haolin</name>
-            <email>haolin.h0@gmail.com</email>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git@github.com:ihaolin/wechat.git</connection>
-        <developerConnection>scm:git:git@github.com:ihaolin/wechat.git</developerConnection>
-        <url>git@github.com:ihaolin/wechat.git</url>
-    </scm>
 
     <dependencies>
 
@@ -143,5 +123,25 @@
             </distributionManagement>
         </profile>
     </profiles>
+
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>haolin</name>
+            <email>haolin.h0@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:ihaolin/wechat.git</connection>
+        <developerConnection>scm:git:git@github.com:ihaolin/wechat.git</developerConnection>
+        <url>git@github.com:ihaolin/wechat.git</url>
+    </scm>
 
 </project>

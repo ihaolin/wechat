@@ -22,9 +22,9 @@ public class RecvMenuEvent extends RecvEvent {
     @Override
     public String getEventType() {
         if ("CLICK".equalsIgnoreCase(eventType)){
-            return RecvEventType.MENU_CLICK.toString();
+            return RecvEventType.MENU_CLICK.value();
         }
-        return RecvEventType.MENU_VIEW.toString();
+        return RecvEventType.MENU_VIEW.value();
     }
 
     public String getEventKey() {

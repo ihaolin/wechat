@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.8</version>
+        <version>1.6.9</version>
     </dependency>
 	```
 	
@@ -235,6 +235,10 @@
     + 1.6.8
 
         + 修复消息被动回复问题。
+
+    + 1.6.9
+
+        + 修复微信菜单事件类型判断。
 
 + 微信相关文档
 
