@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.9</version>
+        <version>1.6.10</version>
     </dependency>
 	```
 	
@@ -239,6 +239,10 @@
     + 1.6.9
 
         + 修复微信菜单事件类型判断。
+
+    + 1.6.10
+
+        + 修复User.unionId为String类型
 
 + 微信相关文档
 

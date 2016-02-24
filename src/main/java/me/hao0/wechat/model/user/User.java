@@ -45,7 +45,7 @@ public class User implements Serializable {
     private Date subscribeTime;
 
     @JsonProperty("unionid")
-    private Integer unionId;
+    private String unionId;
 
     private String remark;
 
@@ -124,11 +124,11 @@ public class User implements Serializable {
         this.subscribeTime = subscribeTime;
     }
 
-    public Integer getUnionId() {
+    public String getUnionId() {
         return unionId;
     }
 
-    public void setUnionId(Integer unionId) {
+    public void setUnionId(String unionId) {
         this.unionId = unionId;
     }
 
