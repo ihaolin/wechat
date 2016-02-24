@@ -221,12 +221,18 @@ public class WechatTests {
 
     @Test
     public void testMessageResp(){
-        assertNotNull(wechat.msg().respText("bcsdafafasdf", "你好"));
-        assertNotNull(wechat.msg().respImage("bcsdafafasdf", "oijwefoiioefjiwfiwf"));
-        assertNotNull(wechat.msg().respVoice("bcsdafafasdf", "9823r8f9h8f239hf293fh"));
-        assertNotNull(wechat.msg().respVideo("bcsdafafasdf", "nowefwifjwopefjiwe", "视频标题", "视频描述"));
-        assertNotNull(wechat.msg().respMusic("bcsdafafasdf", "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
-        assertNotNull(wechat.msg().respNews("bcsdafafasdf",
+        RecvMessage msg = new RecvMessage();
+        msg.setFromUserName("xxx");
+        msg.setToUserName("yyy");
+        msg.setMsgType("text");
+        msg.setCreateTime(123);
+
+        assertNotNull(wechat.msg().respText(msg, "你好"));
+        assertNotNull(wechat.msg().respImage(msg, "oijwefoiioefjiwfiwf"));
+        assertNotNull(wechat.msg().respVoice(msg, "9823r8f9h8f239hf293fh"));
+        assertNotNull(wechat.msg().respVideo(msg, "nowefwifjwopefjiwe", "视频标题", "视频描述"));
+        assertNotNull(wechat.msg().respMusic(msg, "joiwefjoiwejf", "音乐标题", "音乐描述", "http://jofwieofj.com", "http://jofwieofj.com?hq"));
+        assertNotNull(wechat.msg().respNews(msg,
                         Arrays.asList(
                                 new Article("图文标题", "图文描述", "图片链接", "链接"),
                                 new Article("图文标题", "图文描述", "图片链接", "链接"),
