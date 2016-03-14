@@ -2,19 +2,23 @@ package me.hao0.wechat.core;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
+import me.hao0.common.json.Jsons;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
-import me.hao0.common.json.Jsons;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import static me.hao0.common.util.Preconditions.*;
+
+import static me.hao0.common.util.Preconditions.checkArgument;
+import static me.hao0.common.util.Preconditions.checkNotNullAndEmpty;
 
 /**
  * 用户组件
  * Author: haolin
  * Email: haolin.h0@gmail.com
  * Date: 18/11/15
+ *
  * @since 1.4.0
  */
 public final class Users extends Component {
@@ -55,39 +59,48 @@ public final class Users extends Component {
     private static final String GET_USER_INFO = "https://api.weixin.qq.com/cgi-bin/user/info?lang=zh_CN&access_token=";
 
     /**
+     * 拉取用户列表信息
+     */
+    private static final String GET_USER_LIST_INFO = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=";
+
+    /**
      * 备注用户
      */
     private static final String REMARK_USER = "https://api.weixin.qq.com/cgi-bin/user/info/updateremark?access_token=";
 
     private static final JavaType ARRAY_LIST_GROUP_TYPE = Jsons.DEFAULT.createCollectionType(ArrayList.class, Group.class);
 
-    Users(){}
+    Users() {
+    }
 
     /**
      * 创建用户分组
+     *
      * @param name 名称
      * @return 分组ID，或抛WechatException
      */
-    public Integer createGroup(String name){
+    public Integer createGroup(String name) {
         return createGroup(loadAccessToken(), name);
     }
 
     /**
      * 创建用户分组
+     *
      * @param name 名称
-     * @param cb 回调
+     * @param cb   回调
      */
-    public void createGroup(final String name, Callback<Integer> cb){
+    public void createGroup(final String name, Callback<Integer> cb) {
         createGroup(loadAccessToken(), name, cb);
     }
 
     /**
      * 创建用户分组
+     *
      * @param accessToken accessToken
-     * @param name 名称
-     * @param cb 回调
+     * @param name        名称
+     * @param cb          回调
      */
-    public void createGroup(final String accessToken, final String name, Callback<Integer> cb){
+    public void createGroup(final String accessToken, final String name, Callback<Integer> cb) {
         doAsync(new AsyncFunction<Integer>(cb) {
             @Override
             public Integer execute() {
@@ -98,11 +111,12 @@ public final class Users extends Component {
 
     /**
      * 创建用户分组
+     *
      * @param accessToken accessToken
-     * @param name 名称
+     * @param name        名称
      * @return 分组ID，或抛WechatException
      */
-    public Integer createGroup(String accessToken, String name){
+    public Integer createGroup(String accessToken, String name) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(name, "name");
 
@@ -113,23 +127,25 @@ public final class Users extends Component {
         params.put("group", g);
 
         Map<String, Object> resp = doPost(url, params);
-        return (Integer)((Map)resp.get("group")).get("id");
+        return (Integer) ((Map) resp.get("group")).get("id");
     }
 
     /**
      * 获取所有分组列表
+     *
      * @return 分组列表，或抛WechatException
      */
-    public List<Group> getGroup(){
+    public List<Group> getGroup() {
         return getGroup(loadAccessToken());
     }
 
     /**
      * 获取所有分组列表
+     *
      * @param accessToken accessToken
-     * @param cb 回调
+     * @param cb          回调
      */
-    public void getGroup(final String accessToken, Callback<List<Group>> cb){
+    public void getGroup(final String accessToken, Callback<List<Group>> cb) {
         doAsync(new AsyncFunction<List<Group>>(cb) {
             @Override
             public List<Group> execute() {
@@ -140,10 +156,11 @@ public final class Users extends Component {
 
     /**
      * 获取所有分组列表
+     *
      * @param accessToken accessToken
      * @return 分组列表，或抛WechatException
      */
-    public List<Group> getGroup(String accessToken){
+    public List<Group> getGroup(String accessToken) {
         checkNotNullAndEmpty(accessToken, "accessToken");
 
         String url = GET_GROUP + accessToken;
@@ -154,29 +171,32 @@ public final class Users extends Component {
 
     /**
      * 删除分组
+     *
      * @param id 分组ID
      * @return 删除成功返回true，或抛WechatException
      */
-    public Boolean deleteGroup(Integer id){
+    public Boolean deleteGroup(Integer id) {
         return deleteGroup(loadAccessToken(), id);
     }
 
     /**
      * 删除分组
+     *
      * @param id 分组ID
      * @param cb 回调
      */
-    public void deleteGroup(final Integer id, Callback<Boolean> cb){
+    public void deleteGroup(final Integer id, Callback<Boolean> cb) {
         deleteGroup(loadAccessToken(), id, cb);
     }
 
     /**
      * 删除分组
+     *
      * @param accessToken accessToken
-     * @param id 分组ID
-     * @param cb 回调
+     * @param id          分组ID
+     * @param cb          回调
      */
-    public void deleteGroup(final String accessToken, final Integer id, Callback<Boolean> cb){
+    public void deleteGroup(final String accessToken, final Integer id, Callback<Boolean> cb) {
         doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
@@ -187,11 +207,12 @@ public final class Users extends Component {
 
     /**
      * 删除分组
+     *
      * @param accessToken accessToken
-     * @param id 分组ID
+     * @param id          分组ID
      * @return 删除成功返回true，或抛WechatException
      */
-    public Boolean deleteGroup(String accessToken, Integer id){
+    public Boolean deleteGroup(String accessToken, Integer id) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkArgument(id != null && id > 0, "id must > 0");
 
@@ -207,32 +228,35 @@ public final class Users extends Component {
 
     /**
      * 更新分组名称
-     * @param id 分组ID
+     *
+     * @param id      分组ID
      * @param newName 分组新名称
      * @return 更新成功返回true，或抛WechatException
      */
-    public Boolean updateGroup(Integer id, String newName){
+    public Boolean updateGroup(Integer id, String newName) {
         return updateGroup(loadAccessToken(), id, newName);
     }
 
     /**
      * 更新分组名称
-     * @param id 分组ID
+     *
+     * @param id      分组ID
      * @param newName 分组新名称
-     * @param cb 回调
+     * @param cb      回调
      */
-    public void updateGroup(final Integer id, final String newName, Callback<Boolean> cb){
+    public void updateGroup(final Integer id, final String newName, Callback<Boolean> cb) {
         updateGroup(loadAccessToken(), id, newName, cb);
     }
 
     /**
      * 更新分组名称
+     *
      * @param accessToken accessToken
-     * @param id 分组ID
-     * @param newName 分组新名称
-     * @param cb 回调
+     * @param id          分组ID
+     * @param newName     分组新名称
+     * @param cb          回调
      */
-    public void updateGroup(final String accessToken, final Integer id, final String newName, Callback<Boolean> cb){
+    public void updateGroup(final String accessToken, final Integer id, final String newName, Callback<Boolean> cb) {
         doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
@@ -243,12 +267,13 @@ public final class Users extends Component {
 
     /**
      * 更新分组名称
+     *
      * @param accessToken accessToken
-     * @param id 分组ID
-     * @param newName 分组新名称
+     * @param id          分组ID
+     * @param newName     分组新名称
      * @return 更新成功返回true，或抛WechatException
      */
-    public Boolean updateGroup(String accessToken, Integer id, String newName){
+    public Boolean updateGroup(String accessToken, Integer id, String newName) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkArgument(id != null && id > 0, "id must > 0");
         checkNotNullAndEmpty(newName, "group name");
@@ -266,29 +291,32 @@ public final class Users extends Component {
 
     /**
      * 获取用户所在组
+     *
      * @param openId 用户openId
      * @return 组ID，或抛WechatException
      */
-    public Integer getUserGroup(String openId){
+    public Integer getUserGroup(String openId) {
         return getUserGroup(loadAccessToken(), openId);
     }
 
     /**
      * 获取用户所在组
+     *
      * @param openId 用户openId
-     * @param cb 回调
+     * @param cb     回调
      */
-    public void getUserGroup(final String openId, Callback<Integer> cb){
+    public void getUserGroup(final String openId, Callback<Integer> cb) {
         getUserGroup(loadAccessToken(), openId, cb);
     }
 
     /**
      * 获取用户所在组
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param cb 回调
+     * @param openId      用户openId
+     * @param cb          回调
      */
-    public void getUserGroup(final String accessToken, final String openId, Callback<Integer> cb){
+    public void getUserGroup(final String accessToken, final String openId, Callback<Integer> cb) {
         doAsync(new AsyncFunction<Integer>(cb) {
             @Override
             public Integer execute() {
@@ -299,11 +327,12 @@ public final class Users extends Component {
 
     /**
      * 获取用户所在组
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
+     * @param openId      用户openId
      * @return 组ID，或抛WechatException
      */
-    public Integer getUserGroup(String accessToken, String openId){
+    public Integer getUserGroup(String accessToken, String openId) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(openId, "openId");
 
@@ -312,37 +341,40 @@ public final class Users extends Component {
         params.put("openid", openId);
 
         Map<String, Object> resp = doPost(url, params);
-        return (Integer)resp.get("groupid");
+        return (Integer) resp.get("groupid");
     }
 
     /**
      * 移动用户所在组
-     * @param openId 用户openId
+     *
+     * @param openId  用户openId
      * @param groupId 新组ID
      * @return 移动成功返回true，或抛WechatException
      */
-    public Boolean mvUserGroup(String openId, Integer groupId){
+    public Boolean mvUserGroup(String openId, Integer groupId) {
         return mvUserGroup(loadAccessToken(), openId, groupId);
     }
 
     /**
      * 移动用户所在组
-     * @param openId 用户openId
+     *
+     * @param openId  用户openId
      * @param groupId 新组ID
-     * @param cb 回调
+     * @param cb      回调
      */
-    public void mvUserGroup(final String openId, final Integer groupId, Callback<Boolean> cb){
+    public void mvUserGroup(final String openId, final Integer groupId, Callback<Boolean> cb) {
         mvUserGroup(loadAccessToken(), openId, groupId, cb);
     }
 
     /**
      * 移动用户所在组
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param groupId 新组ID
-     * @param cb 回调
+     * @param openId      用户openId
+     * @param groupId     新组ID
+     * @param cb          回调
      */
-    public void mvUserGroup(final String accessToken, final String openId, final Integer groupId, Callback<Boolean> cb){
+    public void mvUserGroup(final String accessToken, final String openId, final Integer groupId, Callback<Boolean> cb) {
         doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
@@ -353,12 +385,13 @@ public final class Users extends Component {
 
     /**
      * 移动用户所在组
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param groupId 新组ID
+     * @param openId      用户openId
+     * @param groupId     新组ID
      * @return 移动成功返回true，或抛WechatException
      */
-    public Boolean mvUserGroup(String accessToken, String openId, Integer groupId){
+    public Boolean mvUserGroup(String accessToken, String openId, Integer groupId) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(openId, "openId");
         checkArgument(groupId != null && groupId > 0, "groupId must > 0");
@@ -374,29 +407,32 @@ public final class Users extends Component {
 
     /**
      * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+     *
      * @param openId 用户openId
      * @return 用户信息，或抛WechatException
      */
-    public User getUser(String openId){
+    public User getUser(String openId) {
         return getUser(loadAccessToken(), openId);
     }
 
     /**
      * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+     *
      * @param openId 用户openId
-     * @param cb 回调
+     * @param cb     回调
      */
-    public void getUser(final String openId, Callback<User> cb){
+    public void getUser(final String openId, Callback<User> cb) {
         getUser(loadAccessToken(), openId, cb);
     }
 
     /**
      * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param cb 回调
+     * @param openId      用户openId
+     * @param cb          回调
      */
-    public void getUser(final String accessToken, final String openId, Callback<User> cb){
+    public void getUser(final String accessToken, final String openId, Callback<User> cb) {
         doAsync(new AsyncFunction<User>(cb) {
             @Override
             public User execute() {
@@ -407,11 +443,12 @@ public final class Users extends Component {
 
     /**
      * 拉取用户信息(若用户未关注，且未授权，将拉取不了信息)
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
+     * @param openId      用户openId
      * @return 用户信息，或抛WechatException
      */
-    public User getUser(String accessToken, String openId){
+    public User getUser(String accessToken, String openId) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(openId, "openId");
 
@@ -421,34 +458,76 @@ public final class Users extends Component {
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
     }
 
+    public List<String> getUserList(String nextOpenId) {
+        return getUserList(loadAccessToken(), nextOpenId);
+    }
+
+    public void getUserList(String nextOpenId, Callback<List<String>> cb) {
+        getUserList(loadAccessToken(), nextOpenId, cb);
+    }
+
+    public void getUserList(final String accessToken, final String nextOpenId, Callback<List<String>> cb) {
+        doAsync(new AsyncFunction<List<String>>(cb) {
+            @Override
+            public List<String> execute() throws Exception {
+                return getUserList(accessToken, nextOpenId);
+            }
+        });
+    }
+
+    /**
+     * 拉取用户列表信息
+     *
+     * @param accessToken accessToken
+     * @param nextOpenId  nextOpenId
+     * @return 用户列表，或抛WechatExeption
+     */
+    public List<String> getUserList(String accessToken, String nextOpenId) {
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        String url;
+        if (nextOpenId == null || nextOpenId.equalsIgnoreCase("")) {
+            url = GET_USER_LIST_INFO + accessToken;
+        } else {
+            url = GET_USER_LIST_INFO + accessToken + "&next_openid=" + nextOpenId;
+        }
+        Map<String, Object> resp = doGet(url);
+
+        List<String> openIds = (List<String>) ((Map) resp.get("data")).get("openid");
+
+        return openIds;
+    }
+
     /**
      * 备注用户
+     *
      * @param openId 用户openId
      * @param remark 备注
      * @return 备注成功返回true，或抛WechatException
      */
-    public Boolean remarkUser(String openId, String remark){
+    public Boolean remarkUser(String openId, String remark) {
         return remarkUser(loadAccessToken(), openId, remark);
     }
 
     /**
      * 备注用户
+     *
      * @param openId 用户openId
      * @param remark 备注
-     * @param cb 回调
+     * @param cb     回调
      */
-    public void remarkUser(final String openId, final String remark, Callback<Boolean> cb){
+    public void remarkUser(final String openId, final String remark, Callback<Boolean> cb) {
         remarkUser(loadAccessToken(), openId, remark, cb);
     }
 
     /**
      * 备注用户
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param remark 备注
-     * @param cb 回调
+     * @param openId      用户openId
+     * @param remark      备注
+     * @param cb          回调
      */
-    public void remarkUser(final String accessToken, final String openId, final String remark, Callback<Boolean> cb){
+    public void remarkUser(final String accessToken, final String openId, final String remark, Callback<Boolean> cb) {
         doAsync(new AsyncFunction<Boolean>(cb) {
             @Override
             public Boolean execute() {
@@ -459,12 +538,13 @@ public final class Users extends Component {
 
     /**
      * 备注用户
+     *
      * @param accessToken accessToken
-     * @param openId 用户openId
-     * @param remark 备注
+     * @param openId      用户openId
+     * @param remark      备注
      * @return 备注成功返回true，或抛WechatException
      */
-    public Boolean remarkUser(String accessToken, String openId, String remark){
+    public Boolean remarkUser(String accessToken, String openId, String remark) {
         checkNotNullAndEmpty(accessToken, "accessToken");
         checkNotNullAndEmpty(openId, "openId");
         checkNotNullAndEmpty(remark, "remark");
