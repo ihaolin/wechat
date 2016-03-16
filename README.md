@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.6.10</version>
+        <version>1.7.0</version>
     </dependency>
 	```
 	
@@ -242,7 +242,11 @@
 
     + 1.6.10
 
-        + 修复User.unionId为String类型
+        + 修复User.unionId为String类型。
+        
+    + 1.7.0
+    
+        + 增加获取用户列表的接口``Users.getUsers()``。  
 
 + 微信相关文档
 

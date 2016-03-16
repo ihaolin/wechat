@@ -500,7 +500,7 @@ public final class Users extends Component {
      * 拉取用户列表信息
      *
      * @param accessToken accessToken
-     * @param nextOpenId  nextOpenId
+     * @param nextOpenId   第一个拉取的OPENID，不填默认从头开始拉取
      * @return 用户列表，或抛WechatExeption
      */
     public UserList getUsers(String accessToken, String nextOpenId) {
