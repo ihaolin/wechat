@@ -3,8 +3,10 @@ package me.hao0.wechat.core;
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
 import me.hao0.common.json.Jsons;
+import me.hao0.common.util.Strings;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
+import me.hao0.wechat.model.user.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +63,7 @@ public final class Users extends Component {
     /**
      * 拉取用户列表信息
      */
-    private static final String GET_USER_LIST_INFO = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=";
+    private static final String GET_USERS_INFO = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=";
 
     /**
      * 备注用户
@@ -458,19 +460,38 @@ public final class Users extends Component {
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
     }
 
-    public List<String> getUserList(String nextOpenId) {
-        return getUserList(loadAccessToken(), nextOpenId);
+    /**
+     * 拉取用户列表信息
+     *
+     * @param nextOpenId nextOpenId
+     * @return 用户列表
+     */
+    public UserList getUsers(String nextOpenId) {
+        return getUsers(loadAccessToken(), nextOpenId);
     }
 
-    public void getUserList(String nextOpenId, Callback<List<String>> cb) {
-        getUserList(loadAccessToken(), nextOpenId, cb);
+    /**
+     * 拉取用户列表信息
+     *
+     * @param nextOpenId nextOpenId
+     * @param cb         回调
+     */
+    public void getUsers(String nextOpenId, Callback<UserList> cb) {
+        getUsers(loadAccessToken(), nextOpenId, cb);
     }
 
-    public void getUserList(final String accessToken, final String nextOpenId, Callback<List<String>> cb) {
-        doAsync(new AsyncFunction<List<String>>(cb) {
+    /**
+     * 拉取用户列表信息
+     *
+     * @param accessToken accessToken
+     * @param nextOpenId  nextOpenId
+     * @param cb          回调
+     */
+    public void getUsers(final String accessToken, final String nextOpenId, Callback<UserList> cb) {
+        doAsync(new AsyncFunction<UserList>(cb) {
             @Override
-            public List<String> execute() throws Exception {
-                return getUserList(accessToken, nextOpenId);
+            public UserList execute() throws Exception {
+                return getUsers(accessToken, nextOpenId);
             }
         });
     }
@@ -482,19 +503,16 @@ public final class Users extends Component {
      * @param nextOpenId  nextOpenId
      * @return 用户列表，或抛WechatExeption
      */
-    public List<String> getUserList(String accessToken, String nextOpenId) {
+    public UserList getUsers(String accessToken, String nextOpenId) {
         checkNotNullAndEmpty(accessToken, "accessToken");
-        String url;
-        if (nextOpenId == null || nextOpenId.equalsIgnoreCase("")) {
-            url = GET_USER_LIST_INFO + accessToken;
-        } else {
-            url = GET_USER_LIST_INFO + accessToken + "&next_openid=" + nextOpenId;
-        }
+        String url = GET_USERS_INFO + accessToken;
+
+        if (!Strings.isNullOrEmpty(nextOpenId))
+            url += ("&next_openid=" + nextOpenId);
+
         Map<String, Object> resp = doGet(url);
 
-        List<String> openIds = (List<String>) ((Map) resp.get("data")).get("openid");
-
-        return openIds;
+        return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), UserList.class);
     }
 
     /**
