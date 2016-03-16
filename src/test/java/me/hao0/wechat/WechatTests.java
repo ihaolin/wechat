@@ -215,6 +215,11 @@ public class WechatTests {
     }
 
     @Test
+    public void testGetUsersInfo() throws Exception {
+        assertNotNull( wechat.user().getUsers("").getData().getOpenId());
+    }
+
+    @Test
     public void testUserRemark(){
         assertTrue(wechat.user().remarkUser(accessToken, openId, "林浩"));
     }
