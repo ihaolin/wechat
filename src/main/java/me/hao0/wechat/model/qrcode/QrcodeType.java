@@ -15,7 +15,12 @@ public enum QrcodeType {
     /**
      * 永久二维码，最多100000个
      */
-    QR_LIMIT_SCENE("QR_LIMIT_SCENE");
+    QR_LIMIT_SCENE("QR_LIMIT_SCENE"),
+    
+    /**
+     * 永久二维码，字符串类型，长度限制为1到64
+     */
+    QR_LIMIT_STR_SCENE("QR_LIMIT_STR_SCENE");
 
     private String value;
 

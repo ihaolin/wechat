@@ -1,13 +1,17 @@
 package me.hao0.wechat.core;
 
 import com.google.common.collect.Maps;
+
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.qrcode.Qrcode;
 import me.hao0.wechat.model.qrcode.QrcodeType;
 import me.hao0.common.json.Jsons;
+import me.hao0.common.util.Strings;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+
 import static me.hao0.common.util.Preconditions.*;
 
 /**
@@ -85,7 +89,7 @@ public final class QrCodes extends Component {
         checkArgument(expire != null && expire > 0, "expire must > 0");
 
         String url = TICKET_GET + accessToken;
-        Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_SCENE);
+        Map<String, Object> params = buildQrcodeParams(sceneId, null, QrcodeType.QR_SCENE);
         params.put("expire_seconds", expire);
 
         Map<String, Object> resp = doPost(url, params);
@@ -137,7 +141,59 @@ public final class QrCodes extends Component {
         checkNotNullAndEmpty(sceneId, "sceneId");
 
         String url = TICKET_GET + accessToken;
-        Map<String, Object> params = buildQrcodeParams(sceneId, QrcodeType.QR_LIMIT_SCENE);
+        Map<String, Object> params = buildQrcodeParams(sceneId, null, QrcodeType.QR_LIMIT_SCENE);
+
+        Map<String, Object> resp = doPost(url, params);
+        Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
+
+        return showQrcode(qr.getTicket());
+    }
+    
+    
+    /**
+     * 获取永久二维码
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+     * @return 永久二维码链接，或抛WechatException
+     */
+    public String getPermQrcodeBySceneStr(String sceneStr){
+        return getPermQrcodeBySceneStr(loadAccessToken(), sceneStr);
+    }
+    /**
+     * 获取永久二维码
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+     * @param cb 回调
+     */
+    public void getPermQrcodeBySceneStr(final String sceneStr, Callback<String> cb){
+        getPermQrcodeBySceneStr(loadAccessToken(), sceneStr, cb);
+    }
+
+    /**
+     * 获取永久二维码
+     * @param accessToken accessToken
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+     * @param cb 回调
+     */
+    public void getPermQrcodeBySceneStr(final String accessToken, final String sceneId, Callback<String> cb){
+        doAsync(new AsyncFunction<String>(cb) {
+            @Override
+            public String execute() {
+                return getPermQrcodeBySceneStr(accessToken, sceneId);
+            }
+        });
+    }
+    
+    /**
+     * 获取永久二维码
+     * @param accessToken accessToken
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+     * @return 永久二维码链接，或抛WechatException
+     */
+    public String getPermQrcodeBySceneStr(String accessToken, String sceneStr){
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(sceneStr, "sceneStr");
+
+        String url = TICKET_GET + accessToken;
+        Map<String, Object> params = buildQrcodeParams(null, sceneStr, QrcodeType.QR_LIMIT_STR_SCENE);
 
         Map<String, Object> resp = doPost(url, params);
         Qrcode qr = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), Qrcode.class);
@@ -145,15 +201,26 @@ public final class QrCodes extends Component {
         return showQrcode(qr.getTicket());
     }
 
-    private Map<String, Object> buildQrcodeParams(String sceneId, QrcodeType type) {
+    /**
+     * 生成二维码参数，首先尝试使用 sceneId，再使用sceneStr
+     * @param sceneId	场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+     * @param type	二维码类型，QR_SCENE为临时,QR_LIMIT_SCENE为永久,QR_LIMIT_STR_SCENE为永久的字符串参数值
+     * @return	二维码参数
+     */
+    private Map<String, Object> buildQrcodeParams(String sceneId, String sceneStr, QrcodeType type) {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
         params.put("action_name", type.value());
 
-        Map<String, Object> sceneIdMap = Maps.newHashMapWithExpectedSize(1);
-        sceneIdMap.put("scene_id", sceneId);
-
+        Map<String, Object> sceneMap = Maps.newHashMapWithExpectedSize(1);
+        if (!Strings.isNullOrEmpty(sceneId)) {
+        	sceneMap.put("scene_id", sceneId);
+		}else if (!Strings.isNullOrEmpty(sceneStr)) {
+        	sceneMap.put("scene_str", sceneStr);
+		}
+        
         Map<String, Object> scene = Maps.newHashMapWithExpectedSize(1);
-        scene.put("scene", sceneIdMap);
+        scene.put("scene", sceneMap);
 
         params.put("action_info", scene);
         return params;
