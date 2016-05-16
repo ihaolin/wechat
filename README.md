@@ -247,7 +247,11 @@
     + 1.7.0
     
         + 增加获取用户列表的接口``Users.getUsers()``。  
-
+    
+    + 1.8.0
+        
+        + 增加通过场景字符串获取永久二维码的接口``QrCodes.getPermQrcodeBySceneStr()``。 
+    
 + 微信相关文档
 
 	+ [公众号接口权限说明](http://mp.weixin.qq.com/wiki/8/71e1908fa08e67c6251ebdd78fd6b6b4.html)
