@@ -390,6 +390,14 @@
          * @return 永久二维码链接，或抛WechatException
          */
         String getPermQrcode(String accessToken, String sceneId)
+        
+        /**
+         * 根据场景字符串获取永久二维码
+         * @param accessToken accessToken
+         * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段   
+         * @return 永久二维码链接，或抛WechatException
+         */
+        public String getPermQrcodeBySceneStr(String accessToken, String sceneStr)
 		
 		/**
          * 将二维码长链接转换为端链接，生成二维码将大大提升扫码速度和成功率

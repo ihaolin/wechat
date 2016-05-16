@@ -168,16 +168,16 @@ public final class QrCodes extends Component {
     }
 
     /**
-     * 获取永久二维码
+     * 根据场景字符串获取永久二维码
      * @param accessToken accessToken
-     * @param sceneId	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段
+     * @param sceneStr	场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段
      * @param cb 回调
      */
-    public void getPermQrcodeBySceneStr(final String accessToken, final String sceneId, Callback<String> cb){
+    public void getPermQrcodeBySceneStr(final String accessToken, final String sceneStr, Callback<String> cb){
         doAsync(new AsyncFunction<String>(cb) {
             @Override
             public String execute() {
-                return getPermQrcodeBySceneStr(accessToken, sceneId);
+                return getPermQrcodeBySceneStr(accessToken, sceneStr);
             }
         });
     }
