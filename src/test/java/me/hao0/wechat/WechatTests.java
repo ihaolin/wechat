@@ -470,6 +470,11 @@ public class WechatTests {
     public void testGetPermQrcode(){
         assertNotNull(wechat.qr().getPermQrcode(accessToken, "12345"));
     }
+    
+    @Test
+    public void testGetPermQrcodeBySceneStr(){
+        assertNotNull(wechat.qr().getPermQrcodeBySceneStr(accessToken, "abcdefg"));
+    }
 
     @Test
     public void testShortUrl(){
