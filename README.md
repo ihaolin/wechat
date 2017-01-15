@@ -1,4 +1,4 @@
-# Wechat
+# Wechat[![Build Status](https://travis-ci.org/ihaolin/wechat.svg?branch=master)](https://travis-ci.org/ihaolin/wechat)
 
 轻量的微信公众号组件(A Lightweight Wechat Component)
 ---
