@@ -6,7 +6,7 @@
 
     <groupId>me.hao0</groupId>
     <artifactId>wechat</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
 
     <name>wechat</name>
     <description>A Lightweight Wechat Component</description>
@@ -17,13 +17,13 @@
         <dependency>
             <groupId>me.hao0</groupId>
             <artifactId>common</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
+            <version>19.0</version>
         </dependency>
 
         <dependency>

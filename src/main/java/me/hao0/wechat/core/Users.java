@@ -6,12 +6,11 @@ import me.hao0.common.json.Jsons;
 import me.hao0.common.util.Strings;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
+import me.hao0.wechat.model.user.UserInfo;
 import me.hao0.wechat.model.user.UserList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static me.hao0.common.util.Preconditions.checkArgument;
 import static me.hao0.common.util.Preconditions.checkNotNullAndEmpty;
 
@@ -56,9 +55,14 @@ public final class Users extends Component {
     private static final String MOVE_USER_GROUP = "https://api.weixin.qq.com/cgi-bin/groups/members/update?access_token=";
 
     /**
-     * 拉取用户信息
+     * 拉取用户信息(用户已关注)
      */
     private static final String GET_USER_INFO = "https://api.weixin.qq.com/cgi-bin/user/info?lang=zh_CN&access_token=";
+
+    /**
+     * 获取用户信息(用户未关注，但用户已手动同意授权)
+     */
+    private static final String GET_USER_INFO_NO_SUB = "https://api.weixin.qq.com/sns/userinfo?lang=zh_CN&access_token=";
 
     /**
      * 拉取用户列表信息
@@ -458,6 +462,23 @@ public final class Users extends Component {
         Map<String, Object> resp = doGet(url);
 
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), User.class);
+    }
+
+    /**
+     * 获取用户信息(用户未关注，但已手动同意授权)
+     *
+     * @param accessToken accessToken
+     * @param openId      用户openId
+     * @return 用户信息，或抛WechatException
+     */
+    public UserInfo getUserInfo(String accessToken, String openId) {
+        checkNotNullAndEmpty(accessToken, "accessToken");
+        checkNotNullAndEmpty(openId, "openId");
+
+        String url = GET_USER_INFO_NO_SUB + accessToken + "&openid=" + openId;
+        Map<String, Object> resp = doGet(url);
+
+        return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), UserInfo.class);
     }
 
     /**

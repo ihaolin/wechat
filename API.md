@@ -108,6 +108,14 @@
         User getUser(String accessToken, String openId)
         
         /**
+         * 获取用户信息(用户未关注，但已手动同意授权)
+         * @param accessToken accessToken
+         * @param openId 用户openId
+         * @return 用户信息，或抛WechatException
+         */
+        UserInfo getUserInfo(String accessToken, String openId)
+        
+        /**
          * 拉取用户列表信息
          * @param accessToken accessToken
          * @param nextOpenId  第一个拉取的OPENID，不填默认从头开始拉取

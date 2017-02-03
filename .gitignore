@@ -83,3 +83,4 @@ src/test/resources/dev.properties
 
 Demo*.java
 
+*.versionsBackup

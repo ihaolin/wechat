@@ -51,6 +51,7 @@ import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import me.hao0.wechat.model.user.Group;
+import me.hao0.wechat.model.user.UserInfo;
 import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
@@ -74,11 +75,11 @@ public class WechatTests {
 
     private Wechat wechat;
 
-    private String accessToken = "a9l23BUNe5v3qvZeJs3N5nzRid9GbmXSjwW5XNMI0iUrZVkWPZFO-KLQvFRSa1GYY6CDAVNW0jXn5uGA6v1MGRsJgLSgVpeKR0HuJWB2LKdkFSDfACAUHS";
+    private String accessToken = "HjGtUG1NwQ8ar6aXWIIWc43fdgdI-kvwYVhZrH8q6lpS4Dhvs4v6VOGFZ-UZcKeL7nmgjoFyKBUK0-790cEk3_oNu3_sMigaBd6eQ5Q5yHLMGTmDNqffuOAcGaaaCPJqOEShAGAUKY";
 
     private String testDomain = "xxx";
 
-    private String openId = "onN_8trIW7PSoXLMzMSWySb5jfdY";
+    private String openId = "o0PISt4RakRiy-2bwwY_NmYfQL2o";
 
     @Before
     public void init() throws IOException {
@@ -210,13 +211,22 @@ public class WechatTests {
     }
 
     @Test
-    public void testGetUserInfo(){
+    public void testGetUser(){
         assertNotNull(wechat.user().getUser(accessToken, openId));
     }
 
     @Test
-    public void testGetUsersInfo() throws Exception {
-        assertNotNull( wechat.user().getUsers("").getData().getOpenId());
+    public void testGetUsers() throws Exception {
+        List<String> openIds = wechat.user().getUsers("").getData().getOpenId();
+        assertNotNull(openIds);
+        System.out.println(openIds);
+    }
+
+    @Test
+    public void testGetUserInfo(){
+        UserInfo userInfo = wechat.user().getUserInfo(accessToken, openId);
+        assertNotNull(userInfo);
+        System.out.println(userInfo);
     }
 
     @Test

@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.8.0</version>
+        <version>1.9.0</version>
     </dependency>
 	```
 	
@@ -19,13 +19,13 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>common</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </dependency>
     <!-- 1.3.0之后引入 -->
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>19.0</version>
     </dependency>
 	```
 
@@ -251,6 +251,11 @@
     + 1.8.0
         
         + 增加通过场景字符串获取永久二维码的接口``QrCodes.getPermQrcodeBySceneStr()``。 
+    
+    + 1.9.0
+    
+        + 增加获取未关注公众号用户的信息接口；
+        + 升级common，guava。
     
 + 微信相关文档
 
