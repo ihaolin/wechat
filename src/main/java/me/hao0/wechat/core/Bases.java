@@ -1,7 +1,9 @@
 package me.hao0.wechat.core;
 
+import me.hao0.common.json.Jsons;
 import me.hao0.wechat.exception.WechatException;
 import me.hao0.wechat.model.base.AccessToken;
+import me.hao0.wechat.model.base.AuthAccessToken;
 import me.hao0.wechat.model.base.AuthType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -24,14 +26,17 @@ public final class Bases extends Component {
     private static final String AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?";
 
     /**
-     * 获取用户openId
-     */
-    private static final String OPEN_ID_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?";
-
-    /**
-     * 获取accessToken
+     * 获取accessToken(调用其他公众号接口需要)
      */
     private static final String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential";
+
+    /**
+     * 获取accessToken(用户同意授权后，获取用户信息前，需要该accessToken，有别于上面的accessToken)
+     * <p>
+     *     <a href="http://mp.weixin.qq.com/wiki/17/c0f37d5704f0b64713d5d2c37b468d75.html" target="_blank">参考链接</a>
+     * </p>
+     */
+    private static final String AUTH_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code";
 
     /**
      * 获取微信服务器的IP地址列表
@@ -74,6 +79,7 @@ public final class Bases extends Component {
      * 获取用户openId
      * @param code 用户授权的code
      * @param cb 回调
+     * @see #authAccessToken(String)
      */
     public void openId(final String code, final Callback<String> cb){
         doAsync(new AsyncFunction<String>(cb) {
@@ -88,14 +94,14 @@ public final class Bases extends Component {
      * 获取用户openId
      * @param code 用户授权的code
      * @return 用户的openId，或抛WechatException
+     * @see #authAccessToken(String)
      */
     public String openId(String code){
         checkNotNullAndEmpty(code, "code");
-        String url = OPEN_ID_URL +
-                "appid=" + wechat.getAppId() +
+        String url = AUTH_ACCESS_TOKEN_URL +
+                "&appid=" + wechat.getAppId() +
                 "&secret=" + wechat.getAppSecret() +
-                "&code=" + code +
-                "&grant_type=authorization_code";
+                "&code=" + code;
 
         Map<String, Object> resp = doGet(url);
 
@@ -128,6 +134,39 @@ public final class Bases extends Component {
         Integer expire = (Integer)resp.get("expires_in");
         token.setExpire(expire);
         token.setExpiredAt(System.currentTimeMillis() + expire * 1000);
+
+        return token;
+    }
+
+    /**
+     * 获取用户授权的accessToken(与上面不同，该accessToken用于在用户同意授权后，获取用户信息)
+     * @param code 用户同意授权后返回的code
+     * @param cb 回调函数
+     */
+    public void authAccessToken(final String code, final Callback<AuthAccessToken> cb){
+        doAsync(new AsyncFunction<AuthAccessToken>(cb) {
+            @Override
+            public AuthAccessToken execute() {
+                return authAccessToken(code);
+            }
+        });
+    }
+
+    /**
+     * 获取用户授权的accessToken(与上面不同，该accessToken用于在用户同意授权后，获取用户信息)
+     * @param code 用户同意授权后返回的code
+     * @return accessToken，或抛WechatException
+     */
+    public AuthAccessToken authAccessToken(String code){
+
+        String url = AUTH_ACCESS_TOKEN_URL +
+                        "&appid=" + wechat.getAppId() +
+                        "&secret=" + wechat.getAppSecret() +
+                        "&code=" + code;
+
+        Map<String, Object> resp = doGet(url);
+        AuthAccessToken token = Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), AuthAccessToken.class);
+        token.setExpiredAt(System.currentTimeMillis() + token.getExpire() * 1000);
 
         return token;
     }

@@ -33,11 +33,18 @@
 		String accessToken()
 		
 		/**
-         * 获取用户openId
-         * @param code 用户授权的code
-         * @return 用户的openId，或抛WechatException
-         */
-		String openId(String code)
+	     * 获取用户openId
+	     * @param code 用户授权的code
+	     * @return 用户的openId，或抛WechatException
+	     * @see #authAccessToken(String)
+	     */
+	    public String openId(String code)
+	    
+		/**
+	     * 获取用户授权的accessToken(与上面不同，该accessToken用于在用户同意授权后，获取用户信息)
+	     * @param code 用户同意授权后返回的code
+	     */
+	    public AuthAccessToken authAccessToken(String code)
 		
 		/**
          * 获取微信服务器IP列表
@@ -108,12 +115,12 @@
         User getUser(String accessToken, String openId)
         
         /**
-         * 获取用户信息(用户未关注，但已手动同意授权)
-         * @param accessToken accessToken
-         * @param openId 用户openId
-         * @return 用户信息，或抛WechatException
-         */
-        UserInfo getUserInfo(String accessToken, String openId)
+	     * 获取用户信息(用户未关注，但已手动同意授权，并通过code获取到授权accessToken)
+	     * @param authAccessToken 用户手动同意授权后，通过code获取的accessToken
+	     * @return 用户信息，或抛WechatException
+	     * @see Bases#authAccessToken(String)
+	     */
+        UserInfo getUserInfo(AuthAccessToken authAccessToken)
         
         /**
          * 拉取用户列表信息

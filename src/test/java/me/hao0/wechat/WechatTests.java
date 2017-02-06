@@ -51,7 +51,6 @@ import me.hao0.wechat.model.message.send.SendMessageType;
 import me.hao0.wechat.model.message.send.SendPreviewMessage;
 import me.hao0.wechat.model.message.send.TemplateField;
 import me.hao0.wechat.model.user.Group;
-import me.hao0.wechat.model.user.UserInfo;
 import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
@@ -220,13 +219,6 @@ public class WechatTests {
         List<String> openIds = wechat.user().getUsers("").getData().getOpenId();
         assertNotNull(openIds);
         System.out.println(openIds);
-    }
-
-    @Test
-    public void testGetUserInfo(){
-        UserInfo userInfo = wechat.user().getUserInfo(accessToken, openId);
-        assertNotNull(userInfo);
-        System.out.println(userInfo);
     }
 
     @Test

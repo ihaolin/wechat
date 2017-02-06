@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.9.0</version>
+        <version>1.9.1</version>
     </dependency>
 	```
 	
@@ -256,6 +256,11 @@
     
         + 增加获取未关注公众号用户的信息接口；
         + 升级common，guava。
+    
+    + 1.9.1
+        
+        + 修复用户授权accessToken获取；
+        + 废弃~~Bases.openId~~，替换为Bases.authAccessToken。
     
 + 微信相关文档
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.Maps;
 import me.hao0.common.json.Jsons;
 import me.hao0.common.util.Strings;
+import me.hao0.wechat.model.base.AuthAccessToken;
 import me.hao0.wechat.model.user.Group;
 import me.hao0.wechat.model.user.User;
 import me.hao0.wechat.model.user.UserInfo;
@@ -62,7 +63,7 @@ public final class Users extends Component {
     /**
      * 获取用户信息(用户未关注，但用户已手动同意授权)
      */
-    private static final String GET_USER_INFO_NO_SUB = "https://api.weixin.qq.com/sns/userinfo?lang=zh_CN&access_token=";
+    private static final String GET_USER_INFO_AUTHED = "https://api.weixin.qq.com/sns/userinfo?lang=zh_CN&access_token=";
 
     /**
      * 拉取用户列表信息
@@ -465,17 +466,14 @@ public final class Users extends Component {
     }
 
     /**
-     * 获取用户信息(用户未关注，但已手动同意授权)
-     *
-     * @param accessToken accessToken
-     * @param openId      用户openId
+     * 获取用户信息(用户未关注，但已手动同意授权，并通过code获取到授权accessToken)
+     * @param authAccessToken 用户手动同意授权后，通过code获取的accessToken
      * @return 用户信息，或抛WechatException
+     * @see Bases#authAccessToken(String)
      */
-    public UserInfo getUserInfo(String accessToken, String openId) {
-        checkNotNullAndEmpty(accessToken, "accessToken");
-        checkNotNullAndEmpty(openId, "openId");
+    public UserInfo getUserInfo(AuthAccessToken authAccessToken) {
 
-        String url = GET_USER_INFO_NO_SUB + accessToken + "&openid=" + openId;
+        String url = GET_USER_INFO_AUTHED + authAccessToken.getAccessToken() + "&openid=" + authAccessToken.getOpenId();
         Map<String, Object> resp = doGet(url);
 
         return Jsons.DEFAULT.fromJson(Jsons.DEFAULT.toJson(resp), UserInfo.class);
