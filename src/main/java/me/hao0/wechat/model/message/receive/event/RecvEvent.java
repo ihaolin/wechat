@@ -17,8 +17,6 @@ public class RecvEvent extends RecvMessage {
      */
     protected String eventType;
 
-
-
     public RecvEvent(){}
 
     public RecvEvent(RecvMessage e){

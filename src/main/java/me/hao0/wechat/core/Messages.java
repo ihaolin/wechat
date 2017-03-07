@@ -11,7 +11,9 @@ import me.hao0.wechat.model.message.receive.event.RecvLocationEvent;
 import me.hao0.wechat.model.message.receive.event.RecvMenuEvent;
 import me.hao0.wechat.model.message.receive.event.RecvScanEvent;
 import me.hao0.wechat.model.message.receive.event.RecvSubscribeEvent;
+import me.hao0.wechat.model.message.receive.event.RecvTemplateSendJobFinishEvent;
 import me.hao0.wechat.model.message.receive.event.RecvUnSubscribeEvent;
+import me.hao0.wechat.model.message.receive.event.RecvUnknownEvent;
 import me.hao0.wechat.model.message.receive.msg.RecvImageMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvLinkMessage;
 import me.hao0.wechat.model.message.receive.msg.RecvLocationMessage;
@@ -304,6 +306,14 @@ public final class Messages extends Component {
                 scan.setEventKey(readers.getNodeStr("EventKey"));
                 scan.setTicket(readers.getNodeStr("Ticket"));
                 return scan;
+
+            case TEMPLATE_SEND_JOB_FINISH:
+                RecvTemplateSendJobFinishEvent send = new RecvTemplateSendJobFinishEvent(event);
+                send.setStatus(readers.getNodeStr("Status"));
+                return send;
+
+            case UNKNOW:
+                return new RecvUnknownEvent(event);
 
             default:
                 throw new IllegalArgumentException("unknown event msg");

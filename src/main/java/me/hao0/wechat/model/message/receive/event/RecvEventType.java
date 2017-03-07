@@ -1,7 +1,5 @@
 package me.hao0.wechat.model.message.receive.event;
 
-import me.hao0.wechat.exception.EventException;
-
 import java.util.Objects;
 
 /**
@@ -11,6 +9,8 @@ import java.util.Objects;
  * Date: 8/11/15
  */
 public enum RecvEventType {
+
+    UNKNOW("unknown", "未知事件"),
 
     SUBSCRIBE("subscribe", "关注公众号"),
     UN_SUBSCRIBE("unsubscribe", "取消关注公众号"),
@@ -26,13 +26,18 @@ public enum RecvEventType {
     /**
      * 点击菜单跳转链接时的事件推送
      */
-    MENU_VIEW("VIEW", "点击菜单跳转链接时");
+    MENU_VIEW("VIEW", "点击菜单跳转链接时"),
+
+    /**
+     * 模版消息发送结果通知事件
+     */
+    TEMPLATE_SEND_JOB_FINISH("TEMPLATESENDJOBFINISH", "模版消息发送任务完成后, 微信服务器会将是否送达成功作为通知");
 
     private String value;
 
     private String desc;
 
-    private RecvEventType(String value, String desc){
+    RecvEventType(String value, String desc){
         this.value = value;
         this.desc = desc;
     }
@@ -42,12 +47,14 @@ public enum RecvEventType {
     }
 
     public static RecvEventType from(String type){
+
         for (RecvEventType t : RecvEventType.values()){
             if (Objects.equals(t.value(), type)){
                 return t;
             }
         }
-        throw new EventException("unknown event type");
+
+        return UNKNOW;
     }
 
     @Override

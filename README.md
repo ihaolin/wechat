@@ -9,7 +9,7 @@
 	<dependency>
         <groupId>me.hao0</groupId>
         <artifactId>wechat</artifactId>
-        <version>1.9.1</version>
+        <version>1.9.2</version>
     </dependency>
 	```
 	
@@ -261,6 +261,11 @@
         
         + 修复用户授权accessToken获取；
         + 废弃~~Bases.openId~~，替换为Bases.authAccessToken。
+    
+    + 1.9.2
+            
+        + 增加模版消息事件类型`RecvTemplateSendJobFinishEvent`；
+        + 兼容在接收到微信新增的事件消息时，不作抛错处理，而是返回`RecvUnknownEvent`。
     
 + 微信相关文档
 
