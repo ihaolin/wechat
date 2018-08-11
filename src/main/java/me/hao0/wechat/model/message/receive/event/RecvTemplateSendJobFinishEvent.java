@@ -14,8 +14,8 @@ public class RecvTemplateSendJobFinishEvent extends RecvEvent {
     /**
      * 模版消息送达状态：
      * <p>
-     *     1. 送达成功时：success <br/>
-     *     2. 送达由于用户拒收（用户设置拒绝接收公众号消息）而失败时：failed:user block <br/>
+     *     1. 送达成功时：success
+     *     2. 送达由于用户拒收（用户设置拒绝接收公众号消息）而失败时：failed:user block
      *     3. 送达由于其他原因失败时：failed: system failed
      * </p>
      */
