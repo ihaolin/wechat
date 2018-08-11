@@ -266,6 +266,10 @@
             
         + 增加模版消息事件类型`RecvTemplateSendJobFinishEvent`；
         + 兼容在接收到微信新增的事件消息时，不作抛错处理，而是返回`RecvUnknownEvent`。
+        
+    + 1.9.3
+                
+        + 升级common包到`1.1.3`，修复`XmlReaders`线程安全问题。
     
 + 微信相关文档
 
