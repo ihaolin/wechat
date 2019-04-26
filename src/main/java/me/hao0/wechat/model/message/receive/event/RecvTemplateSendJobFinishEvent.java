@@ -28,7 +28,7 @@ public class RecvTemplateSendJobFinishEvent extends RecvEvent {
 
     @Override
     public String getEventType() {
-        return RecvEventType.SUBSCRIBE.value();
+        return RecvEventType.TEMPLATE_SEND_JOB_FINISH.value();
     }
 
     public String getStatus() {
